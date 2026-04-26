@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Search</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="CSS/Global.css" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <script>
+      window.tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#005a32",
+              "background-light": "#F9FAFB",
+              "card-light": "#FFFFFF",
+              "border-light": "#E5E7EB",
+            },
+            fontFamily: { sans: ["Inter", "sans-serif"] },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="flex h-screen bg-background-light text-gray-800 font-sans overflow-hidden">
+    <script src="JS/Sidebar.js"></script>
+    <script>loadSidebar("Search.html");</script>
+
+    <main class="flex-1 ml-64 p-5 overflow-y-auto">
+      <div class="mainContent bg-card-light rounded-xl shadow-sm border border-border-light p-6">
+        <section class="top flex flex-col gap-5 mb-6">
+          <div class="topSec">
+            <h1 class="title text-2xl font-semibold text-gray-800">Search</h1>
+            <h2 class="subTitle text-gray-500 mt-1">Find patients, appointments, and reports</h2>
+          </div>
+          <div class="searchCon flex flex-wrap items-center gap-4">
+            <div class="searchBarWrapper bg-gray-50 flex-1 min-w-[200px] h-10 flex items-center gap-2 pl-3 rounded-lg">
+              <i class="searchIcon fa-solid fa-magnifying-glass text-gray-600"></i>
+              <input class="searchBar w-full bg-transparent outline-none border-none" type="text" placeholder="Search patients, appointments or report..." />
+            </div>
+            <div class="filter">
+              <select id="filterSelect" class="h-10 px-4 rounded-lg border border-gray-200 bg-gray-50 outline-none">
+                <option value="all">All</option>
+                <option value="active">Patient</option>
+                <option value="appointment">Appointment</option>
+                <option value="report">Report</option>
+              </select>
+            </div>
+            <a href="" class="searchBtn inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-primary text-white font-semibold hover:bg-primary/90">Search</a>
+          </div>
+        </section>
+
+        <section class="bottom flex flex-col items-center justify-center py-12 text-center">
+          <i class="searchIcon fa-solid fa-magnifying-glass text-4xl text-gray-400 mb-4"></i>
+          <h2 class="subText1 text-xl font-semibold text-gray-700 mb-2">Start searching</h2>
+          <h2 class="subText2 text-gray-500 mb-8">Enter a search term to find patients, appointments, or reports</h2>
+          <div class="searchHelpCon flex flex-wrap justify-center gap-8 text-left">
+            <div class="seachExCon">
+              <h2 class="exTitle font-semibold text-gray-800 mb-2">Search examples:</h2>
+              <ul class="list-none space-y-1 text-gray-600">
+                <li class="exText">"John Smith" (patient names)</li>
+                <li class="exText">"P001" (patient IDs)</li>
+                <li class="exText">"A001" (appointment IDs)</li>
+              </ul>
+            </div>
+            <div class="filterOpt">
+              <h2 class="optTitle font-semibold text-gray-800 mb-2">Filter options:</h2>
+              <ul class="list-none space-y-1 text-gray-600">
+                <li class="optText">Patient</li>
+                <li class="optText">Appointment</li>
+                <li class="optText">Report</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>

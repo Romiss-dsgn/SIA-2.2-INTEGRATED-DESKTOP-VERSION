@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Archive</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#005a32",
+            "primary-light": "#f0fdf4",
+            secondary: "#d62828",
+            accent: "#8b5a2b",
+            "background-light": "#f1f5f9",
+            "background-dark": "#1e293b",
+            "card-light": "#ffffff",
+            "card-dark": "#334155",
+            "text-light": "#475569",
+            "text-dark": "#cbd5e1",
+            "border-light": "#e2e8f0",
+            "border-dark": "#475569",
+            "success": "#16a34a",
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ["'Plus Jakarta Sans'", "sans-serif"],
+          }
+        },
+      },
+    };
+  </script>
+
+  <style>
+    .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+  </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark font-sans h-screen overflow-hidden">
+  <div class="flex h-full">
+
+    <!-- ✅ SIDEBAR — matching sidebar.js style -->
+    <aside class="w-64 flex flex-col bg-white border-r border-slate-200 h-screen" style="box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+      <!-- Logo -->
+      <div class="p-6 mb-2">
+        <div class="flex items-center gap-3">
+          <img src="../user/Assets/wellserved_logo.jpg" alt="Well Served Logo" class="w-12 h-12 rounded-full object-cover"/>
+          <div>
+            <h1 class="text-lg font-extrabold leading-none" style="color:#065f46;">WellServed</h1>
+            <p class="text-[10px] font-bold tracking-widest mt-0.5 uppercase" style="color:#8b5a2b;">Admin Portal</p>
+          </div>
+        </div>
+      </div>
+      <!-- Nav Links -->
+      <nav class="flex-1 px-4 space-y-1">
+        <a href="emrAdmin.html"
+           class="navLink flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold transition-all text-slate-500 hover:text-[#065f46] hover:bg-slate-50">
+          <span class="material-symbols-outlined">grid_view</span>
+          <span>Dashboard</span>
+        </a>
+        <a href="adminUsersAccount.html"
+           class="navLink flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold transition-all text-slate-500 hover:text-[#065f46] hover:bg-slate-50">
+          <span class="material-symbols-outlined">group</span>
+          <span>Users Account</span>
+        </a>
+        <a href="adminBackup.html"
+           class="navLink flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold transition-all text-slate-500 hover:text-[#065f46] hover:bg-slate-50">
+          <span class="material-symbols-outlined">description</span>
+          <span>Backup Logs</span>
+        </a>
+        <a href="adminArchive.html"
+           class="navLink flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold transition-all"
+           style="background-color:#f0fdf4; color:#065f46;">
+          <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">history</span>
+          <span>Archive</span>
+        </a>
+        <a href="adminSettings.html"
+           class="navLink flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold transition-all text-slate-500 hover:text-[#065f46] hover:bg-slate-50">
+          <span class="material-symbols-outlined">settings</span>
+          <span>Settings</span>
+        </a>
+      </nav>
+      <!-- Logout -->
+      <div class="p-4 mt-auto border-t border-slate-200">
+        <button onclick="showLogoutModal()"
+                class="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold transition-all text-red-500 hover:bg-red-50">
+          <span class="material-symbols-outlined">logout</span>
+          <span class="text-sm">Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Wrapper -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+
+      <!-- ✅ HEADER (matching dashboard) -->
+      <header id="topHeader" class="h-20 flex items-center justify-end px-10 bg-white/80 backdrop-blur-md border-b border-slate-100 sticky top-0 z-40 shrink-0">
+        <div class="flex items-center gap-6">
+          <!-- Clock Display -->
+          <div class="flex items-center gap-4 bg-slate-50 px-4 py-2 rounded-2xl border border-slate-100">
+            <div class="flex flex-col items-end">
+              <span id="clockDisplay" class="text-sm font-bold text-slate-700">12:00:00 PM</span>
+              <span id="headerDateDisplay" class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">—</span>
+            </div>
+          </div>
+          <!-- User Info & Avatar -->
+          <div class="flex items-center gap-3">
+            <div id="headerUserInfo" class="flex flex-col items-end">
+              <span class="text-sm font-bold text-slate-700 leading-tight">Admin</span>
+              <span class="text-xs font-semibold text-primary leading-tight">Administrator</span>
+            </div>
+            <div id="headerUserAvatar" class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm ring-4 ring-primary/5">
+              A
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Scrollable Main Content -->
+      <main class="flex-1 p-8 overflow-y-auto custom-scrollbar">
+        <div class="bg-card-light dark:bg-card-dark p-8 rounded-lg border-2 shadow-md max-w-6xl mx-auto">
+          <!-- Header -->
+          <div class="text-center mb-8">
+            <h2 class="text-3xl font-semibold text-[#005a32]">Archive</h2>
+            <p class="text-text-light dark:text-text-dark mt-2">View and manage archived records of users</p>
+          </div>
+
+          <!-- Search -->
+          <div class="mb-6 flex justify-between items-center">
+            <input
+              id="archiveSearch"
+              type="text"
+              placeholder="Search archived users..."
+              class="w-1/3 px-4 py-2 border border-border-light dark:border-border-dark rounded-lg bg-background-light dark:bg-background-dark text-slate-800 dark:text-white focus:ring-2 focus:ring-primary focus:border-primary"
+            />
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-border-light dark:border-border-dark text-sm bg-gray-50 dark:bg-gray-700/50">
+                  <th class="py-3 px-4">ID</th>
+                  <th class="py-3 px-4">Name</th>
+                  <th class="py-3 px-4">Email</th>
+                  <th class="py-3 px-4">Role</th>
+                  <th class="py-3 px-4">Date Archived</th>
+                  <th class="py-3 px-4 text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="archiveTable" class="divide-y divide-border-light dark:divide-border-dark"></tbody>
+            </table>
+          </div>
+
+          <div id="emptyArchive" class="text-center py-12 hidden">
+            <div class="inline-block p-4 bg-gray-100 dark:bg-slate-700 rounded-full mb-4">
+              <span class="material-symbols-outlined text-6xl text-text-light dark:text-text-dark">archive</span>
+            </div>
+            <h3 class="text-xl text-slate-800 dark:text-white">No archived records</h3>
+            <p class="text-text-light dark:text-text-dark mt-2">When users are archived, they will appear here.</p>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div id="confirmModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-card-light dark:bg-card-dark p-6 rounded-lg w-96 shadow-lg">
+      <h3 id="confirmTitle" class="text-xl font-semibold mb-4 text-[#005a32]">Confirm Action</h3>
+      <p id="confirmMessage" class="mb-6 text-text-light dark:text-text-dark">Are you sure?</p>
+      <div class="flex justify-end space-x-2">
+        <button onclick="closeConfirmModal()" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 transition-colors">Cancel</button>
+        <button id="confirmActionBtn" class="px-4 py-2 bg-primary text-white rounded hover:opacity-90 transition-all">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Logout Confirmation Modal -->
+  <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header text-white" style="background-color: #005a32;">
+          <h5 class="modal-title font-bold" id="logoutModalLabel">Confirm Logout</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body text-center">
+          <p class="mb-3">Are you sure you want to log out of the admin portal?</p>
+        </div>
+        <div class="modal-footer justify-content-center">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn text-white" id="confirmLogoutBtn" style="background-color: #005a32; border: none;">Logout</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Auth Modal for Restore -->
+  <div id="adminAuthRestoreModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 w-96 shadow-lg">
+      <h3 class="text-xl font-bold mb-4 text-[#005a32]">Admin Authentication Required</h3>
+      <p class="text-sm text-gray-600 mb-2">Admin ID: <span id="authAdminIdRestoreDisplay" class="font-bold text-[#005a32]"></span></p>
+      <p class="text-sm text-gray-700 mb-4 font-semibold" id="restoreUserNameDisplay"></p>
+      <input type="password" id="adminPasswordRestoreInput" placeholder="Enter admin password" class="w-full border border-border-light rounded-lg px-3 py-2 mb-2 focus:ring-2 focus:ring-primary focus:border-primary">
+      <p id="authRestoreMessage" class="text-secondary text-sm mb-4 hidden"></p>
+      <div class="flex justify-end space-x-2">
+        <button onclick="closeAdminAuthRestoreModal()" class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 transition-colors">Cancel</button>
+        <button onclick="verifyAdminPasswordForRestore()" class="px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition-all">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Auth Modal for Delete -->
+  <div id="adminAuthDeleteModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 w-96 shadow-lg">
+      <h3 class="text-xl font-bold mb-4 text-secondary">Admin Authentication Required</h3>
+      <p class="text-sm text-gray-600 mb-2">Admin ID: <span id="authAdminIdDeleteDisplay" class="font-bold text-[#005a32]"></span></p>
+      <p class="text-sm text-secondary font-semibold mb-4" id="deleteUserNameDisplay"></p>
+      <p class="text-xs text-gray-500 mb-4">This action cannot be undone. The user will be permanently deleted from the system.</p>
+      <input type="password" id="adminPasswordDeleteInput" placeholder="Enter admin password" class="w-full border border-border-light rounded-lg px-3 py-2 mb-2 focus:ring-2 focus:ring-secondary focus:border-secondary">
+      <p id="authDeleteMessage" class="text-secondary text-sm mb-4 hidden"></p>
+      <div class="flex justify-end space-x-2">
+        <button onclick="closeAdminAuthDeleteModal()" class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 transition-colors">Cancel</button>
+        <button onclick="verifyAdminPasswordForDelete()" class="px-4 py-2 bg-secondary text-white rounded-lg hover:opacity-90 transition-all">Confirm Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../user/JS/auto_refresh.js"></script>
+  <script src="../admin/JS/admin_archive.js"></script>
+
+  <!-- ✅ HEADER SCRIPT (matching dashboard) -->
+  <script>
+    function initializeHeader() {
+      updateClock();
+      setInterval(updateClock, 1000);
+      populateHeaderUserInfo();
+    }
+
+    function updateClock() {
+      const now = new Date();
+      const hours = now.getHours();
+      const minutes = String(now.getMinutes()).padStart(2, "0");
+      const seconds = String(now.getSeconds()).padStart(2, "0");
+      const ampm = hours >= 12 ? "PM" : "AM";
+      const h12 = hours % 12 || 12;
+      const hoursStr = String(h12).padStart(2, "0");
+      const timeStr = `${hoursStr}:${minutes}:${seconds} ${ampm}`;
+
+      const clockDisplay = document.getElementById("clockDisplay");
+      if (clockDisplay) clockDisplay.textContent = timeStr;
+
+      const dateDisplay = document.getElementById("headerDateDisplay");
+      if (dateDisplay) {
+        const months = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+        dateDisplay.textContent = months[now.getMonth()] + " " + now.getDate() + ", " + now.getFullYear();
+      }
+    }
+
+    function populateHeaderUserInfo() {
+      const headerAvatar = document.getElementById("headerUserAvatar");
+      const headerUserInfo = document.getElementById("headerUserInfo");
+
+      if (headerAvatar && headerUserInfo) {
+        const name = sessionStorage.getItem("name") || "Admin";
+        const role = sessionStorage.getItem("role") || "Administrator";
+        const initials = name.split(" ").map(function(n) { return n[0]; }).join("").toUpperCase().slice(0, 2);
+
+        headerAvatar.textContent = initials || "A";
+        headerUserInfo.innerHTML = `
+          <span class="text-sm font-bold text-slate-700 leading-tight">${name}</span>
+          <span class="text-xs font-semibold text-primary leading-tight">${role}</span>
+        `;
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      initializeHeader();
+    });
+  </script>
+</body>
+</html>

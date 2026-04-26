@@ -1,0 +1,132 @@
+:root {
+  /* Brand Palette from Image */
+  --primary-color: #005a32;    /* Deep Green */
+  --secondary-color: #d62828;  /* Vibrant Red */
+  --accent-color: #8b5a2b;     /* Brown Accent */
+  --off-white: #ffffff;
+  --bg-neutral: #f1f5f9;
+}
+
+/* sidebar.css — updated with brand colors */
+.sideBar, .logoCon, .accountCon, .navBar, .logoutCon, .dashboard {
+  all: unset;
+  display: revert;
+}
+
+.sideBar {
+  width: 100%;
+  max-width: 250px;
+  background-color: var(--off-white);
+  display: flex;
+  flex-direction: column;
+  padding: 15px;
+  box-sizing: border-box;
+  /* Updated to 'Inter' as per your palette image */
+  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: bold; 
+  height: 100vh !important;
+  position: fixed !important;
+  border-right: 1px solid #ddd;
+}
+
+.logoImg {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+  border-radius: 50%;
+  background-color: transparent;
+}
+
+.logoCon {
+  display: flex;
+  align-items: center;
+  padding-bottom: 20px;
+  gap: 12px; 
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 20px;
+}
+
+.title {
+  font-size: 20px;
+  margin: 0;
+  color: var(--primary-color); /* Updated to Primary Green */
+  font-weight: 700;
+}
+
+.subTitle {
+  color: var(--accent-color);
+}
+
+.accountCon {
+  display: flex;
+  align-items: center;
+  padding-bottom: 20px;
+  gap: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+/* Updated User Initials Background to use Accent Color */
+.userPic {
+  background-color: var(--primary-color) !important;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.accountName {
+  font-size: 18px;
+  color: #333;
+  font-weight: 600;
+}
+
+.role {
+  font-size: 14px;
+  color: #777;
+}
+
+.navBar {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.navBar a, .logoutCon a {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 12px;
+  border-radius: 8px; /* Matching the 12px logic or slightly softer 8px */
+  transition: all 0.3s ease;
+  color: #504f4f;
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+/* Hover state using the soft neutral background from palette */
+.navBar a:hover {
+  background-color: var(--bg-neutral);
+  color: var(--primary-color);
+}
+
+.logoutCon {
+  border-top: 1px solid #ddd;
+  padding-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Logout text and icon color using Secondary Red */
+.logoutCon a {
+  color: var(--secondary-color) !important;
+}
+
+.logoutCon a:hover {
+  background-color: #fff1f1; /* Light red tint for hover */
+}

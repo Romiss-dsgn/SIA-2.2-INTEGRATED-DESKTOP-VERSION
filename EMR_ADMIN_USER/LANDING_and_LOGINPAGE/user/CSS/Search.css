@@ -1,0 +1,229 @@
+*{
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-weight: 600;
+    }
+    body{
+        display: flex;
+        height: 100vh;
+        background-color: #efeeee;
+    }
+    a{
+        text-decoration: none;
+        color: inherit;
+    }
+     .sideBar{
+        width: 100%;
+        max-width: 250px;
+        background-color: white;
+        display: flex;
+        flex-direction: column;
+        padding: 15px;
+    }
+    .logoCon{
+        display: flex;
+        align-items: center;
+        padding-bottom: 20px;
+        gap: 10px;
+        border-bottom: 1px solid #ddd;
+        margin-bottom: 20px;
+    }
+    .logo{
+        font-size: 30px;
+        padding: 10px;
+        background-color: #358F85;
+        color: white;
+        border-radius: 10px;
+    }
+    .title{
+        font-size: 24px;
+        color: #333;
+        font-weight: 600;
+    }
+    .subTitle{
+        font-size: 14px;
+        color: #777;
+        font-weight: 600;
+    }
+    .accountCon{
+        display: flex;
+        align-items: center;
+        padding-bottom: 20px;
+        gap: 10px;
+        border-bottom: 1px solid #ddd;
+    }
+    .userPic{
+        width: 40px;
+        height: 40px;
+        background-color: #358F85;
+        border-radius: 50%;
+        margin-bottom: 10px;
+    }
+    .accountInfo{
+        margin-left: 10px;
+    }
+    .accountName{
+        font-size: 18px;
+        color: #333;
+    }
+    .role{
+        font-size: 14px;
+        color: #777;
+    }
+    .navBar{
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin-top: 20px;
+    }
+    .navBar a, .logoutCon a{
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding: 10px;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+    .navBar img{
+        width: 20px;
+        height: 20px;
+    }
+    .navBar a:hover, .logoutCon a:hover{
+        background-color: #f0f0f0;
+    }
+   
+    .dashboard{
+        font-size: 16px;
+        font-weight: 500;
+        color: #504f4f;
+    }
+    
+    .logoutCon{
+        border-top: 1px solid #ddd;
+        padding-top: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+     .logoutCon .logout:hover{
+        background-color: #f5bcbc;
+    }
+
+    main{
+        flex-grow: 1;
+        padding: 20px;
+    }
+    .mainContent{
+        background-color: white;
+        border-radius: 10px;
+        padding: 30px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        min-height: 50%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .top{
+        display: flex;
+        gap: 20px;
+        flex-direction: column;
+        justify-content: space-between;
+        
+        padding-bottom: 10px;
+    }
+    .topSec {
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .title{
+        font-size: 24px;
+        color: #333;
+        font-weight: 600;
+    }
+    .subTitle{
+        font-size: 14px;
+        color: #777;
+    }
+    .searchCon{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+    }
+    .searchBarWrapper{
+        background-color: #fbf8f8;
+        width: 60%;
+        height: 40px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 10px;
+        padding-left: 10px;
+        border-radius: 7px;
+    }
+  
+   .searchBar{
+    width: 100%;
+    background-color: #fbf8f8;
+    outline: none;
+    border: none;
+   }
+select{
+    border: none;
+    background-color: #fbf8f8;
+    height: 40px;
+    width: 200px;
+    border-radius: 7px;
+    outline: none;
+}
+option{
+    border: none;
+    background-color: #fbf8f8;
+    outline: none;
+}
+.searchBtn{
+    background-color: #358F85;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 10px;
+}
+
+.bottom{
+    margin-top: 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    color: #777;
+}
+.subText1{
+    font-size: 22px;
+    color: #504f4f;
+}
+.subText2{
+    font-size: 18px;
+}
+.searchHelpCon{
+    display: flex;
+    flex-direction: row;
+    gap: 50px;
+}
+.seachExCon, .filterOpt{
+    flex-direction: column;
+    display: flex;
+    gap: 5px;
+}
+.exTitle, .optTitle{
+    font-size: 17px;
+    color: #343434;
+    
+}
+.exText, .optText{
+    font-size: 15px;
+}

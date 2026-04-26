@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Patient Information - Medical History</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="CSS/Global.css" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <script>
+      window.tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#005a32",
+              "background-light": "#F9FAFB",
+              "card-light": "#FFFFFF",
+              "border-light": "#E5E7EB",
+            },
+            fontFamily: { sans: ["Inter", "sans-serif"] },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="flex h-screen bg-background-light text-gray-800 font-sans overflow-hidden">
+    <script src="JS/Sidebar.js"></script>
+    <script src="JS/recent_patients.js"></script>
+    <script>loadSidebar("Patients.html");</script>
+
+    <div class="mainContainer flex-1 ml-64 p-5 overflow-y-auto">
+      <header class="mb-6">
+        <h1 class="text-2xl font-bold text-primary">Patient Information</h1>
+      </header>
+      <main class="bg-card-light rounded-xl shadow-sm border border-border-light p-6">
+        <nav-bar class="flex flex-wrap gap-2 mb-6 border-b border-border-light pb-4">
+          <a class="personal px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 font-medium" href="PatientInfo.html">Personal Info</a>
+          <a class="medication px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 font-medium" href="Medications.html">Medication</a>
+          <a class="allergies px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 font-medium" href="Allergies.html">Allergies</a>
+          <a class="medicalHistory px-4 py-2 rounded-lg bg-white border border-primary text-primary font-medium" href="MedicalHistory.html">Medical History</a>
+          <a class="vitalSigns px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 font-medium" href="VitalSigns.html">Vital Signs</a>
+        </nav-bar>
+
+        <div class="medecineWrap">
+          <section class="topSec flex flex-wrap justify-between items-center gap-4 mb-6">
+            <h2 class="text-lg font-semibold text-primary">Medical History</h2>
+            <a id="addConditionBtn" href="#" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white font-medium hover:bg-primary/90">Add Condition</a>
+          </section>
+          <div id="historyContainer"></div>
+          <div class="buttonCon flex gap-4 justify-end mt-6" id="buttonCon">
+            <a class="savebtn inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-white font-medium hover:bg-primary/90" href="#">Save all changes</a>
+            <a class="cancelbtn inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-100" href="#">Cancel</a>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script src="JS/appointment_monitor.js"></script>
+    <script src="JS/medical_history.js"></script>
+  </body>
+</html>

@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Complete Appointment - Prescription - WellServed</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <!-- jQuery: CDN primary, two local fallbacks -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script>
+  if (typeof jQuery === 'undefined') {
+    document.write('<script src="libs/jquery-3.6.0.min.js"><\/script>');
+  }
+</script>
+<script>
+  if (typeof jQuery === 'undefined') {
+    document.write('<script src="../libs/jquery-3.6.0.min.js"><\/script>');
+  }
+</script>
+
+<!-- Select2: CDN primary, two local fallbacks -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+<script>
+  if (typeof jQuery !== 'undefined' && typeof jQuery.fn.select2 === 'undefined') {
+    document.write('<script src="libs/select2.min.js"><\/script>');
+  }
+</script>
+    <link rel="stylesheet" href="CSS/Global.css" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#065f46",
+              secondary: "#8B5A2B",
+              "brand-light": "#f0fdf4",
+              "background-light": "#f8fafc",
+            },
+            fontFamily: {
+              sans: ["'Plus Jakarta Sans'", "sans-serif"],
+              display: ["'Plus Jakarta Sans'", "sans-serif"],
+            },
+            borderRadius: {
+              "3xl": "24px",
+              "4xl": "32px",
+            },
+          },
+        },
+      };
+    </script>
+    <style type="text/tailwindcss">
+      @layer base {
+        body {
+          font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+        }
+      }
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 5px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #e2e8f0;
+        border-radius: 10px;
+      }
+      .material-symbols-outlined {
+        font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+        display: inline-block;
+        vertical-align: middle;
+      }
+      .card-shadow {
+        box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+      }
+    </style>
+    <style>
+      /* ── Select2 overrides inside medication cards ── */
+      .medecineCon .select2-container--default .select2-selection--single,
+      .medecineCon .select2-container--default .select2-selection--multiple {
+        height: auto;
+        min-height: 42px;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.5rem;
+        background-color: #fff;
+        padding: 0.375rem 0.75rem;
+        font-size: 0.875rem;
+        color: #1e293b;
+        display: flex;
+        align-items: center;
+      }
+      .medecineCon .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 1.5;
+        padding: 0;
+        color: #1e293b;
+      }
+      .medecineCon .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 42px;
+        right: 8px;
+      }
+      .medecineCon .select2-container--default .select2-selection--multiple .select2-selection__choice {
+        background-color: #f0fdf4;
+        border: 1px solid #065f46;
+        color: #065f46;
+        border-radius: 0.375rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 2px 8px;
+        margin: 2px;
+      }
+      .medecineCon .select2-container--default.select2-container--focus .select2-selection--single,
+      .medecineCon .select2-container--default.select2-container--focus .select2-selection--multiple,
+      .medecineCon .select2-container--default.select2-container--open .select2-selection--single {
+        border-color: #065f46;
+        box-shadow: 0 0 0 2px rgba(6, 95, 70, 0.12);
+        outline: none;
+      }
+      .medecineCon .select2-container {
+        width: 100% !important;
+      }
+
+      /* ✅ GPU COMPOSITOR FIX for Electron - forces dropdown out of all stacking contexts */
+.select2-dropdown {
+  position: fixed !important;
+  z-index: 999999 !important;
+  background: white !important;
+  border: 1px solid #aaa !important;
+  transform: none !important;
+  will-change: unset !important;
+}
+.select2-container--open {
+  z-index: 999999 !important;
+}
+.select2-results__options {
+  background: white !important;
+  max-height: 200px !important;
+  overflow-y: auto !important;
+}
+.select2-results__option {
+  background: white !important;
+  color: #333 !important;
+  padding: 8px 12px !important;
+}
+.select2-results__option--highlighted {
+  background: #065f46 !important;
+  color: white !important;
+}
+.select2-search__field {
+  background: white !important;
+  color: #333 !important;
+  border: 1px solid #ddd !important;
+  padding: 5px !important;
+}
+.select2-container * {
+  box-sizing: border-box !important;
+}
+    </style>
+  </head>
+  <body class="bg-[#F3F4F6] dark:bg-slate-900 dark:text-slate-100 text-slate-900 transition-colors duration-200 flex h-screen overflow-hidden" data-notification-handler="page">
+    <script src="JS/Sidebar.js"></script>
+    <script src="JS/recent_patients.js"></script>
+    <script>loadSidebar("Appointments.html");</script>
+
+    <!-- NEW HEADER -->
+    <header id="topHeader" class="fixed top-0 left-64 right-0 h-20 flex items-center justify-end px-10 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-100 dark:border-slate-700 z-40">
+      <div class="flex items-center gap-6">
+        <div class="flex items-center gap-4 bg-slate-50 dark:bg-slate-700 px-4 py-2 rounded-2xl border border-slate-100 dark:border-slate-600">
+          <div class="flex flex-col items-end">
+            <span id="clockDisplay" class="text-sm font-bold text-slate-700 dark:text-slate-200">12:00:00 PM</span>
+            <span id="headerDateDisplay" class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">—</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-6">
+          <div class="relative">
+            <button type="button" id="notificationBell" aria-label="Notifications" class="relative flex items-center justify-center w-12 h-12 text-primary hover:opacity-90 transition-opacity rounded-full hover:bg-slate-100 dark:hover:bg-slate-700/50 border-0 cursor-pointer z-50">
+              <span class="material-symbols-outlined text-[28px] select-none">notifications</span>
+              <span id="notificationBadge" class="absolute top-0.5 right-0.5 w-5 h-5 bg-red-500 border-2 border-white dark:border-slate-800 rounded-full hidden items-center justify-center text-[10px] font-bold text-white"></span>
+            </button>
+          </div>
+          <div id="headerUserAvatar" class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm ring-4 ring-primary/5">—</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ORIGINAL STRUCTURE PRESERVED EXACTLY -->
+    <div class="mainContainer flex-1 ml-64 p-5 overflow-y-auto" style="margin-top: 80px;">
+      <header class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-primary">Complete Appointment - Prescription</h1>
+        <button type="button" onclick="window.location.href='Appointments.html'" class="editbtn inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-100 cursor-pointer">
+          <i class="fas fa-times"></i> Close
+        </button>
+      </header>
+      <main class="bg-white rounded-xl shadow-sm border border-border-light p-6">
+        <div class="medecineWrap">
+          <section class="topSec flex flex-wrap justify-between items-center gap-4 mb-6">
+            <h2 class="text-lg font-semibold text-primary">Complete Appointment</h2>
+            <div class="flex gap-3">
+              <a id="printPrescriptionBtn" href="#" class="inline-flex items-center px-4 py-2 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-100">
+                <i class="fas fa-print mr-2"></i>Print
+              </a>
+              <button type="button" onclick="openPrescriptionPage()" class="add-prescription-btn inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white font-medium hover:bg-primary/90 border-none cursor-pointer">
+                <i class="fas fa-plus-circle"></i> Add Medication
+              </button>
+            </div>
+          </section>
+
+          <div id="prescriptionMedicationsList" class="my-5">
+            <h4 class="text-primary font-semibold mb-2">Prescribed Medications:</h4>
+            <div id="prescriptionMedicationsContent">
+              <p class="text-gray-500 text-center py-4">No medications added yet. Click "Add Medication" to add medications.</p>
+            </div>
+          </div>
+
+          <div id="medicationFormContainer" class="hidden my-5 p-5 border-2 border-gray-200 rounded-lg bg-gray-50">
+            <div id="medicationsContainer"></div>
+            <div class="buttonCon flex gap-4 mt-5" id="buttonCon">
+              <button type="button" id="saveMedicationsBtn" class="savebtn flex-1 py-3 rounded-lg bg-primary text-white font-semibold border-none cursor-pointer hover:bg-primary/90">Save Medications</button>
+              <button type="button" id="cancelMedicationsBtn" class="cancelbtn flex-1 py-3 rounded-lg bg-gray-200 text-gray-600 font-semibold border-none cursor-pointer hover:bg-gray-300">Cancel</button>
+            </div>
+          </div>
+          <!-- Impression (Diagnosis) Section - ENHANCED -->
+          
+
+          <!-- Management Done Section (Read-only Service Display) - ENHANCED -->
+          <div class="management-section my-6 p-5 bg-gray-50 rounded-2xl border-2 border-gray-300">
+            <div class="flex items-center gap-2 mb-3">
+              <i class="fas fa-clipboard-check text-secondary text-lg"></i>
+              <label class="block text-sm font-extrabold text-primary uppercase tracking-wide">
+                Management Done
+              </label>
+            </div>
+            <div 
+              id="managementDisplay" 
+              class="w-full min-h-[70px] px-5 py-4 rounded-xl border-2 border-gray-300 bg-white dark:bg-slate-800 text-sm text-gray-700 dark:text-gray-300 flex items-center font-medium">
+              <p class="text-gray-400 dark:text-gray-500 italic">No service selected for this appointment</p>
+            </div>
+            <p class="text-xs text-gray-600 dark:text-gray-400 mt-2 italic flex items-center gap-1">
+              <i class="fas fa-info-circle"></i>
+              This field displays the service/procedure performed during this appointment
+            </p>
+          </div>
+
+          <div class="followupSingleWrapper my-5 p-4 border-2 border-gray-200 rounded-lg bg-gray-50 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <h4 class="text-primary font-semibold w-full col-span-full">Follow Up Appointment</h4>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-1">Follow Up Date</label>
+              <input type="date" id="singleFollowUp" class="followupDatePicker w-full px-4 py-2 rounded-lg border border-gray-200" />
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-1">Follow Up Time</label>
+              <input type="time" id="singleFollowUpTime" class="followupTimePicker w-full px-4 py-2 rounded-lg border border-gray-200" />
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-1">Duration (minutes)</label>
+              <input type="number" id="singleFollowUpDuration" value="30" min="1" max="30" step="1" class="w-full min-w-[150px] max-w-[200px] px-4 py-2 rounded-lg border border-primary bg-gray-50" />
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-1">Service</label>
+              <select id="singleService" class="serviceDropdown w-full px-4 py-2 rounded-lg border border-gray-200">
+                <option value="">Search and select a service...</option>
+              </select>
+            </div>
+            <!-- ✅ NEW: Save Follow-Up Appointment Button -->
+  <div class="col-span-full mt-2">
+    <button 
+      type="button" 
+      id="saveFollowUpBtn" 
+      onclick="saveFollowUpAppointment()"
+      class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-white font-semibold hover:bg-green-700 transition-all border-none cursor-pointer">
+      <i class="fas fa-calendar-check"></i> Save Follow-Up Appointment
+    </button>
+    <span id="followUpStatus" class="ml-3 text-sm font-medium hidden"></span>
+  </div>
+</div>
+          </div>
+
+          <div class="prescription-notes-section my-5">
+            <label for="prescriptionNotes" class="block text-sm font-semibold text-gray-700 mb-2">Prescription Notes</label>
+            <textarea id="prescriptionNotes" class="prescription-notes-input w-full min-h-[120px] px-4 py-3 rounded-lg border-2 border-gray-200 text-sm resize-y" placeholder="Enter any prescription notes or additional information..."></textarea>
+          </div>
+
+
+
+          <div class="buttonCon flex gap-4 mt-6">
+            <button type="button" onclick="window.location.href='Appointments.html'" class="cancel-prescription-btn flex-1 py-3.5 rounded-lg bg-gray-200 text-gray-600 font-semibold border-none cursor-pointer inline-flex items-center justify-center gap-2 hover:bg-gray-300">
+              <i class="fas fa-times"></i> Cancel
+            </button>
+            <button type="button" onclick="completeAppointment()" class="done-prescription-btn flex-1 py-3.5 rounded-lg bg-primary text-white font-semibold border-none cursor-pointer inline-flex items-center justify-center gap-2 hover:bg-primary/90">
+              <i class="fas fa-check"></i> Done
+            </button>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Notification dropdown -->
+    <div id="notificationDropdown" class="fixed flex flex-col bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl overflow-hidden" style="display: none; top: 88px; right: 40px; width: 400px; max-width: calc(100vw - 320px); max-height: 500px; z-index: 9999;">
+      <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+        <h3 class="text-primary font-semibold text-lg m-0">Notifications</h3>
+        <button type="button" id="clearAllNotifications" class="bg-transparent border-none text-slate-500 dark:text-slate-400 cursor-pointer text-sm py-1 px-2 hover:text-slate-700 dark:hover:text-slate-200">Clear All</button>
+      </div>
+      <div id="notificationList" class="max-h-[440px] overflow-y-auto p-3">
+        <p class="text-center text-slate-400 py-5">No notifications</p>
+      </div>
+    </div>
+
+    <script src="JS/appointment_monitor.js"></script>
+    <script src="JS/prescription.js"></script>
+    <script src="JS/appointment_time_notifications.js"></script>
+    <script src="JS/nurse_notifications.js"></script>
+    <script src="JS/doctor_notifications.js"></script>
+    <script src="JS/header.js"></script>
+    <script>
+      (function() {
+        function ensureNotificationBell() {
+          var bell = document.getElementById("notificationBell");
+          var dropdown = document.getElementById("notificationDropdown");
+          if (!bell || !dropdown) return;
+          if (window._prescriptionNotificationBound) return;
+          window._prescriptionNotificationBound = true;
+          bell.addEventListener("click", function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var show = dropdown.style.display !== "flex";
+            dropdown.style.display = show ? "flex" : "none";
+            if (show && typeof loadNotifications === "function") loadNotifications();
+          });
+          document.addEventListener("click", function(e) {
+            if (!bell.contains(e.target) && !dropdown.contains(e.target))
+              dropdown.style.display = "none";
+          });
+        }
+        if (document.readyState === "loading")
+          document.addEventListener("DOMContentLoaded", ensureNotificationBell);
+        else
+          ensureNotificationBell();
+      })();
+    </script>
+  </body>
+</html>

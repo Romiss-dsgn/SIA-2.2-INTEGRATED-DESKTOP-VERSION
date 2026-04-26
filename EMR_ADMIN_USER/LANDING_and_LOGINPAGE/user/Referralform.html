@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Referral Form - WellServed</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="CSS/Global.css" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#065f46",
+              secondary: "#8B5A2B",
+              "brand-light": "#f0fdf4",
+              "background-light": "#f8fafc",
+            },
+            fontFamily: {
+              sans: ["'Plus Jakarta Sans'", "sans-serif"],
+              display: ["'Plus Jakarta Sans'", "sans-serif"],
+            },
+            borderRadius: {
+              "3xl": "24px",
+              "4xl": "32px",
+            },
+          },
+        },
+      };
+    </script>
+    <style type="text/tailwindcss">
+      @layer base {
+        body { font-feature-settings: "cv02", "cv03", "cv04", "cv11"; }
+      }
+      .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+      .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+      .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+      .material-symbols-outlined {
+        font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+        display: inline-block;
+        vertical-align: middle;
+      }
+      .card-shadow { box-shadow: 0 4px 20px -2px rgba(0,0,0,0.05); }
+      input:focus, select:focus, textarea:focus {
+        outline: none;
+        border-color: #065f46 !important;
+        box-shadow: 0 0 0 3px rgba(6,95,70,0.08);
+      }
+      input.error, select.error, textarea.error {
+        border-color: #f87171 !important;
+        box-shadow: 0 0 0 3px rgba(248,113,113,0.12) !important;
+      }
+      .btn-loading { opacity: 0.7; pointer-events: none; cursor: not-allowed; }
+      .autofilled {
+        background-color: #f0fdf4 !important;
+        border-color: #6ee7b7 !important;
+        color: #065f46 !important;
+        font-weight: 600 !important;
+      }
+      .dark .autofilled {
+        background-color: rgba(6,95,70,0.15) !important;
+        border-color: #065f46 !important;
+        color: #34d399 !important;
+      }
+    </style>
+  </head>
+  <body class="bg-[#F3F4F6] dark:bg-slate-900 dark:text-slate-100 text-slate-900 transition-colors duration-200 flex h-screen overflow-hidden" data-notification-handler="page">
+    <script src="JS/Sidebar.js"></script>
+    <script>loadSidebar("Referralform.html");</script>
+
+    <!-- Redirect to Patients if no patient data -->
+    <script>
+      (function() {
+  const hasPatient = sessionStorage.getItem("rf_patientName");
+  if (!hasPatient) {
+    window.location.href = "Patients.html";
+  }
+})();
+    </script>
+
+    <main class="flex-1 flex flex-col overflow-hidden relative ml-64">
+      <!-- Header -->
+      <header id="topHeader" class="h-20 flex items-center justify-end px-10 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-100 dark:border-slate-700 sticky top-0 z-40 shrink-0">
+        <div class="flex items-center gap-6">
+          <div class="flex items-center gap-4 bg-slate-50 dark:bg-slate-700 px-4 py-2 rounded-2xl border border-slate-100 dark:border-slate-600">
+            <div class="flex flex-col items-end">
+              <span id="clockDisplay" class="text-sm font-bold text-slate-700 dark:text-slate-200">12:00:00 PM</span>
+              <span id="headerDateDisplay" class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">—</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-6">
+            <div class="relative">
+              <button type="button" id="notificationBell" aria-label="Notifications" class="relative flex items-center justify-center w-12 h-12 text-primary hover:opacity-90 transition-opacity rounded-full hover:bg-slate-100 dark:hover:bg-slate-700/50 border-0 cursor-pointer z-50">
+                <span class="material-symbols-outlined text-[28px] select-none">notifications</span>
+                <span id="notificationBadge" class="absolute top-0.5 right-0.5 w-5 h-5 bg-red-500 border-2 border-white dark:border-slate-800 rounded-full hidden items-center justify-center text-[10px] font-bold text-white"></span>
+              </button>
+            </div>
+            <div id="headerUserAvatar" class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm ring-4 ring-primary/5">—</div>
+          </div>
+        </div>
+      </header>
+
+      <div class="flex-1 overflow-y-auto p-10 custom-scrollbar" id="pageScroll">
+        <div class="max-w-4xl mx-auto space-y-6">
+
+          <!-- PAGE TITLE -->
+          <div class="flex items-center gap-4">
+            <button onclick="history.back()"
+              class="flex items-center justify-center w-9 h-9 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-primary hover:border-primary hover:bg-brand-light transition-all shadow-sm shrink-0"
+              title="Go back">
+              <span class="material-symbols-outlined text-xl">arrow_back</span>
+            </button>
+            <div>
+              <h2 class="text-3xl font-extrabold tracking-tight text-slate-800 dark:text-white">Referral Form</h2>
+              <p class="text-slate-400 mt-1 text-sm font-medium">Fill out the referral details below and print the form.</p>
+            </div>
+          </div>
+
+          <!-- ERROR ALERT -->
+          <div id="errorAlert" class="hidden items-center gap-3 bg-red-50 border border-red-200 text-red-800 rounded-2xl px-6 py-4 font-semibold text-sm">
+            <span class="material-symbols-outlined text-red-500">error</span>
+            <span id="errorMessage">Please fill in all required fields.</span>
+          </div>
+
+          <!-- FORM CARD -->
+          <div class="bg-white dark:bg-slate-800 rounded-3xl card-shadow border border-slate-100 dark:border-slate-700 p-8 space-y-8">
+
+            <!-- ══ CLINIC HEADER PREVIEW — matches prescription.js exactly ══ -->
+            <div class="border border-slate-200 dark:border-slate-600 rounded-2xl p-5 bg-white dark:bg-slate-800">
+
+              <!-- Logo + Clinic name row -->
+              <div class="flex items-center justify-center gap-3 mb-3">
+                <!-- Circular logo -->
+                <img src="../user/Assets/wellserved_logo.jpg" alt="WellServed Logo" class="w-[72px] h-[72px] rounded-full border-[3px] border-primary object-cover shrink-0" style="box-shadow:0 2px 8px rgba(6,95,70,0.15);">
+                <!-- Clinic text -->
+                <div class="text-center">
+                  <div class="text-[22px] font-black text-primary tracking-[4px]" style="font-family:'Arial Black','Arial Bold',Arial,sans-serif;line-height:1;">WELLSERVED</div>
+                  <div class="text-[10px] font-bold text-[#064e3b] tracking-[1px] mt-0.5" style="font-family:Arial,sans-serif;">INFIRMARY &amp; DRUGSTORE INC.</div>
+                  <div class="text-[8px] font-bold text-secondary leading-relaxed mt-1" style="font-family:Arial,sans-serif;">
+                    &bull; MEDICAL &nbsp;&bull; PEDIA &nbsp;&bull; OB GYNE &nbsp;&bull; MINOR SURGERY<br>
+                    &bull; X-RAY &nbsp;&bull; ECG &nbsp;&bull; LABORATORY &nbsp;&bull; ULTRASOUND &nbsp;&bull; DRUGSTORE
+                  </div>
+                </div>
+              </div>
+
+              <!-- Address + contact -->
+              <div class="flex justify-between text-[9px] text-slate-400 italic border-t border-primary pt-2 mt-1" style="font-family:Arial,sans-serif;">
+                <span>📍 #26 Steve St. cor Villiongco St., Brgy. Commonwealth, Quezon City &nbsp;|&nbsp; Tel: 8 952-77-79</span>
+                <span>📧 <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="295e4c45455a4c5b5f4c4d40474f405b44485b50694e44484045074a4644">[email&#160;protected]</a></span>
+              </div>
+
+              <!-- Doctors — 2-column grid, 3 rows -->
+              <div class="mt-2 text-[8.5px] font-bold text-[#064e3b] text-center" style="font-family:Arial,sans-serif;">
+                <div class="grid grid-cols-2 leading-[1.8]">
+                  <span class="text-right pr-4">DAISY VILLARAMA-TIGA, M.D. CFP, MHA</span>
+                  <span class="text-left pl-4">JOSE EDUARDO M. TIGA, M.D. CFP</span>
+                </div>
+                <div class="grid grid-cols-2 leading-[1.8]">
+                  <span class="text-right pr-4">DANIEL JOSE V. TIGA, M.D. CFP</span>
+                  <span class="text-left pl-4">EDUARDO MARCO DAYRIT M.D.</span>
+                </div>
+                <div class="grid grid-cols-2 leading-[1.8]">
+                  <span class="text-right pr-4">KATRINA MAE TIGA-AGUILA, M.D.</span>
+                  <span class="text-left pl-4">RICSON RAY AGUILA, M.D.</span>
+                </div>
+              </div>
+            </div>
+            <!-- ══ END CLINIC HEADER PREVIEW ══ -->
+
+            <!-- BASIC INFO -->
+            <div>
+              <div class="flex items-center gap-2 mb-5 pb-3 border-b border-slate-100 dark:border-slate-700">
+                <span class="material-symbols-outlined text-secondary text-xl">edit_document</span>
+                <h3 class="font-extrabold text-slate-700 dark:text-slate-200 text-sm uppercase tracking-widest">Basic Information</h3>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Date <span class="text-red-400">*</span></label>
+                  <input type="date" id="referralDate"
+                    class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-sm font-medium transition-all" />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">To (Referred Doctor / Specialist) <span class="text-red-400">*</span></label>
+                  <input type="text" id="referredTo" placeholder="e.g. Dr. Juan dela Cruz, Cardiologist"
+                    class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-sm font-medium transition-all" />
+                </div>
+              </div>
+            </div>
+
+            <!-- PATIENT DETAILS -->
+            <div>
+              <div class="flex items-center gap-2 mb-5 pb-3 border-b border-slate-100 dark:border-slate-700">
+                <span class="material-symbols-outlined text-secondary text-xl">person</span>
+                <h3 class="font-extrabold text-slate-700 dark:text-slate-200 text-sm uppercase tracking-widest">Patient Details</h3>
+                <span class="ml-auto inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 px-3 py-1 rounded-full">
+                  <span class="material-symbols-outlined text-[14px]">check_circle</span>
+                  Autofilled
+                </span>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div class="flex flex-col gap-1.5 md:col-span-1">
+                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Patient Name</label>
+                  <input type="text" id="patientName" readonly
+                    class="autofilled w-full px-4 py-3 rounded-xl border text-sm transition-all" />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Age / Sex</label>
+                  <input type="text" id="patientAgeSex" readonly
+                    class="autofilled w-full px-4 py-3 rounded-xl border text-sm transition-all" />
+                </div>
+              </div>
+            </div>
+
+            <!-- CLINICAL INFORMATION -->
+            <div>
+              <div class="flex items-center gap-2 mb-5 pb-3 border-b border-slate-100 dark:border-slate-700">
+                <span class="material-symbols-outlined text-secondary text-xl">biotech</span>
+                <h3 class="font-extrabold text-slate-700 dark:text-slate-200 text-sm uppercase tracking-widest">Clinical Information</h3>
+              </div>
+              <div class="space-y-5">
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Reason for Referral <span class="text-red-400">*</span></label>
+                  <textarea id="reasonForReferral" rows="3" placeholder="State the reason for referral..."
+                    class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-sm font-medium transition-all resize-none"></textarea>
+                </div>
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Impression</label>
+                  <textarea id="impression" rows="2" placeholder="Clinical impression / diagnosis..."
+                    class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-sm font-medium transition-all resize-none"></textarea>
+                </div>
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Pertinent History and PE</label>
+                  <textarea id="pertinentHistory" rows="3" placeholder="Relevant history and physical examination findings..."
+                    class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-sm font-medium transition-all resize-none"></textarea>
+                </div>
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Pertinent Labs</label>
+                  <textarea id="pertinentLabs" rows="3" placeholder="Relevant laboratory / diagnostic results..."
+                    class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-sm font-medium transition-all resize-none"></textarea>
+                </div>
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Management Done</label>
+                  <textarea id="managementDone" rows="3" placeholder="Medications given, procedures done, management provided..."
+                    class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-sm font-medium transition-all resize-none"></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- ATTENDING PHYSICIAN -->
+            <div>
+              <div class="flex items-center gap-2 mb-5 pb-3 border-b border-slate-100 dark:border-slate-700">
+                <span class="material-symbols-outlined text-secondary text-xl">stethoscope</span>
+                <h3 class="font-extrabold text-slate-700 dark:text-slate-200 text-sm uppercase tracking-widest">Attending Physician</h3>
+                <span class="ml-auto inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 px-3 py-1 rounded-full">
+                  <span class="material-symbols-outlined text-[14px]">check_circle</span>
+                  Autofilled
+                </span>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div class="flex flex-col gap-1.5 md:col-span-2">
+                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Name, MD</label>
+                  <input type="text" id="physicianName" readonly
+                    class="autofilled w-full px-4 py-3 rounded-xl border text-sm transition-all" />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">License No.</label>
+                  <input type="text" id="licenseNo" placeholder="License No."
+                    class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-sm font-medium transition-all" />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">PTR No.</label>
+                  <input type="text" id="ptrNo" placeholder="PTR No."
+                    class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-sm font-medium transition-all" />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">S2 No.</label>
+                  <input type="text" id="s2No" placeholder="S2 No."
+                    class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-sm font-medium transition-all" />
+                </div>
+              </div>
+            </div>
+
+            <!-- FORM ACTIONS -->
+            <div class="flex items-center justify-end gap-3 pt-2 border-t border-slate-100 dark:border-slate-700">
+              <button onclick="resetReferralForm()"
+                class="px-6 py-3 rounded-2xl border border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 font-bold text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-all">
+                Clear Form
+              </button>
+              <button onclick="printReferral()"
+                class="px-8 py-3 bg-primary text-white font-extrabold rounded-2xl hover:bg-[#054a37] transition-all shadow-lg shadow-primary/10 flex items-center gap-2 text-sm">
+                <span class="material-symbols-outlined text-[18px]">print</span>
+                Print Referral
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Notification dropdown -->
+    <div id="notificationDropdown" class="fixed flex flex-col bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl overflow-hidden" style="display: none; top: 88px; right: 40px; width: 400px; max-width: calc(100vw - 320px); max-height: 500px; z-index: 9999;">
+      <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+        <h3 class="text-primary font-semibold text-lg m-0">Notifications</h3>
+        <button type="button" id="clearAllNotifications" class="bg-transparent border-none text-slate-500 dark:text-slate-400 cursor-pointer text-sm py-1 px-2 hover:text-slate-700 dark:hover:text-slate-200">Clear All</button>
+      </div>
+      <div id="notificationList" class="max-h-[440px] overflow-y-auto p-3">
+        <p class="text-center text-slate-400 py-5">No notifications</p>
+      </div>
+    </div>
+
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="JS/appointment_monitor.js"></script>
+    <script src="JS/nurse_notifications.js"></script>
+    <script src="JS/doctor_notifications.js"></script>
+    <script src="JS/appointment_time_notifications.js"></script>
+    <script src="JS/header.js"></script>
+    <script>
+      (function() {
+        function ensureNotificationBell() {
+          var bell = document.getElementById("notificationBell");
+          var dropdown = document.getElementById("notificationDropdown");
+          if (!bell || !dropdown) return;
+          if (window._referralNotificationBound) return;
+          window._referralNotificationBound = true;
+          bell.addEventListener("click", function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var show = dropdown.style.display !== "flex";
+            dropdown.style.display = show ? "flex" : "none";
+            if (show && typeof loadNotifications === "function") loadNotifications();
+          });
+          document.addEventListener("click", function(e) {
+            if (!bell.contains(e.target) && !dropdown.contains(e.target))
+              dropdown.style.display = "none";
+          });
+        }
+        if (document.readyState === "loading")
+          document.addEventListener("DOMContentLoaded", ensureNotificationBell);
+        else
+          ensureNotificationBell();
+      })();
+    </script>
+    <script src="JS/session_checker.js"></script>
+    <script src="JS/Referralform.js"></script>
+  </body>
+</html>

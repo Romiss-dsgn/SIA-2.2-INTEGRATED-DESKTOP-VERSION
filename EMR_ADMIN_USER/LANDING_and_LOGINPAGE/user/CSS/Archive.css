@@ -1,0 +1,441 @@
+:root {
+    --primary-color: #005a32;    /* Forest Green */
+    --secondary-color: #d62828;  /* Vibrant Red */
+    --accent-color: #8b5a2b;     /* Brown Accent */
+    --bg-neutral: #f1f5f9;
+}
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: 600;
+}
+body{
+    display: flex;
+    height: 100vh;
+    background-color: var(--bg-neutral);
+}
+a{
+    text-decoration: none;
+    color: inherit;
+}
+.sideBar{
+    width: 100%;
+    max-width: 250px;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+    border-right: 1px solid #ddd;
+}
+.logoCon{
+    display: flex;
+    align-items: center;
+    padding-bottom: 20px;
+    gap: 10px;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 20px;
+}
+.logo{
+    font-size: 30px;
+    padding: 10px;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 10px;
+}
+.title{
+    font-size: 25px;
+    color: var(--primary-color);
+    font-weight: 700;
+}
+.subTitle{
+    font-size: 14px;
+    color: #777;
+    font-weight: 600;
+}
+.accountCon{
+    display: flex;
+    align-items: center;
+    padding-bottom: 20px;
+    gap: 10px;
+    border-bottom: 1px solid #ddd;
+}
+.userPic{
+    width: 40px;
+    height: 40px;
+    background-color: #358F85;
+    border-radius: 50%;
+    margin-bottom: 10px;
+}
+.accountInfo{
+    margin-left: 10px;
+}
+.accountName{
+    font-size: 18px;
+    color: #333;
+}
+.role{
+    font-size: 14px;
+    color: #777;
+}
+.navBar{
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+}
+.navBar a, .logoutCon a{
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 10px;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+.navBar img{
+    width: 20px;
+    height: 20px;
+}
+.navBar a:hover, .logoutCon a:hover{
+    background-color: #f0f0f0;
+}
+
+.dashboard{
+    font-size: 16px;
+    font-weight: 500;
+    color: #504f4f;
+}
+
+.logoutCon{
+    border-top: 1px solid #ddd;
+    padding-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+ .logoutCon .logout:hover{
+    background-color: #f5bcbc;
+}
+
+main{
+    flex-grow: 1;
+    padding: 20px;
+}
+.mainContent{
+    background-color: white;
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    min-height: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.top{
+    display: flex;
+    gap: 20px;
+    flex-direction: column;
+    justify-content: space-between;
+    
+    padding-bottom: 10px;
+}
+.topSec {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+.title{
+    font-size: 24px;
+    color: #333;
+    font-weight: 600;
+    flex: 1;
+}
+.switchView {
+    display: flex;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #f8fafc;
+}
+.tblViewCon, .calenViewCon{
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    align-items: center;
+    padding: 5px;
+}
+.tblViewCon h3, .calenViewCon h3, .addBtn h3{
+    font-size: 15px;
+    
+}
+
+.tblViewCon {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 8px 15px;
+}
+.switchView:hover{
+background-color: #c5f9be;
+}
+.calenViewCon:hover{
+color: #358F85;
+}
+.addBtn{
+    display: flex;
+    gap: 10px;
+    border-radius: 10px;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    background-color: #358F85;
+    color: white;
+    padding: 10px 20px;
+}
+
+.filterCon{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+ .searchBarWrapper{
+    background-color: #fbf8f8;
+    width: 60%;
+    height: 40px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    padding-left: 10px;
+    border-radius: 7px;
+}
+
+
+.searchBar{
+width: 100%;
+background-color: #fbf8f8;
+outline: none;
+border: none;
+}
+select{
+border: none;
+background-color: #fbf8f8;
+height: 40px;
+width: 200px;
+border-radius: 7px;
+outline: none;
+}
+option{
+border: none;
+background-color: #fbf8f8;
+outline: none;
+}
+table{
+border-collapse: separate;
+ border-spacing: 0; 
+overflow: hidden;  
+border: #c0bfbf 1px solid;
+border-radius: 10px;
+}
+
+th {
+    background-color: #f8fafc;
+    padding: 15px;
+    color: #64748b;
+    font-size: 13px;
+    text-transform: uppercase;
+}
+
+th, td{
+border-bottom: #c0bfbf 1px solid;
+text-align: center;
+padding: 15px 10px;
+}
+td {
+    padding: 15px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+}
+table td:nth-child(1) {
+    color: var(--primary-color); 
+    font-weight: 700;
+}
+span{
+font-size: 13px;
+font-weight: 400;
+}
+
+td .statusCompleted {
+    background-color: #ecfdf5;
+    color: #047857;
+    border: 1px solid #10b981;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+}
+
+td .statusCanceled {
+    background-color: #fef2f2;
+    color: var(--secondary-color);
+    border: 1px solid #fecaca;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+}
+.actionBtn {
+    border-radius: 8px;
+    border: 1px solid var(--accent-color);
+    color: var(--accent-color);
+    padding: 6px 12px;
+    font-size: 13px;
+    transition: all 0.2s;
+}
+.actionBtn:hover {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+    color: white;
+}
+
+.bottomSec{
+    padding-top: 10px;
+}
+.bottomSec h3{
+    font-size: 14px;
+    color: #777;
+}
+
+
+/* Modern Appointment Modal Styles */
+.appointment-modal {
+background-color: #fff;
+border-radius: 12px;
+width: 500px;
+max-width: 95%;
+max-height: 90vh;
+overflow-y: auto;
+box-shadow: 0 5px 25px rgba(0,0,0,0.25);
+padding: 25px 25px 30px;
+position: relative;
+animation: fadeIn 0.2s ease-in;
+font-weight: 500;
+}
+
+.modal-header {
+display: flex;
+align-items: center;
+justify-content: space-between;
+position: relative;
+margin-bottom: 15px;
+}
+
+.modal-header h2 {
+color: #2e2e2e;
+font-size: 18px;
+font-weight: 700;
+}
+
+.status-badge {
+background-color: var(--primary-color);
+color: white;
+padding: 4px 10px;
+border-radius: 20px;
+font-size: 13px;
+font-weight: 600;
+position: absolute;
+right: 35px;
+}
+
+.close-btn {
+position: absolute;
+top: 2px;
+right: 10px;
+font-size: 22px;
+color: #333;
+cursor: pointer;
+}
+
+.modal-section {
+border: 1px solid #e2e2e2;
+border-radius: 10px;
+padding: 15px 15px 10px;
+margin-top: 15px;
+}
+
+.modal-section h3 {
+color: var(--accent-color);
+font-size: 18px;
+font-weight: 600;
+display: flex;
+align-items: center;
+gap: 8px;
+margin-bottom: 10px;
+}
+
+.overview-grid {
+display: grid;
+grid-template-columns: repeat(2, 1fr);
+gap: 12px;
+padding-top: 5px;
+}
+
+.label {
+color: #777;
+font-size: 13px;
+margin-bottom: 2px;
+}
+
+.value {
+color: #222;
+font-weight: 600;
+font-size: 14px;
+}
+
+.text-box {
+background-color: #f5f8f5;
+border: 1px solid #d8e4d6;
+border-radius: 8px;
+padding: 8px 10px;
+color: #333;
+font-size: 14px;
+min-height: 35px;
+display: flex;
+align-items: center;
+}
+
+/* Dark overlay */
+.modal {
+display: none;
+position: fixed;
+z-index: 1000;
+left: 0;
+top: 0;
+width: 100%;
+height: 100%;
+background-color: rgba(0,0,0,0.6);
+justify-content: center;
+align-items: center;
+}
+.buttonCon{
+display: flex;
+justify-content: space-between;
+margin-top: 20px;
+}
+.buttonCon a{
+text-decoration: none;
+padding: 10px 20px;
+border-radius: 8px;
+font-size: 14px;
+font-weight: 600;
+}
+.editApp{
+border: 1px solid #358F85;
+color: #358F85;
+}
+.cancelApp{
+border: 1px solid #ca3030;
+color: #ca3030;
+}

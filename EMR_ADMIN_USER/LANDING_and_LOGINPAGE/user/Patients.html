@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Patients - WellServed</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="CSS/Global.css" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#065f46",
+              secondary: "#8B5A2B",
+              "brand-light": "#f0fdf4",
+              "background-light": "#f8fafc",
+            },
+            fontFamily: {
+              sans: ["'Plus Jakarta Sans'", "sans-serif"],
+              display: ["'Plus Jakarta Sans'", "sans-serif"],
+            },
+            borderRadius: {
+              "3xl": "24px",
+              "4xl": "32px",
+            },
+          },
+        },
+      };
+    </script>
+    <style type="text/tailwindcss">
+      @layer base {
+        body { font-feature-settings: "cv02", "cv03", "cv04", "cv11"; }
+      }
+      .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+      .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+      .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+      .material-symbols-outlined {
+        font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+        display: inline-block;
+        vertical-align: middle;
+      }
+      .card-shadow { box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05); }
+      tbody tr { transition: background-color 0.2s, transform 0.1s; }
+      tbody tr:hover { background-color: rgba(6, 95, 70, 0.02); }
+      .dark tbody tr:hover { background-color: rgba(51, 65, 85, 0.3); }
+      tbody td {
+        padding: 1rem 1.5rem;
+        text-align: left;
+        vertical-align: middle;
+        font-size: 0.875rem;
+      }
+      tbody td:first-child { font-weight: 700; }
+      tbody td:nth-child(2) { font-weight: 700; color: #1e293b; }
+      .dark tbody td:nth-child(2) { color: #f8fafc; }
+      .viewBtn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: white;
+        background: #065f46;
+        border: none;
+        border-radius: 0.5rem;
+        transition: all 0.2s;
+        text-decoration: none;
+        cursor: pointer;
+      }
+      .viewBtn:hover {
+        background-color: #047857;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(6, 95, 70, 0.2);
+      }
+      .fa-mars { color: #3b82f6; }
+      .fa-venus { color: #ec4899; }
+      .stat-card { transition: transform 0.2s, box-shadow 0.2s; }
+      .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px -2px rgba(0, 0, 0, 0.1);
+      }
+    </style>
+  </head>
+  <body class="bg-[#F3F4F6] dark:bg-slate-900 dark:text-slate-100 text-slate-900 transition-colors duration-200 flex h-screen overflow-hidden" data-notification-handler="page">
+    <script src="JS/Sidebar.js"></script>
+    <script src="JS/recent_patients.js"></script>
+    <script>loadSidebar("Patients.html");</script>
+
+    <main class="flex-1 flex flex-col overflow-hidden relative ml-64">
+      <!-- Header -->
+      <header id="topHeader" class="h-20 flex items-center justify-end px-10 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-100 dark:border-slate-700 sticky top-0 z-40 shrink-0">
+        <div class="flex items-center gap-6">
+          <div class="flex items-center gap-4 bg-slate-50 dark:bg-slate-700 px-4 py-2 rounded-2xl border border-slate-100 dark:border-slate-600">
+            <div class="flex flex-col items-end">
+              <span id="clockDisplay" class="text-sm font-bold text-slate-700 dark:text-slate-200">12:00:00 PM</span>
+              <span id="headerDateDisplay" class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">—</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-6">
+            <div class="relative">
+              <button type="button" id="notificationBell" aria-label="Notifications" class="relative flex items-center justify-center w-12 h-12 text-primary hover:opacity-90 transition-opacity rounded-full hover:bg-slate-100 dark:hover:bg-slate-700/50 border-0 cursor-pointer z-50">
+                <span class="material-symbols-outlined text-[28px] select-none">notifications</span>
+                <span id="notificationBadge" class="absolute top-0.5 right-0.5 w-5 h-5 bg-red-500 border-2 border-white dark:border-slate-800 rounded-full hidden items-center justify-center text-[10px] font-bold text-white"></span>
+              </button>
+            </div>
+            <div id="headerUserAvatar" class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm ring-4 ring-primary/5">—</div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <div class="flex-1 overflow-y-auto p-8 custom-scrollbar">
+        <div class="max-w-7xl mx-auto space-y-6">
+
+          <!-- Title and Button -->
+          <div class="flex items-center justify-between">
+            <h1 class="text-3xl text-primary font-extrabold text-slate-800 dark:text-white tracking-tight">Patient Records</h1>
+            <a href="AddPatient.html" class="addBtn inline-flex gap-2 rounded-xl items-center justify-center bg-primary text-white py-3 px-6 font-bold hover:bg-primary/90 transition-all shadow-md hover:shadow-lg active:scale-95">
+              <span class="material-symbols-outlined text-xl">person_add</span>
+              <span>Register Patient</span>
+            </a>
+          </div>
+
+          <!-- Stats Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="stat-card bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 border-t-4 border-t-secondary card-shadow">
+              <div class="flex justify-between items-start mb-4">
+                <span class="material-symbols-outlined p-2.5 bg-secondary/10 text-secondary rounded-xl text-2xl">group</span>
+              </div>
+              <p class="text-slate-500 dark:text-slate-400 text-sm font-semibold mb-1">Total Patients</p>
+              <h3 id="totalPatients" class="text-3xl font-extrabold text-slate-900 dark:text-white">0</h3>
+            </div>
+            <div class="stat-card bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 border-t-4 border-t-blue-500 card-shadow">
+              <div class="flex justify-between items-start mb-4">
+                <span class="material-symbols-outlined p-2.5 bg-blue-500/10 text-blue-500 rounded-xl text-2xl">male</span>
+              </div>
+              <p class="text-slate-500 dark:text-slate-400 text-sm font-semibold mb-1">Male Patients</p>
+              <h3 id="malePatients" class="text-3xl font-extrabold text-slate-900 dark:text-white">0</h3>
+            </div>
+            <div class="stat-card bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 border-t-4 border-t-pink-500 card-shadow">
+              <div class="flex justify-between items-start mb-4">
+                <span class="material-symbols-outlined p-2.5 bg-pink-500/10 text-pink-500 rounded-xl text-2xl">female</span>
+              </div>
+              <p class="text-slate-500 dark:text-slate-400 text-sm font-semibold mb-1">Female Patients</p>
+              <h3 id="femalePatients" class="text-3xl font-extrabold text-slate-900 dark:text-white">0</h3>
+            </div>
+            <div class="stat-card bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 border-t-4 border-t-secondary card-shadow">
+              <div class="flex justify-between items-start mb-4">
+                <span class="material-symbols-outlined p-2.5 bg-secondary/10 text-secondary rounded-xl text-2xl">person_add</span>
+              </div>
+              <p class="text-slate-500 dark:text-slate-400 text-sm font-semibold mb-1">This Month</p>
+              <h3 id="recentPatients" class="text-3xl font-extrabold text-slate-900 dark:text-white">0</h3>
+            </div>
+          </div>
+
+          <!-- Table Card -->
+          <div class="bg-white dark:bg-slate-800 rounded-2xl card-shadow border border-slate-100 dark:border-slate-700 overflow-hidden">
+            <div class="p-6 border-b border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row gap-4 justify-between items-center">
+              <!-- Search -->
+              <div class="searchBarWrapper relative w-full sm:max-w-md">
+                <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl">search</span>
+                <input class="searchBar w-full pl-12 pr-4 py-2.5 bg-slate-50 dark:bg-slate-700/50 border-transparent rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-slate-400 font-medium" type="text" placeholder="Search patients..." />
+              </div>
+              <!-- Filters -->
+              <div class="flex gap-2 shrink-0">
+                <!-- ✅ NEW: Status Filter -->
+                <select id="statusFilter" class="px-6 py-2.5 bg-slate-50 dark:bg-slate-700/50 border-transparent rounded-xl text-sm font-bold text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer">
+                  <option value="all">All Status</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+                <!-- Sort -->
+                <select id="filterSelect" class="px-6 py-2.5 bg-slate-50 dark:bg-slate-700/50 border-transparent rounded-xl text-sm font-bold text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer">
+                  <option value="all">Sort By</option>
+                  <option value="a-z">A-Z</option>
+                  <option value="z-a">Z-A</option>
+                  <option value="latest">Latest</option>
+                  <option value="oldest">Oldest</option>
+                </select>
+              </div>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full border-collapse">
+                <thead>
+                  <tr class="bg-gradient-to-r from-emerald-100 to-rose-100 text-slate-700 uppercase text-[11px] font-extrabold tracking-widest">
+                    <th class="px-6 py-4 text-left">PATIENT ID</th>
+                    <th class="px-6 py-4 text-left">NAME</th>
+                    <th class="px-6 py-4 text-left">DATE OF BIRTH</th>
+                    <th class="px-6 py-4 text-left">GENDER</th>
+            <!----> <th class="px-6 py-4 text-left">STATUS</th>
+                    <th class="px-6 py-4 text-center">ACTION</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50">
+                  <tr>
+                    <td colspan="6" class="text-center py-8 text-slate-400">Loading...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <!-- Pagination Footer -->
+            <div class="px-6 py-4 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between">
+              <h3 class="bottomSec text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Showing 0 of 0 patients</h3>
+              <div class="flex items-center gap-3">
+                <button type="button" id="prevPageBtn"
+                  class="px-4 py-2 text-sm font-bold text-primary border border-primary rounded-lg hover:bg-primary/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                  ← Previous
+                </button>
+                <span id="pageInfo" class="text-sm font-bold text-slate-600 dark:text-slate-300 min-w-[100px] text-center">
+                  Page 1 of 1
+                </span>
+                <button type="button" id="nextPageBtn"
+                  class="px-4 py-2 text-sm font-bold text-primary border border-primary rounded-lg hover:bg-primary/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                  Next →
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </main>
+
+    <!-- Notification dropdown -->
+    <div id="notificationDropdown" class="fixed flex flex-col bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl overflow-hidden" style="display: none; top: 88px; right: 40px; width: 400px; max-width: calc(100vw - 320px); max-height: 500px; z-index: 9999;">
+      <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+        <h3 class="text-primary font-semibold text-lg m-0">Notifications</h3>
+        <button type="button" id="clearAllNotifications" class="bg-transparent border-none text-slate-500 dark:text-slate-400 cursor-pointer text-sm py-1 px-2 hover:text-slate-700 dark:hover:text-slate-200">Clear All</button>
+      </div>
+      <div id="notificationList" class="max-h-[440px] overflow-y-auto p-3">
+        <p class="text-center text-slate-400 py-5">No notifications</p>
+      </div>
+    </div>
+
+    <script src="JS/appointment_monitor.js"></script>
+    <script src="JS/patients.js"></script>
+    <script src="JS/appointment_time_notifications.js"></script>
+    <script src="JS/nurse_notifications.js"></script>
+    <script src="JS/doctor_notifications.js"></script>
+    <script src="JS/header.js"></script>
+    <script>
+      (function() {
+        function ensureNotificationBell() {
+          var bell = document.getElementById("notificationBell");
+          var dropdown = document.getElementById("notificationDropdown");
+          if (!bell || !dropdown) return;
+          if (window._patientsNotificationBound) return;
+          window._patientsNotificationBound = true;
+          bell.addEventListener("click", function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var show = dropdown.style.display !== "flex";
+            dropdown.style.display = show ? "flex" : "none";
+            if (show && typeof loadNotifications === "function") loadNotifications();
+          });
+          document.addEventListener("click", function(e) {
+            if (!bell.contains(e.target) && !dropdown.contains(e.target))
+              dropdown.style.display = "none";
+          });
+        }
+        if (document.readyState === "loading")
+          document.addEventListener("DOMContentLoaded", ensureNotificationBell);
+        else
+          ensureNotificationBell();
+      })();
+    </script>
+    <script src="JS/auto_refresh.js"></script>
+    <script src="JS/session_checker.js"></script>
+  </body>
+</html>

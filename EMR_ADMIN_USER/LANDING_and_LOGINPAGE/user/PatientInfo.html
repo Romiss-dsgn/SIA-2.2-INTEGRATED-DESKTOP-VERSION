@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Patient Information - WellServed</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="CSS/Global.css" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#065f46",
+              "brand-light": "#f0fdf4",
+              "background-light": "#f8fafc",
+            },
+            fontFamily: {
+              sans: ["'Plus Jakarta Sans'", "sans-serif"],
+              display: ["'Plus Jakarta Sans'", "sans-serif"],
+            },
+            borderRadius: {
+              "3xl": "24px",
+              "4xl": "32px",
+            },
+          },
+        },
+      };
+    </script>
+    <style type="text/tailwindcss">
+      @layer base {
+        body { font-feature-settings: "cv02", "cv03", "cv04", "cv11"; }
+      }
+      .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+      .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+      .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+      .material-symbols-outlined {
+        font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+        display: inline-block;
+        vertical-align: middle;
+      }
+      .card-shadow { box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05); }
+    </style>
+  </head>
+  <body class="bg-[#F3F4F6] dark:bg-slate-900 dark:text-slate-100 text-slate-900 transition-colors duration-200 flex h-screen overflow-hidden" data-notification-handler="page">
+    <script src="JS/Sidebar.js"></script>
+    <script src="JS/recent_patients.js"></script>
+    <script>loadSidebar("Patients.html");</script>
+
+    <header id="topHeader" class="fixed top-0 left-64 right-0 h-20 flex items-center justify-end px-10 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-100 dark:border-slate-700 z-40">
+      <div class="flex items-center gap-6">
+        <div class="flex items-center gap-4 bg-slate-50 dark:bg-slate-700 px-4 py-2 rounded-2xl border border-slate-100 dark:border-slate-600">
+          <div class="flex flex-col items-end">
+            <span id="clockDisplay" class="text-sm font-bold text-slate-700 dark:text-slate-200">12:00:00 PM</span>
+            <span id="headerDateDisplay" class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">—</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-6">
+          <div class="relative">
+            <button type="button" id="notificationBell" aria-label="Notifications" class="relative flex items-center justify-center w-12 h-12 text-primary hover:opacity-90 transition-opacity rounded-full hover:bg-slate-100 dark:hover:bg-slate-700/50 border-0 cursor-pointer z-50">
+              <span class="material-symbols-outlined text-[28px] select-none">notifications</span>
+              <span id="notificationBadge" class="absolute top-0.5 right-0.5 w-5 h-5 bg-red-500 border-2 border-white dark:border-slate-800 rounded-full hidden items-center justify-center text-[10px] font-bold text-white"></span>
+            </button>
+          </div>
+          <div id="headerUserAvatar" class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm ring-4 ring-primary/5">—</div>
+        </div>
+      </div>
+    </header>
+
+    <div class="mainContainer flex-1 ml-64 p-5 overflow-y-auto" style="margin-top: 80px;">
+      <header class="flex justify-between items-center mb-6">
+        <div class="flex items-center gap-4">
+          <a href="Patients.html" class="flex items-center justify-center w-9 h-9 rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-primary hover:border-primary hover:bg-brand-light transition-all shadow-sm" title="Back to Patients">
+            <span class="material-symbols-outlined text-xl">arrow_back</span>
+          </a>
+          <h1 class="text-2xl font-bold text-primary">Patient Information</h1>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button id="requestFormBtn" style="display:none;"
+            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 font-medium transition-all shadow-sm text-sm">
+            <span class="material-symbols-outlined text-base">assignment_add</span>
+            Request Form
+          </button>
+
+          <button id="referralFormBtn" style="display:none;"
+            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-primary text-primary hover:bg-brand-light font-medium transition-all shadow-sm text-sm">
+            <span class="material-symbols-outlined text-base">forward_to_inbox</span>
+            Referral Form
+          </button>
+
+          <a class="editbtn inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-50 font-medium text-sm" href="#">
+            <i class="fa-solid fa-pen-to-square"></i> Edit
+          </a>
+        </div>
+      </header>
+
+      <main class="bg-white rounded-xl shadow-sm border border-border-light p-6">
+        <nav-bar class="flex flex-wrap gap-2 mb-6 border-b border-border-light pb-4">
+          <a class="personal px-4 py-2 rounded-lg bg-white border border-primary text-primary font-medium" href="PatientInfo.html">Personal Info</a>
+          <a class="prescription-history px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 font-medium" href="PrescriptionHistory.html">Prescription History</a>
+          <a class="allergies px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 font-medium" href="Allergies.html">Allergies</a>
+          <a class="vitalSigns px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 font-medium" href="VitalSigns.html">Vital Signs</a>
+          <!-- ✅ Lab Results — hidden by default, shown only to Doctor and Medtech via JS -->
+          <a id="labResultsTab" class="labResults px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 font-medium" href="LabResults.html" style="display:none;">Lab Results</a>
+        </nav-bar>
+
+        <form id="patientForm" action="">
+          <section class="perInfo mb-6">
+            <h2 class="flex items-center gap-2 text-lg font-semibold text-primary mb-4"><i class="fa-solid fa-user text-xl"></i> Personal Information</h2>
+            <div class="infoContainer grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="perInfoLeft space-y-4">
+                <div class="form-group">
+                  <label for="firstname" class="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
+                  <input type="text" id="firstname" name="firstname" required disabled class="w-full px-4 py-2 rounded-lg border border-gray-200 bg-gray-50" />
+                </div>
+                <div class="form-group">
+                  <label for="middlename" class="block text-sm font-medium text-gray-700 mb-1">Middle Name <span class="text-gray-400 text-xs">(Optional)</span></label>
+                  <input type="text" id="middlename" name="middlename" disabled class="w-full px-4 py-2 rounded-lg border border-gray-200 bg-gray-50" />
+                </div>
+
+                <div class="form-group">
+                  <label for="dob" class="block text-sm font-medium text-gray-700 mb-1">Date of Birth *</label>
+                  <input type="date" id="dob" name="dob" required disabled class="w-full px-4 py-2 rounded-lg border border-gray-200 bg-gray-50" />
+                </div>
+                <div class="form-group">
+                  <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status *</label>
+                  <select id="status" name="status" required disabled class="w-full px-4 py-2 rounded-lg border border-gray-200 bg-gray-50">
+                    <option value="" disabled selected hidden>Select Status</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
+                </div>
+              </div>
+              <div class="perInfoRight space-y-4">
+                <div class="form-group">
+                  <label for="lastname" class="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
+                  <input type="text" id="lastname" name="lastname" required disabled class="w-full px-4 py-2 rounded-lg border border-gray-200 bg-gray-50" />
+                </div>
+                <div class="form-group">
+                  <label for="gender" class="block text-sm font-medium text-gray-700 mb-1">Gender *</label>
+                  <select id="gender" name="gender" required disabled class="w-full px-4 py-2 rounded-lg border border-gray-200 bg-gray-50">
+                    <option value="">Select Gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
+                    <option value="prefer-not-to-say">Prefer not to say</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="conInfo mb-6">
+            <h2 class="flex items-center gap-2 text-lg font-semibold text-primary mb-4"><i class="fa-solid fa-phone text-xl"></i> Contact Information</h2>
+            <div class="infoContainer grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="form-group">
+                <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                <input type="tel" id="phone" name="phone" required disabled class="w-full px-4 py-2 rounded-lg border border-gray-200 bg-gray-50" />
+              </div>
+              <div class="form-group">
+                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input type="email" id="email" name="email" required disabled class="w-full px-4 py-2 rounded-lg border border-gray-200 bg-gray-50" />
+              </div>
+            </div>
+          </section>
+
+          <section class="addInfo mb-6">
+            <h2 class="flex items-center gap-2 text-lg font-semibold text-primary mb-4"><i class="fa-solid fa-location-dot text-xl"></i> Address Information</h2>
+            <div class="addInfoContainer">
+              <div class="addInfoTop mb-4">
+                <div class="form-group">
+                  <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Street Address</label>
+                  <input type="text" id="address" name="address" required disabled class="w-full px-4 py-2 rounded-lg border border-gray-200 bg-gray-50" />
+                </div>
+              </div>
+              <div class="addInfoBottom grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="form-group">
+                  <label for="barangay" class="block text-sm font-medium text-gray-700 mb-1">Barangay</label>
+                  <input type="text" id="barangay" name="barangay" required disabled class="w-full px-4 py-2 rounded-lg border border-gray-200 bg-gray-50" />
+                </div>
+                <div class="form-group">
+                  <label for="city" class="block text-sm font-medium text-gray-700 mb-1">City</label>
+                  <input type="text" id="city" name="city" required disabled class="w-full px-4 py-2 rounded-lg border border-gray-200 bg-gray-50" />
+                </div>
+                <div class="form-group">
+                  <label for="zipcode" class="block text-sm font-medium text-gray-700 mb-1">Zip Code</label>
+                  <input type="text" id="zipcode" name="zipcode" required disabled class="w-full px-4 py-2 rounded-lg border border-gray-200 bg-gray-50" />
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="emerInfo mb-6">
+            <h2 class="flex items-center gap-2 text-lg font-semibold text-primary mb-4"><i class="fa-solid fa-triangle-exclamation text-xl"></i> Emergency Contact</h2>
+            <div class="infoContainer grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="emerInfoLeft space-y-4">
+                <div class="form-group">
+                  <label for="em_fullname" class="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+                  <input type="text" id="em_fullname" name="fullname" required disabled class="w-full px-4 py-2 rounded-lg border border-gray-200 bg-gray-50" />
+                </div>
+                <div class="form-group">
+                  <label for="em_phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                  <input type="tel" id="em_phone" name="phone" required disabled class="w-full px-4 py-2 rounded-lg border border-gray-200 bg-gray-50" />
+                </div>
+              </div>
+              <div class="emerInfoRight space-y-4">
+                <div class="form-group">
+                  <label for="relationship" class="block text-sm font-medium text-gray-700 mb-1">Relationship *</label>
+                  <input type="text" id="relationship" name="relationship" required disabled class="w-full px-4 py-2 rounded-lg border border-gray-200 bg-gray-50" />
+                </div>
+                <div class="form-group">
+                  <label for="em_email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <input type="email" id="em_email" name="email" required disabled class="w-full px-4 py-2 rounded-lg border border-gray-200 bg-gray-50" />
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div class="buttonCon flex gap-4 justify-end" id="buttonCon">
+            <a class="savebtn inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-white hover:bg-primary/90 font-medium" href="#">Save all changes</a>
+            <a class="cancelbtn inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 font-medium" href="#">Cancel</a>
+          </div>
+        </form>
+      </main>
+    </div>
+
+    <!-- Notification dropdown -->
+    <div id="notificationDropdown" class="fixed flex flex-col bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl overflow-hidden" style="display: none; top: 88px; right: 40px; width: 400px; max-width: calc(100vw - 320px); max-height: 500px; z-index: 9999;">
+      <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+        <h3 class="text-primary font-semibold text-lg m-0">Notifications</h3>
+        <button type="button" id="clearAllNotifications" class="bg-transparent border-none text-slate-500 dark:text-slate-400 cursor-pointer text-sm py-1 px-2 hover:text-slate-700 dark:hover:text-slate-200">Clear All</button>
+      </div>
+      <div id="notificationList" class="max-h-[440px] overflow-y-auto p-3">
+        <p class="text-center text-slate-400 py-5">No notifications</p>
+      </div>
+    </div>
+
+    
+    <script src="JS/patient_info.js"></script>
+    <script src="JS/header.js"></script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+ 
+        // ── Shared helper: store patient data to sessionStorage ────────────
+        function storePatientToSession() {
+          const patientId = new URLSearchParams(window.location.search).get("patientId");
+          const firstname = document.getElementById("firstname")?.value || "";
+          const middlename = document.getElementById("middlename")?.value || ""; // ✅ ADDED
+          const lastname  = document.getElementById("lastname")?.value  || "";
+          const dob       = document.getElementById("dob")?.value       || "";
+          const phone     = document.getElementById("phone")?.value     || "";
+          const genderRaw = document.getElementById("gender")?.value    || "";
+ 
+          let age = "";
+          if (dob) {
+            const today = new Date();
+            const birth = new Date(dob);
+            age = today.getFullYear() - birth.getFullYear();
+            const notYetBirthday =
+              today.getMonth() < birth.getMonth() ||
+              (today.getMonth() === birth.getMonth() && today.getDate() < birth.getDate());
+            if (notYetBirthday) age--;
+          }
+ 
+          const sex = genderRaw ? genderRaw.charAt(0).toUpperCase() + genderRaw.slice(1) : "";
+ 
+          // ✅ Format name with middle initial
+          let fullName = firstname;
+          if (middlename && middlename.trim()) {
+            fullName += " " + middlename.trim().charAt(0).toUpperCase() + ".";
+          }
+          fullName += " " + lastname;
+ 
+          sessionStorage.setItem("rf_patientName",   fullName.trim()); // ✅ CHANGED
+          sessionStorage.setItem("rf_patientDOB",    dob);
+          sessionStorage.setItem("rf_patientID",     patientId || "");
+          sessionStorage.setItem("rf_contactNumber", phone);
+          sessionStorage.setItem("rf_patientAge",    String(age));
+          sessionStorage.setItem("rf_patientSex",    sex);
+        }
+
+        // ── Request Form button ───────────────────────────────────────────
+        const requestBtn = document.getElementById("requestFormBtn");
+        if (requestBtn) {
+          requestBtn.addEventListener("click", () => {
+            storePatientToSession();
+            window.location.href = "Requestform.html";
+          });
+        }
+
+        // ── Referral Form button ──────────────────────────────────────────
+        const referralBtn = document.getElementById("referralFormBtn");
+        if (referralBtn) {
+          referralBtn.addEventListener("click", () => {
+            storePatientToSession();
+            window.location.href = "Referralform.html";
+          });
+        }
+
+      });
+    </script>
+
+    <script>
+      (function() {
+        function ensureNotificationBell() {
+          var bell     = document.getElementById("notificationBell");
+          var dropdown = document.getElementById("notificationDropdown");
+          if (!bell || !dropdown) return;
+          if (window._patientInfoNotificationBound) return;
+          window._patientInfoNotificationBound = true;
+          bell.addEventListener("click", function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var show = dropdown.style.display !== "flex";
+            dropdown.style.display = show ? "flex" : "none";
+            if (show && typeof loadNotifications === "function") loadNotifications();
+          });
+          document.addEventListener("click", function(e) {
+            if (!bell.contains(e.target) && !dropdown.contains(e.target))
+              dropdown.style.display = "none";
+          });
+        }
+        if (document.readyState === "loading")
+          document.addEventListener("DOMContentLoaded", ensureNotificationBell);
+        else
+          ensureNotificationBell();
+      })();
+    </script>
+    <script src="JS/auto_refresh.js"></script>
+  </body>
+</html>

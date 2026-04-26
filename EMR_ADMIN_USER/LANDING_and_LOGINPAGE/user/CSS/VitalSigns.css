@@ -1,0 +1,314 @@
+:root {
+    --primary-color: #005a32;    /* Forest Green */
+    --secondary-color: #d62828;  /* Vibrant Red */
+    --accent-color: #8b5a2b;     /* Brown Accent */
+    --bg-neutral: #f1f5f9;
+}
+
+*{
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-weight: 600;
+    }
+    body{
+        display: flex;
+        min-height: 100vh;
+        background-color: var(--bg-neutral);
+        font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    a{
+        text-decoration: none;
+        color: inherit;
+    }
+    .sideBar{
+        width: 100%;
+        max-width: 250px;
+        background-color: white;
+        display: flex;
+        flex-direction: column;
+        padding: 15px;
+        height: 100vh;
+        position: fixed;
+        border-right: 1px solid #ddd;
+    }
+    .logoCon{
+        display: flex;
+        align-items: center;
+        padding-bottom: 20px;
+        gap: 10px;
+        border-bottom: 1px solid #ddd;
+        margin-bottom: 20px;
+    }
+    .logo{
+        font-size: 30px;
+        padding: 10px;
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: 10px;
+    }
+    .title{
+        font-size: 25px;
+        color: #333;
+        font-weight: 600;
+    }
+    .subTitle{
+        font-size: 14px;
+        color: #777;
+        font-weight: 600;
+    }
+    .accountCon{
+        display: flex;
+        align-items: center;
+        padding-bottom: 20px;
+        gap: 10px;
+        border-bottom: 1px solid #ddd;
+    }
+    .userPic{
+        width: 40px;
+        height: 40px;
+        background-color: var(--primary-color);
+        border-radius: 50%;
+        margin-bottom: 10px;
+    }
+    .accountInfo{
+        margin-left: 10px;
+    }
+    .accountName{
+        font-size: 18px;
+        color: #333;
+    }
+    .role{
+        font-size: 14px;
+        color: #777;
+    }
+    .navBar{
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin-top: 20px;
+    }
+    .navBar a, .logoutCon a{
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding: 10px;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+    .navBar img{
+        width: 20px;
+        height: 20px;
+    }
+    .navBar a:hover, .logoutCon a:hover{
+        background-color: #f0f0f0;
+    }
+   
+    .dashboard{
+        font-size: 16px;
+        font-weight: 500;
+        color: #504f4f;
+    }
+    
+    .logoutCon{
+        border-top: 1px solid #ddd;
+        padding-top: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+     .logoutCon .logout:hover{
+        background-color: #f5bcbc;
+    }
+
+    h1,h2{
+        color: var(--primary-color);
+    }
+
+    .mainContainer{
+        display: flex;
+        flex-direction: column;
+       margin-left: 200px;
+        align-items: center;
+        flex-grow: 1;
+        padding: 20px;
+        margin-top: 50px;
+    }
+    main{
+        display: flex;
+        flex-direction: column;
+        gap: 30px;
+        background-color: white;
+        width: 90%;
+        padding: 20px;
+    }
+    header{
+        margin-top: 20px;
+        width: 90%;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        border-bottom: 2px solid var(--primary-color);
+        background-color: #f8fafc;
+        padding: 20px;
+        border-radius: 10px 10px 0px 0px;
+    }
+    .fa-trash{
+        color: #ff1010;
+    }
+    .editbtn{
+        text-align: center;
+        color: var(--primary-color);
+        border:1px solid var(--primary-color);
+        border-radius: 5px;
+        font-size: 14px;
+        padding: 5px;
+        height: 35px;
+    }
+    .editbtn i{
+        margin-right: 5px;
+    }
+
+    nav-bar{
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        background-color: rgb(222, 222, 222);
+        padding: 1px;
+        border-radius: 10px;
+    }
+    nav-bar a{
+        text-align: center;
+        color: rgb(80, 79, 79);
+        border-radius: 10px;
+        font-size: 14px;
+        width: 20%;
+        padding: 1px 10px;
+    }
+    .form-group{
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        margin-top: 15px;
+    }
+    input, select{
+        width: 280px;
+        padding: 5px;
+        border-radius: 5px;
+        border: 1px solid var(--primary-color);
+        font-size: 14px;
+        background-color: #f3f1f1;
+        color: #555;
+    }
+    input:focus, select:focus{
+        outline: none;
+        box-shadow: 0 0 5px rgba(53, 143, 133, 0.5);
+        background-color: white;
+    }
+
+     .buttonCon {
+        display: none;
+        gap: 10px;
+      }
+
+      .buttonCon.show {
+        display: flex;
+      }
+
+      input:disabled,
+      select:disabled {
+        background-color: #f3f3f3;
+        color: #666;
+        cursor: not-allowed;
+      }
+   
+    .buttonCon{
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        margin-top: 20px;
+    }
+    .buttonCon a{
+        width: 50%;
+        text-align: center;
+    }
+    .savebtn{
+        padding:5px 0px;
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+    .cancelbtn{
+        padding:5px 0px;
+        
+        color: var(--secondary-color);
+        border: 1px solid var(--secondary-color);
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+    .cancelbtn:hover {
+    background-color: var(--secondary-color);
+    color: white;
+    border-color: var(--secondary-color);
+    }
+
+    .topSec{
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    .topSec a{
+        text-align: center;
+        color: white;
+        background-color: var(--primary-color);
+        border: none;
+        border-radius: 5px;
+        font-size: 14px;
+        padding: 5px 10px;
+        height: 30px;
+    }
+
+    .medecineCon{
+        border: var(--primary-color) 1px solid;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        
+    }
+    .medecineHeader{
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    form{
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .topform {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+        gap: 20px;   
+    }
+    .bottomform {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        gap: 20px;   
+    }

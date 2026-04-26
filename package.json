@@ -1,0 +1,53 @@
+{
+  "name": "sia101",
+  "version": "1.0.0",
+  "description": "SIA101 Electron App",
+  "main": "main.js",
+  "author": "Author Name",
+  "license": "ISC",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "electron": "electron .",
+    "dev": "concurrently \"npm run start\" \"npm run electron\"",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win"
+  },
+  "keywords": [],
+  "build": {
+    "appId": "com.tlc.wellserved",
+    "productName": "TLC WellServed",
+    "electronVersion": "40.8.0",
+    "win": {
+      "target": "nsis",
+      "icon": "view/tlc.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "files": [
+      "**/*"
+    ],
+    "asarUnpack": [
+      "view/**/*",
+      "node_modules/**/*"
+    ]
+  },
+  "dependencies": {
+    "axios": "^1.13.2",
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "mongoose": "^8.18.2",
+    "node-fetch": "^3.3.2",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "electron": "^40.8.0",
+    "electron-builder": "^26.8.1"
+  }
+}

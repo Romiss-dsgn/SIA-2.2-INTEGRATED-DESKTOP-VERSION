@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Backup Logs</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#005a32",
+            "primary-light": "#f0fdf4",
+            secondary: "#d62828",
+            accent: "#8b5a2b",
+            "background-light": "#f1f5f9",
+            "card-light": "#FFFFFF",
+            "text-light": "#1F2937",
+            "text-secondary-light": "#6B7280",
+            "border-light": "#E5E7EB"
+          },
+          fontFamily: {
+            sans: ["Inter", "sans-serif"],
+            display: ["'Plus Jakarta Sans'", "sans-serif"]
+          }
+        },
+      },
+    };
+  </script>
+
+  <style>
+    .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+
+    .tab-button {
+      background-color: transparent;
+      color: #6B7280;
+      border: none;
+    }
+    .tab-button:hover {
+      background-color: #F3F4F6;
+    }
+    .tab-button.active {
+      background-color: #FFFFFF;
+      color: #005a32;
+      border-bottom: 3px solid #005a32;
+    }
+    .scope-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .scope-full { background-color: #EDE9FE; color: #7C3AED; }
+    .scope-active { background-color: #DBEAFE; color: #2563EB; }
+    .scope-archived { background-color: #F3E8FF; color: #9333EA; }
+  </style>
+</head>
+<body class="bg-white text-text-light font-sans h-screen overflow-hidden">
+<div class="flex h-full">
+
+  <!-- ✅ SIDEBAR — matching sidebar.js style -->
+  <aside class="w-64 flex flex-col bg-white border-r border-slate-200 h-screen" style="box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+    <!-- Logo -->
+    <div class="p-6 mb-2">
+      <div class="flex items-center gap-3">
+        <img src="../user/Assets/wellserved_logo.jpg" alt="Well Served Logo" class="w-12 h-12 rounded-full object-cover"/>
+        <div>
+          <h1 class="text-lg font-extrabold leading-none" style="color:#065f46;">WellServed</h1>
+          <p class="text-[10px] font-bold tracking-widest mt-0.5 uppercase" style="color:#8b5a2b;">Admin Portal</p>
+        </div>
+      </div>
+    </div>
+    <!-- Nav Links -->
+    <nav class="flex-1 px-4 space-y-1">
+      <a href="emrAdmin.html"
+         class="navLink flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold transition-all text-slate-500 hover:text-[#065f46] hover:bg-slate-50">
+        <span class="material-symbols-outlined">grid_view</span>
+        <span>Dashboard</span>
+      </a>
+      <a href="adminUsersAccount.html"
+         class="navLink flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold transition-all text-slate-500 hover:text-[#065f46] hover:bg-slate-50">
+        <span class="material-symbols-outlined">group</span>
+        <span>Users Account</span>
+      </a>
+      <a href="adminBackup.html"
+         class="navLink flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold transition-all"
+         style="background-color:#f0fdf4; color:#065f46;">
+        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">description</span>
+        <span>Backup Logs</span>
+      </a>
+      <a href="adminArchive.html"
+         class="navLink flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold transition-all text-slate-500 hover:text-[#065f46] hover:bg-slate-50">
+        <span class="material-symbols-outlined">history</span>
+        <span>Archive</span>
+      </a>
+      <a href="adminSettings.html"
+         class="navLink flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold transition-all text-slate-500 hover:text-[#065f46] hover:bg-slate-50">
+        <span class="material-symbols-outlined">settings</span>
+        <span>Settings</span>
+      </a>
+    </nav>
+    <!-- Logout -->
+    <div class="p-4 mt-auto border-t border-slate-200">
+      <button onclick="showLogoutModal()"
+              class="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold transition-all text-red-500 hover:bg-red-50">
+        <span class="material-symbols-outlined">logout</span>
+        <span class="text-sm">Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT WRAPPER -->
+  <div class="flex-1 flex flex-col overflow-hidden">
+
+    <!-- ✅ HEADER (matching dashboard) -->
+    <header id="topHeader" class="h-20 flex items-center justify-end px-10 bg-white/80 backdrop-blur-md border-b border-slate-100 sticky top-0 z-40 shrink-0">
+      <div class="flex items-center gap-6">
+        <!-- Clock Display -->
+        <div class="flex items-center gap-4 bg-slate-50 px-4 py-2 rounded-2xl border border-slate-100">
+          <div class="flex flex-col items-end">
+            <span id="clockDisplay" class="text-sm font-bold text-slate-700">12:00:00 PM</span>
+            <span id="headerDateDisplay" class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">—</span>
+          </div>
+        </div>
+        <!-- User Info & Avatar -->
+        <div class="flex items-center gap-3">
+          <div id="headerUserInfo" class="flex flex-col items-end">
+            <span class="text-sm font-bold text-slate-700 leading-tight">Admin</span>
+            <span class="text-xs font-semibold text-primary leading-tight">Administrator</span>
+          </div>
+          <div id="headerUserAvatar" class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm ring-4 ring-primary/5">
+            A
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- SCROLLABLE CONTENT BELOW HEADER -->
+    <main class="flex-1 flex flex-col overflow-hidden">
+
+      <!-- Page Title -->
+      <div class="p-8 pb-4 bg-background-light border-b border-border-light">
+        <h1 class="text-2xl font-bold mb-2 text-[#005a32]">Backup & Activity Logs</h1>
+        <p class="text-text-secondary-light">Monitor system backups and user activity</p>
+      </div>
+
+      <!-- Tab Navigation -->
+      <div class="px-8 pt-4 bg-background-light border-b border-border-light">
+        <nav class="flex space-x-1">
+          <button onclick="switchTab('appointments')" id="tab-appointments" class="tab-button active px-6 py-3 font-semibold rounded-t-lg transition-colors">
+            <span class="material-symbols-outlined text-sm align-middle mr-2">event</span>
+            Appointment Backups
+          </button>
+          <button onclick="switchTab('accounts')" id="tab-accounts" class="tab-button px-6 py-3 font-semibold rounded-t-lg transition-colors">
+            <span class="material-symbols-outlined text-sm align-middle mr-2">folder_shared</span>
+            Account Backups
+          </button>
+          <button onclick="switchTab('activity')" id="tab-activity" class="tab-button px-6 py-3 font-semibold rounded-t-lg transition-colors">
+            <span class="material-symbols-outlined text-sm align-middle mr-2">schedule</span>
+            User Activity
+          </button>
+        </nav>
+      </div>
+
+      <!-- Tab Content Container -->
+      <div class="flex-1 overflow-y-auto custom-scrollbar p-8">
+
+        <!-- APPOINTMENTS TAB -->
+        <div id="content-appointments" class="tab-content">
+          <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-6">
+            <div class="bg-card-light p-6 rounded-lg shadow border border-border-light">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-text-secondary-light text-sm mb-1">Total Backups</p>
+                  <p id="totalAppointmentBackups" class="text-2xl font-bold text-[#005a32]">0</p>
+                </div>
+                <span class="material-symbols-outlined text-[#005a32] text-3xl">event_note</span>
+              </div>
+            </div>
+            <div class="bg-card-light p-6 rounded-lg shadow border border-border-light">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-text-secondary-light text-sm mb-1">Active Apt.</p>
+                  <p id="activeAppointmentsCount" class="text-2xl font-bold text-accent-brown">0</p>
+                  <p class="text-xs text-gray-500 mt-1">Upcoming + Ongoing</p>
+                </div>
+                <span class="material-symbols-outlined text-[#8b5a2b] text-3xl">event_available</span>
+              </div>
+            </div>
+            <div class="bg-card-light p-6 rounded-lg shadow border border-border-light">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-text-secondary-light text-sm mb-1">Archived Apt.</p>
+                  <p id="archivedAppointmentsCount" class="text-2xl font-bold text-accent-brown">0</p>
+                  <p class="text-xs text-gray-500 mt-1">Completed + Canceled</p>
+                </div>
+                <span class="material-symbols-outlined text-[#8b5a2b] text-3xl">archive</span>
+              </div>
+            </div>
+            <div class="bg-card-light p-6 rounded-lg shadow border border-border-light">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-text-secondary-light text-sm mb-1">Successful</p>
+                  <p id="successfulAppointmentBackups" class="text-2xl font-bold text-[#005a32]">0</p>
+                </div>
+                <span class="material-symbols-outlined text-[#005a32] text-3xl">check_circle</span>
+              </div>
+            </div>
+            <div class="bg-card-light p-6 rounded-lg shadow border border-border-light">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-text-secondary-light text-sm mb-1">Last Backup</p>
+                  <p id="lastAppointmentBackup" class="text-sm font-semibold">Never</p>
+                </div>
+                <span class="material-symbols-outlined text-[#005a32] text-3xl">schedule</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filters -->
+          <div class="bg-card-light p-6 rounded-lg shadow border border-border-light mb-6">
+            <div class="flex flex-wrap items-center gap-4">
+              <div class="flex-1 min-w-[200px]">
+                <input type="text" id="searchAppointments" placeholder="Search appointment backups..."
+                  class="w-full px-4 py-2 border border-border-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+              </div>
+              <select id="filterAppointmentScope" class="px-4 py-2 border border-border-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                <option value="all">All Appointments</option>
+                <option value="active">Active Only</option>
+                <option value="archived">Archived Only</option>
+              </select>
+              <select id="filterAppointmentStatus" class="px-4 py-2 border border-border-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                <option value="all">All Types</option>
+                <option value="Manual">Manual</option>
+                <option value="Automatic">Automatic</option>
+              </select>
+              <select id="filterAppointmentPeriod" class="px-4 py-2 border border-border-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                <option value="all">All Time</option>
+                <option value="today">Today</option>
+                <option value="week">This Week</option>
+                <option value="month">This Month</option>
+              </select>
+              <button onclick="triggerManualBackup('appointments')" class="bg-[#005a32] hover:opacity-90 text-white font-semibold py-2 px-6 rounded-lg transition-all flex items-center">
+                <span class="material-symbols-outlined mr-2">backup</span>
+                Manual Backup
+              </button>
+            </div>
+          </div>
+
+          <!-- Table -->
+          <div class="bg-card-light rounded-lg shadow border border-border-light overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full">
+                <thead class="bg-gray-50 border-b border-border-light">
+                  <tr>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-text-secondary-light uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-text-secondary-light uppercase tracking-wider">Date & Time</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-text-secondary-light uppercase tracking-wider">Type</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-text-secondary-light uppercase tracking-wider">Scope</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-text-secondary-light uppercase tracking-wider">Active</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-text-secondary-light uppercase tracking-wider">Archived</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-text-secondary-light uppercase tracking-wider">Total</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-text-secondary-light uppercase tracking-wider">Size</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-text-secondary-light uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="appointmentTableBody" class="divide-y divide-border-light"></tbody>
+              </table>
+            </div>
+            <div class="px-6 py-4 border-t border-border-light flex items-center justify-between">
+              <p class="text-sm text-text-secondary-light">
+                Showing <span id="appointmentShowingStart">0</span> to <span id="appointmentShowingEnd">0</span> of <span id="appointmentTotalLogs">0</span> logs
+              </p>
+              <div class="flex gap-2">
+                <button onclick="previousPage('appointments')" id="appointmentPrevBtn" class="px-4 py-2 border border-border-light rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">Previous</button>
+                <button onclick="nextPage('appointments')" id="appointmentNextBtn" class="px-4 py-2 border border-border-light rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">Next</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ACCOUNTS TAB -->
+        <div id="content-accounts" class="tab-content hidden">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div class="bg-card-light p-6 rounded-lg shadow border border-border-light">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-text-secondary-light text-sm mb-1">Total Backups</p>
+                  <p id="totalAccountBackups" class="text-2xl font-bold text-[#005a32]">0</p>
+                </div>
+                <span class="material-symbols-outlined text-[#005a32] text-3xl">backup</span>
+              </div>
+            </div>
+            <div class="bg-card-light p-6 rounded-lg shadow border border-border-light">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-text-secondary-light text-sm mb-1">Successful</p>
+                  <p id="successfulAccountBackups" class="text-2xl font-bold text-[#005a32]">0</p>
+                </div>
+                <span class="material-symbols-outlined text-[#005a32] text-3xl">check_circle</span>
+              </div>
+            </div>
+            <div class="bg-card-light p-6 rounded-lg shadow border border-border-light">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-text-secondary-light text-sm mb-1">Last Backup</p>
+                  <p id="lastAccountBackup" class="text-sm font-semibold">Never</p>
+                </div>
+                <span class="material-symbols-outlined text-[#005a32] text-3xl">schedule</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filters -->
+          <div class="bg-card-light p-6 rounded-lg shadow border border-border-light mb-6">
+            <div class="flex flex-wrap items-center gap-4">
+              <div class="flex-1 min-w-[200px]">
+                <input type="text" id="searchAccounts" placeholder="Search account backups..."
+                  class="w-full px-4 py-2 border border-border-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+              </div>
+              <select id="filterAccountStatus" class="px-4 py-2 border border-border-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                <option value="all">All Types</option>
+                <option value="Manual">Manual</option>
+                <option value="Automatic">Automatic</option>
+              </select>
+              <select id="filterAccountPeriod" class="px-4 py-2 border border-border-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                <option value="all">All Time</option>
+                <option value="today">Today</option>
+                <option value="week">This Week</option>
+                <option value="month">This Month</option>
+              </select>
+              <button onclick="triggerManualBackup('accounts')" class="bg-[#005a32] hover:opacity-90 text-white font-semibold py-2 px-6 rounded-lg transition-all flex items-center">
+                <span class="material-symbols-outlined mr-2">backup</span>
+                Manual Backup
+              </button>
+            </div>
+          </div>
+
+          <!-- Table -->
+          <div class="bg-card-light rounded-lg shadow border border-border-light overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full">
+                <thead class="bg-gray-50 border-b border-border-light">
+                  <tr>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-text-secondary-light uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-text-secondary-light uppercase tracking-wider">Date & Time</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-text-secondary-light uppercase tracking-wider">Type</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-text-secondary-light uppercase tracking-wider">Category</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-text-secondary-light uppercase tracking-wider">Records</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-text-secondary-light uppercase tracking-wider">Size</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-text-secondary-light uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="accountTableBody" class="divide-y divide-border-light"></tbody>
+              </table>
+            </div>
+            <div class="px-6 py-4 border-t border-border-light flex items-center justify-between">
+              <p class="text-sm text-text-secondary-light">
+                Showing <span id="accountShowingStart">0</span> to <span id="accountShowingEnd">0</span> of <span id="accountTotalLogs">0</span> logs
+              </p>
+              <div class="flex gap-2">
+                <button onclick="previousPage('accounts')" id="accountPrevBtn" class="px-4 py-2 border border-border-light rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">Previous</button>
+                <button onclick="nextPage('accounts')" id="accountNextBtn" class="px-4 py-2 border border-border-light rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">Next</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ACTIVITY TAB -->
+        <div id="content-activity" class="tab-content hidden">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            <div class="bg-card-light p-6 rounded-lg shadow border border-border-light">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-text-secondary-light text-sm mb-1">Total Backups</p>
+                  <p id="todaySessions" class="text-2xl font-bold text-[#005a32]">0</p>
+                </div>
+                <span class="material-symbols-outlined text-[#005a32] text-3xl">backup</span>
+              </div>
+            </div>
+            <div class="bg-card-light p-6 rounded-lg shadow border border-border-light">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-text-secondary-light text-sm mb-1">Successful</p>
+                  <p id="activeNow" class="text-2xl font-bold text-[#005a32]">0</p>
+                </div>
+                <span class="material-symbols-outlined text-[#005a32] text-3xl">check_circle</span>
+              </div>
+            </div>
+            <div class="bg-card-light p-6 rounded-lg shadow border border-border-light">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-text-secondary-light text-sm mb-1">Last Backup</p>
+                  <p id="avgSessionTime" class="text-sm font-semibold">Never</p>
+                </div>
+                <span class="material-symbols-outlined text-accent-brown text-3xl">schedule</span>
+              </div>
+            </div>
+            <div class="bg-card-light p-6 rounded-lg shadow border border-border-light">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-text-secondary-light text-sm mb-1">Total Records</p>
+                  <p id="totalActivityRecords" class="text-2xl font-bold text-[#8b5a2b]">0</p>
+                </div>
+                <span class="material-symbols-outlined text-[#8b5a2b] text-3xl">history</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filters -->
+          <div class="bg-card-light p-6 rounded-lg shadow border border-border-light mb-6">
+            <div class="flex flex-wrap items-center gap-4">
+              <div class="flex-1 min-w-[200px]">
+                <input type="text" id="searchActivity" placeholder="Search activity backups..."
+                  class="w-full px-4 py-2 border border-border-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+              </div>
+              <select id="filterActivityRole" class="px-4 py-2 border border-border-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                <option value="all">All Types</option>
+                <option value="Manual">Manual</option>
+                <option value="Automatic">Automatic</option>
+              </select>
+              <select id="filterActivityPeriod" class="px-4 py-2 border border-border-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                <option value="all">All Time</option>
+                <option value="today">Today</option>
+                <option value="week">This Week</option>
+                <option value="month">This Month</option>
+              </select>
+              <button onclick="triggerManualBackup('activity')" class="bg-[#005a32] hover:opacity-90 text-white font-semibold py-2 px-6 rounded-lg transition-all flex items-center">
+                <span class="material-symbols-outlined mr-2">backup</span>
+                Manual Backup
+              </button>
+            </div>
+          </div>
+
+          <!-- Table -->
+          <div class="bg-card-light rounded-lg shadow border border-border-light overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full">
+                <thead class="bg-gray-50 border-b border-border-light">
+                  <tr>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-text-secondary-light uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-text-secondary-light uppercase tracking-wider">Date & Time</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-text-secondary-light uppercase tracking-wider">Type</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-text-secondary-light uppercase tracking-wider">Records</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-text-secondary-light uppercase tracking-wider">Size</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-text-secondary-light uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="activityTableBody" class="divide-y divide-border-light"></tbody>
+              </table>
+            </div>
+            <div class="px-6 py-4 border-t border-border-light flex items-center justify-between">
+              <p class="text-sm text-text-secondary-light">
+                Showing <span id="activityShowingStart">0</span> to <span id="activityShowingEnd">0</span> of <span id="activityTotalLogs">0</span> logs
+              </p>
+              <div class="flex gap-2">
+                <button onclick="previousPage('activity')" id="activityPrevBtn" class="px-4 py-2 border border-border-light rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">Previous</button>
+                <button onclick="nextPage('activity')" id="activityNextBtn" class="px-4 py-2 border border-border-light rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">Next</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end tab content container -->
+    </main>
+  </div><!-- end main content wrapper -->
+</div>
+
+<!-- Details Modal -->
+<div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header text-white" style="background-color: #005a32;">
+        <h5 class="modal-title font-bold" id="detailsModalLabel">Log Details</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="detailsContent"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Logout Modal -->
+<div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header text-white" style="background-color: #005a32;">
+        <h5 class="modal-title font-bold" id="logoutModalLabel">Confirm Logout</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <p class="mb-3">Are you sure you want to log out of the admin portal?</p>
+      </div>
+      <div class="modal-footer justify-content-center">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn text-white" onclick="confirmLogout()" style="background-color: #005a32; border: none;">Logout</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="../user/JS/auto_refresh.js"></script>
+<script src="../admin/JS/adminBackup.js"></script>
+
+<!-- ✅ HEADER SCRIPT (matching dashboard) -->
+<script>
+  function initializeHeader() {
+    updateClock();
+    setInterval(updateClock, 1000);
+    populateHeaderUserInfo();
+  }
+
+  function updateClock() {
+    const now = new Date();
+    const hours = now.getHours();
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    const seconds = String(now.getSeconds()).padStart(2, "0");
+    const ampm = hours >= 12 ? "PM" : "AM";
+    const h12 = hours % 12 || 12;
+    const hoursStr = String(h12).padStart(2, "0");
+    const timeStr = `${hoursStr}:${minutes}:${seconds} ${ampm}`;
+
+    const clockDisplay = document.getElementById("clockDisplay");
+    if (clockDisplay) clockDisplay.textContent = timeStr;
+
+    const dateDisplay = document.getElementById("headerDateDisplay");
+    if (dateDisplay) {
+      const months = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+      dateDisplay.textContent = months[now.getMonth()] + " " + now.getDate() + ", " + now.getFullYear();
+    }
+  }
+
+  function populateHeaderUserInfo() {
+    const headerAvatar = document.getElementById("headerUserAvatar");
+    const headerUserInfo = document.getElementById("headerUserInfo");
+
+    if (headerAvatar && headerUserInfo) {
+      const name = sessionStorage.getItem("name") || "Admin";
+      const role = sessionStorage.getItem("role") || "Administrator";
+      const initials = name.split(" ").map(function(n) { return n[0]; }).join("").toUpperCase().slice(0, 2);
+
+      headerAvatar.textContent = initials || "A";
+      headerUserInfo.innerHTML = `
+        <span class="text-sm font-bold text-slate-700 leading-tight">${name}</span>
+        <span class="text-xs font-semibold text-primary leading-tight">${role}</span>
+      `;
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    initializeHeader();
+  });
+</script>
+</body>
+</html>

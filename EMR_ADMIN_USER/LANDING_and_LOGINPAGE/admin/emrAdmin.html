@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>WellServed Admin Portal</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  
+  <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+
+  <script>
+    window.tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#005a32",
+            "primary-light": "#f0fdf4",
+            "accent-brown": "#8b5a2b",
+            "warning-red": "#d62828",
+            "background-light": "#F9FAFB",
+            "card-light": "#FFFFFF",
+            "text-light": "#1F2937",
+            "text-secondary-light": "#6B7280",
+            "border-light": "#E5E7EB",
+          },
+          fontFamily: { 
+            sans: ["Inter", "sans-serif"],
+            display: ["'Plus Jakarta Sans'", "sans-serif"]
+          }
+        },
+      },
+    };
+  </script>
+  
+  <style>
+    .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* Active nav link — filled icon */
+    .navLink.active .material-symbols-outlined {
+      font-variation-settings: 'FILL' 1;
+    }
+  </style>
+</head>
+<body class="bg-background-light text-text-light font-sans h-screen overflow-hidden">
+<div class="flex h-full">
+
+  <!-- ✅ SIDEBAR — redesigned to match sidebar.js style -->
+  <aside class="w-64 flex flex-col bg-white border-r border-slate-200 h-screen" style="box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+    <!-- Logo -->
+    <div class="p-6 mb-2">
+      <div class="flex items-center gap-3">
+        <img src="../user/Assets/wellserved_logo.jpg" alt="Well Served Logo" class="w-12 h-12 rounded-full object-cover"/>
+        <div>
+          <h1 class="text-lg font-extrabold leading-none" style="color:#065f46;">WellServed</h1>
+          <p class="text-[10px] font-bold tracking-widest mt-0.5 uppercase" style="color:#8b5a2b;">Admin Portal</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nav Links -->
+    <nav class="flex-1 px-4 space-y-1">
+      <a href="emrAdmin.html"
+         class="navLink active flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold transition-all"
+         style="background-color:#f0fdf4; color:#065f46;">
+        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">grid_view</span>
+        <span>Dashboard</span>
+      </a>
+      <a href="adminUsersAccount.html"
+         class="navLink flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold transition-all text-slate-500 hover:text-[#065f46] hover:bg-slate-50">
+        <span class="material-symbols-outlined">group</span>
+        <span>Users Account</span>
+      </a>
+      <a href="adminBackup.html"
+         class="navLink flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold transition-all text-slate-500 hover:text-[#065f46] hover:bg-slate-50">
+        <span class="material-symbols-outlined">description</span>
+        <span>Backup Logs</span>
+      </a>
+      <a href="adminArchive.html"
+         class="navLink flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold transition-all text-slate-500 hover:text-[#065f46] hover:bg-slate-50">
+        <span class="material-symbols-outlined">history</span>
+        <span>Archive</span>
+      </a>
+      <a href="adminSettings.html"
+         class="navLink flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold transition-all text-slate-500 hover:text-[#065f46] hover:bg-slate-50">
+        <span class="material-symbols-outlined">settings</span>
+        <span>Settings</span>
+      </a>
+    </nav>
+
+    <!-- Logout -->
+    <div class="p-4 mt-auto border-t border-slate-200">
+      <button onclick="showLogoutModal()"
+              class="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold transition-all text-red-500 hover:bg-red-50">
+        <span class="material-symbols-outlined">logout</span>
+        <span class="text-sm">Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ✅ MAIN CONTENT WITH HEADER -->
+  <div class="flex-1 flex flex-col overflow-hidden">
+    <!-- HEADER -->
+    <header id="topHeader" class="h-20 flex items-center justify-end px-10 bg-white/80 backdrop-blur-md border-b border-slate-100 sticky top-0 z-40 shrink-0">
+      <div class="flex items-center gap-6">
+        <!-- Clock Display -->
+        <div class="flex items-center gap-4 bg-slate-50 px-4 py-2 rounded-2xl border border-slate-100">
+          <div class="flex flex-col items-end">
+            <span id="clockDisplay" class="text-sm font-bold text-slate-700">12:00:00 PM</span>
+            <span id="headerDateDisplay" class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">—</span>
+          </div>
+        </div>
+        <!-- User Info & Avatar -->
+        <div class="flex items-center gap-3">
+          <div id="headerUserInfo" class="flex flex-col items-end">
+            <span class="text-sm font-bold text-slate-700 leading-tight">Admin</span>
+            <span class="text-xs font-semibold text-primary leading-tight">Administrator</span>
+          </div>
+          <div id="headerUserAvatar" class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm ring-4 ring-primary/5">
+            A
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ✅ SCROLLABLE MAIN CONTENT -->
+    <main class="flex-1 p-8 overflow-y-auto custom-scrollbar">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <div class="bg-card-light p-6 rounded-lg shadow-sm border border-border-light flex flex-col h-full">
+          <div class="flex items-center mb-6">
+            <span class="material-symbols-outlined text-accent-brown mr-3">group</span>
+            <h2 class="text-lg font-semibold">Users Preview</h2>
+          </div>
+          <div class="grid grid-cols-3 gap-4 text-center mb-6">
+            <div>
+              <p id="totalUsers" class="text-3xl font-bold text-[#005a32]">0</p>
+              <p class="text-xs uppercase font-bold text-text-secondary-light">Total</p>
+            </div>
+            <div>
+              <p id="activeUsers" class="text-3xl font-bold text-[#005a32]">0</p>
+              <p class="text-xs uppercase font-bold text-text-secondary-light">Active</p>
+            </div>
+            <div>
+              <p id="inactiveUsers" class="text-3xl font-bold text-warning-red">0</p>
+              <p class="text-xs uppercase font-bold text-text-secondary-light">Inactive</p>
+            </div>
+          </div>
+          <h3 class="font-semibold text-sm uppercase text-text-secondary-light mb-4">Recent Logins</h3>
+          <div id="recentLogins" class="space-y-4 flex-1"></div>
+          <div class="mt-6 flex justify-end">
+            <a href="adminUsersAccount.html" class="bg-[#005a32] hover:bg-opacity-90 text-white font-semibold py-2 px-6 rounded-lg transition-all shadow-sm">Manage Users</a>
+          </div>
+        </div>
+
+        <div class="bg-card-light p-6 rounded-lg shadow-sm border border-border-light">
+          <div class="flex items-center mb-6">
+            <span class="material-symbols-outlined text-accent-brown mr-3">settings_suggest</span>
+            <h2 class="text-lg font-semibold">System Status</h2>
+          </div>
+          <div class="space-y-6">
+            <div>
+              <h3 class="font-semibold mb-3 text-sm uppercase text-text-secondary-light">Integrations</h3>
+              <div class="flex justify-between items-center p-3 rounded-lg mb-2">
+                <p class="font-medium">Pharmacy</p>
+                <span id="pharmacyStatus" class="flex items-center text-xs font-bold bg-red-100 text-warning-red px-2 py-1 rounded-full uppercase">
+                  <span class="material-symbols-outlined text-sm mr-1" style="font-size:16px;">cancel</span> Disconnected
+                </span>
+              </div>
+              <div class="flex justify-between items-center p-3 rounded-lg">
+                <p class="font-medium">Billing</p>
+                <span id="billingStatus" class="flex items-center text-xs font-bold bg-red-100 text-warning-red px-2 py-1 rounded-full uppercase">
+                  <span class="material-symbols-outlined text-sm mr-1" style="font-size:16px;">cancel</span> Disconnected
+                </span>
+              </div>
+            </div>
+            <div class="pt-4 flex justify-end">
+              <a href="adminSettings.html" class="bg-[#005a32] hover:bg-opacity-90 text-white font-semibold py-2 px-6 rounded-lg transition-all shadow-sm">
+                Go to Settings
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-card-light p-6 rounded-lg shadow-sm border border-border-light lg:col-span-2">
+          <div class="flex items-center mb-6">
+            <span class="material-symbols-outlined text-accent-brown mr-3">backup</span>
+            <h2 class="text-lg font-semibold">Last Backup Status</h2>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="flex flex-col p-4 bg-gray-50 rounded-lg border border-border-light">
+              <div class="flex items-center mb-2">
+                <span class="material-symbols-outlined text-accent-brown mr-2">event</span>
+                <p class="font-semibold text-sm">Appointments</p>
+              </div>
+              <p class="text-xs text-text-secondary-light mb-3" id="appointmentBackupTime">Loading...</p>
+              <span id="appointmentBackupStatus" class="inline-flex w-fit items-center text-[10px] font-bold bg-gray-200 text-gray-700 px-2 py-1 rounded uppercase">
+                <span class="material-symbols-outlined mr-1" style="font-size:12px;">pending</span> Loading
+              </span>
+            </div>
+            <div class="flex flex-col p-4 bg-gray-50 rounded-lg border border-border-light">
+              <div class="flex items-center mb-2">
+                <span class="material-symbols-outlined text-accent-brown mr-2">folder_shared</span>
+                <p class="font-semibold text-sm">Accounts</p>
+              </div>
+              <p class="text-xs text-text-secondary-light mb-3" id="accountBackupTime">Loading...</p>
+              <span id="accountBackupStatus" class="inline-flex w-fit items-center text-[10px] font-bold bg-gray-200 text-gray-700 px-2 py-1 rounded uppercase">
+                <span class="material-symbols-outlined mr-1" style="font-size:12px;">pending</span> Loading
+              </span>
+            </div>
+            <div class="flex flex-col p-4 bg-gray-50 rounded-lg border border-border-light">
+              <div class="flex items-center mb-2">
+                <span class="material-symbols-outlined text-accent-brown mr-2">schedule</span>
+                <p class="font-semibold text-sm">Activity Logs</p>
+              </div>
+              <p class="text-xs text-text-secondary-light mb-3" id="activityBackupTime">Loading...</p>
+              <span id="activityBackupStatus" class="inline-flex w-fit items-center text-[10px] font-bold bg-gray-200 text-gray-700 px-2 py-1 rounded uppercase">
+                <span class="material-symbols-outlined mr-1" style="font-size:12px;">pending</span> Loading
+              </span>
+            </div>
+          </div>
+          <div class="pt-6 flex justify-end">
+            <a href="adminBackup.html" class="bg-[#005a32] hover:bg-opacity-90 text-white font-semibold py-2 px-4 rounded-lg transition-colors text-sm shadow-sm">
+              View All Backups
+            </a>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Logout Modal -->
+<div class="modal fade" id="logoutModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header text-white" style="background-color: #005a32;">
+        <h5 class="modal-title font-bold">Confirm Logout</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center py-4">
+        <p>Are you sure you want to log out of the admin portal?</p>
+      </div>
+      <div class="modal-footer justify-content-center border-0 pb-4">
+        <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn text-white px-4" id="confirmLogoutBtn" style="background-color: #005a32; border: none;">Logout</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../user/JS/auto_refresh.js"></script>
+<script src="../admin/JS/admin_dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Schedule New Appointment - WellServed</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="CSS/Global.css" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#065f46",
+              "brand-light": "#f0fdf4",
+              "background-light": "#f8fafc",
+            },
+            fontFamily: {
+              sans: ["'Plus Jakarta Sans'", "sans-serif"],
+              display: ["'Plus Jakarta Sans'", "sans-serif"],
+            },
+            borderRadius: {
+              "3xl": "24px",
+              "4xl": "32px",
+            },
+          },
+        },
+      };
+    </script>
+    <style type="text/tailwindcss">
+      @layer base {
+        body {
+          font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+        }
+      }
+      .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+      .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+      .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+      .material-symbols-outlined {
+        font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+        display: inline-block;
+        vertical-align: middle;
+      }
+      .card-shadow { box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05); }
+
+      /* ── Custom searchable dropdown ── */
+      [id^="sd-panel-"] ::-webkit-scrollbar { width: 4px; }
+      [id^="sd-panel-"] ::-webkit-scrollbar-track { background: transparent; }
+      [id^="sd-panel-"] ::-webkit-scrollbar-thumb { background: #d1fae5; border-radius: 4px; }
+    </style>
+  </head>
+  <body class="bg-[#F3F4F6] dark:bg-slate-900 dark:text-slate-100 text-slate-900 transition-colors duration-200 flex h-screen overflow-hidden" data-notification-handler="page">
+    <script src="JS/Sidebar.js"></script>
+    <script>loadSidebar("AddAppointment.html");</script>
+
+    <!-- HEADER -->
+    <header id="topHeader" class="fixed top-0 left-64 right-0 h-20 flex items-center justify-end px-10 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-100 dark:border-slate-700 z-40">
+      <div class="flex items-center gap-6">
+        <div class="flex items-center gap-4 bg-slate-50 dark:bg-slate-700 px-4 py-2 rounded-2xl border border-slate-100 dark:border-slate-600">
+          <div class="flex flex-col items-end">
+            <span id="clockDisplay" class="text-sm font-bold text-slate-700 dark:text-slate-200">12:00:00 PM</span>
+            <span id="headerDateDisplay" class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">—</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-6">
+          <div class="relative">
+            <button type="button" id="notificationBell" aria-label="Notifications" class="relative flex items-center justify-center w-12 h-12 text-primary hover:opacity-90 transition-opacity rounded-full hover:bg-slate-100 dark:hover:bg-slate-700/50 border-0 cursor-pointer z-50">
+              <span class="material-symbols-outlined text-[28px] select-none">notifications</span>
+              <span id="notificationBadge" class="absolute top-0.5 right-0.5 w-5 h-5 bg-red-500 border-2 border-white dark:border-slate-800 rounded-full hidden items-center justify-center text-[10px] font-bold text-white"></span>
+            </button>
+          </div>
+          <div id="headerUserAvatar" class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm ring-4 ring-primary/5">—</div>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-1 ml-64 p-5 overflow-y-auto" style="margin-top: 80px;">
+      <div class="mainContent bg-white rounded-xl shadow-sm border border-border-light p-6">
+        <div class="titleCon mb-6">
+          <h1 class="txtTitle text-2xl font-bold text-primary">Schedule New Appointment</h1>
+        </div>
+        <form id="addPatient" action="">
+
+          <!-- APPOINTMENT DETAILS -->
+          <section class="topSec mb-6">
+            <div class="section-header flex items-center gap-2 text-primary font-semibold mb-4">
+              <i class="fas fa-calendar-check"></i> Appointment Details
+            </div>
+            <div class="form-row grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+
+              <!-- Select Patient — custom dropdown injected here by JS -->
+              <div class="form-group">
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  Select Patient <span class="text-red-500">*</span>
+                </label>
+                <div class="input-wrapper relative">
+                  <select id="selectPatient" name="selectPatient" required></select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="appDate" class="block text-sm font-medium text-gray-700 mb-1">
+                  Appointment Date <span class="text-red-500">*</span>
+                </label>
+                <div class="input-wrapper relative">
+                  <input type="date" id="appDate" name="appDate" required
+                    class="has-icon w-full px-4 py-2.5 rounded-lg border border-gray-200" />
+                  <i class="fas fa-calendar-alt absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="appTime" class="block text-sm font-medium text-gray-700 mb-1">
+                  Appointment Time <span class="text-red-500">*</span>
+                </label>
+                <div class="input-wrapper relative">
+                  <input type="time" id="appTime" name="appTime" required
+                    class="has-icon w-full px-4 py-2.5 rounded-lg border border-gray-200" />
+                  <i class="fas fa-clock absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="duration" class="block text-sm font-medium text-gray-700 mb-1">
+                  Duration (minutes) <span class="text-red-500">*</span>
+                </label>
+                <div class="input-wrapper relative">
+                  <input type="number" id="duration" name="duration" value="30"
+                    min="1" max="30" step="1" required
+                    class="has-icon w-full px-4 py-2.5 rounded-lg border border-gray-200"
+                    placeholder="30" />
+                  <i class="fas fa-hourglass-half absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- DOCTOR SELECTION -->
+          <section class="middleSec mb-6">
+            <div class="section-header flex items-center gap-2 text-primary font-semibold mb-4">
+              <i class="fas fa-user-md"></i> Doctor Selection
+            </div>
+            <div class="form-group">
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Select Doctor <span class="text-red-500">*</span>
+              </label>
+              <div class="input-wrapper relative">
+                <!-- custom dropdown injected here by JS -->
+                <select id="selectDoctor" name="selectDoctor" required></select>
+              </div>
+            </div>
+          </section>
+
+          <!-- VISIT INFORMATION -->
+          <section class="bottomSec mb-6">
+            <div class="section-header flex items-center gap-2 text-primary font-semibold mb-4">
+              <i class="fas fa-clipboard-list"></i> Visit Information
+            </div>
+
+            <div class="form-group mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Service Type <span class="text-red-500">*</span>
+              </label>
+              <div class="input-wrapper relative">
+                <!-- custom dropdown injected here by JS -->
+                <select id="appType" name="appType" required></select>
+              </div>
+            </div>
+
+            <div class="form-group mb-4">
+              <label for="reason" class="block text-sm font-medium text-gray-700 mb-1">
+                Reason for Visit <span class="text-red-500">*</span>
+              </label>
+              <div class="input-wrapper relative">
+                <input type="text" id="reason" name="reason"
+                  placeholder="Describe the reason for visit" required
+                  class="has-icon w-full px-4 py-2.5 rounded-lg border border-gray-200" />
+                <i class="fas fa-notes-medical absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+              </div>
+            </div>
+
+            <div class="form-group mb-4">
+              <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">
+                Additional Notes (Optional)
+              </label>
+              <div class="input-wrapper relative">
+                <input type="text" id="notes" name="notes"
+                  placeholder="Any additional information"
+                  class="has-icon w-full px-4 py-2.5 rounded-lg border border-gray-200" />
+                <i class="fas fa-comment-medical absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+              </div>
+            </div>
+          </section>
+
+          <!-- ACTIONS -->
+          <section class="btnContainer flex gap-4 justify-end">
+            <a href="Appointments.html"
+              class="cancelBtn inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 font-medium">
+              <i class="fas fa-times"></i> Cancel
+            </a>
+            <button type="submit"
+              class="submitBtn inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-white hover:bg-primary/90 font-medium">
+              <i class="fas fa-calendar-plus"></i> Schedule Appointment
+            </button>
+          </section>
+
+        </form>
+      </div>
+    </main>
+
+    <!-- Notification dropdown -->
+    <div id="notificationDropdown"
+      class="fixed flex flex-col bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl overflow-hidden"
+      style="display:none; top:88px; right:40px; width:400px; max-width:calc(100vw - 320px); max-height:500px; z-index:9999;">
+      <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+        <h3 class="text-primary font-semibold text-lg m-0">Notifications</h3>
+        <button type="button" id="clearAllNotifications"
+          class="bg-transparent border-none text-slate-500 dark:text-slate-400 cursor-pointer text-sm py-1 px-2 hover:text-slate-700 dark:hover:text-slate-200">
+          Clear All
+        </button>
+      </div>
+      <div id="notificationList" class="max-h-[440px] overflow-y-auto p-3">
+        <p class="text-center text-slate-400 py-5">No notifications</p>
+      </div>
+    </div>
+
+    <script src="JS/appointment_monitor.js"></script>
+    <script src="JS/add_appointment.js"></script>
+    <script src="JS/nurse_notifications.js"></script>
+    <script src="JS/doctor_notifications.js"></script>
+    <script src="JS/appointment_time_notifications.js"></script>
+    <script src="JS/header.js"></script>
+    <script>
+      (function () {
+        function ensureNotificationBell() {
+          var bell     = document.getElementById("notificationBell");
+          var dropdown = document.getElementById("notificationDropdown");
+          if (!bell || !dropdown) return;
+          if (window._addAppointmentNotificationBound) return;
+          window._addAppointmentNotificationBound = true;
+          bell.addEventListener("click", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var show = dropdown.style.display !== "flex";
+            dropdown.style.display = show ? "flex" : "none";
+            if (show && typeof loadNotifications === "function") loadNotifications();
+          });
+          document.addEventListener("click", function (e) {
+            if (!bell.contains(e.target) && !dropdown.contains(e.target))
+              dropdown.style.display = "none";
+          });
+        }
+        if (document.readyState === "loading")
+          document.addEventListener("DOMContentLoaded", ensureNotificationBell);
+        else
+          ensureNotificationBell();
+      })();
+    </script>
+  </body>
+</html>

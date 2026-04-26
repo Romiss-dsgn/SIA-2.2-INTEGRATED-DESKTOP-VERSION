@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Appointments - WellServed</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="CSS/Global.css" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#065f46",
+              "brand-light": "#f0fdf4",
+              "background-light": "#f8fafc",
+            },
+            fontFamily: {
+              sans: ["'Plus Jakarta Sans'", "sans-serif"],
+              display: ["'Plus Jakarta Sans'", "sans-serif"],
+            },
+            borderRadius: {
+              "3xl": "24px",
+              "4xl": "32px",
+            },
+          },
+        },
+      };
+    </script>
+    <style type="text/tailwindcss">
+      @layer base {
+        body {
+          font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+        }
+      }
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 5px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #e2e8f0;
+        border-radius: 10px;
+      }
+      .material-symbols-outlined {
+        font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+        display: inline-block;
+        vertical-align: middle;
+      }
+      .card-shadow {
+        box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+      }
+      /* Table hover effect */
+      #appointmentsTable tbody tr {
+        transition: background-color 0.2s;
+      }
+      #appointmentsTable tbody tr:hover {
+        background-color: rgba(248, 250, 252, 0.5);
+      }
+      .dark #appointmentsTable tbody tr:hover {
+        background-color: rgba(51, 65, 85, 0.3);
+      }
+      /* Table cell alignment - match header padding */
+      #appointmentsTable tbody td {
+        padding: 1rem 1.5rem;
+        text-align: left;
+        vertical-align: middle;
+        font-size: 0.875rem;
+      }
+      /* First column (Appointment ID) styling */
+      #appointmentsTable tbody td:first-child {
+        color: #065f46;
+        font-weight: 700;
+      }
+      /* Second column (Patient Name) styling */
+      #appointmentsTable tbody td:nth-child(2) {
+        font-weight: 700;
+        color: #1e293b;
+      }
+      .dark #appointmentsTable tbody td:nth-child(2) {
+        color: #f8fafc;
+      }
+      /* Status badges */
+      .statusUpcoming {
+        background-color: #dbeafe;
+        color: #1e40af;
+        border: 1px solid #93c5fd;
+        padding: 6px 16px;
+        border-radius: 9999px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        display: inline-block;
+      }
+      .statusOngoing {
+        background-color: #fef3c7;
+        color: #92400e;
+        border: 1px solid #fcd34d;
+        padding: 6px 16px;
+        border-radius: 9999px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        display: inline-block;
+      }
+      .statusCompleted {
+        background-color: #f0fdf4;
+        color: #065f46;
+        border: 1px solid rgba(6, 95, 70, 0.2);
+        padding: 6px 16px;
+        border-radius: 9999px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        display: inline-block;
+      }
+      .statusCanceled {
+        background-color: #fef2f2;
+        color: #dc2626;
+        border: 1px solid #fecaca;
+        padding: 6px 16px;
+        border-radius: 9999px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        display: inline-block;
+      }
+      /* Action button */
+      .actionBtn {
+        display: inline-block;
+        padding: 6px 16px;
+        font-size: 12px;
+        font-weight: 700;
+        color: #64748b;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        transition: all 0.2s;
+        text-decoration: none;
+      }
+      .actionBtn:hover {
+        background-color: #f8fafc;
+        color: #065f46;
+        border-color: rgba(6, 95, 70, 0.3);
+      }
+    </style>
+  </head>
+  <body class="bg-[#F3F4F6] dark:bg-slate-900 dark:text-slate-100 text-slate-900 transition-colors duration-200 flex h-screen overflow-hidden" data-notification-handler="page">
+    <script src="JS/Sidebar.js"></script>
+    <script src="JS/recent_patients.js"></script>
+    <script>loadSidebar("Appointments.html");</script>
+
+    <main class="flex-1 flex flex-col overflow-hidden relative md:ml-64 overflow-x-hidden">
+      <!-- Header matching Archive.html style -->
+      <header id="topHeader" class="h-20 flex items-center justify-end px-10 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-100 dark:border-slate-700 sticky top-0 z-40 shrink-0">
+        <div class="flex items-center gap-6">
+          <div class="flex items-center gap-4 bg-slate-50 dark:bg-slate-700 px-4 py-2 rounded-2xl border border-slate-100 dark:border-slate-600">
+            <div class="flex flex-col items-end">
+              <span id="clockDisplay" class="text-sm font-bold text-slate-700 dark:text-slate-200">12:00:00 PM</span>
+              <span id="headerDateDisplay" class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">—</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-6">
+            <div class="relative">
+              <button type="button" id="notificationBell" aria-label="Notifications" class="relative flex items-center justify-center w-12 h-12 text-primary hover:opacity-90 transition-opacity rounded-full hover:bg-slate-100 dark:hover:bg-slate-700/50 border-0 cursor-pointer z-50">
+                <span class="material-symbols-outlined text-[28px] select-none">notifications</span>
+                <span id="notificationBadge" class="absolute top-0.5 right-0.5 w-5 h-5 bg-red-500 border-2 border-white dark:border-slate-800 rounded-full hidden items-center justify-center text-[10px] font-bold text-white"></span>
+              </button>
+            </div>
+            <div id="headerUserAvatar" class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm ring-4 ring-primary/5">—</div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Content Area -->
+      <div class="flex-1 overflow-y-auto p-4 md:p-10 custom-scrollbar min-h-0">
+        <div class="max-w-7xl mx-auto space-y-6">
+          <!-- Title and Button Row (OUTSIDE container like Archive) -->
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <h2 class="text-3xl text-primary font-extrabold text-slate-800 dark:text-white tracking-tight">Appointments</h2>
+            <a href="AddAppointment.html" class="addBtn inline-flex gap-2 rounded-xl items-center justify-center bg-primary text-white py-3 px-6 font-bold hover:bg-primary/90 transition-all shadow-md hover:shadow-lg active:scale-95" id="addAppointmentBtn">
+              <span class="material-symbols-outlined text-xl">event_note</span>
+              <span>Schedule New Appointment</span>
+            </a>
+          </div>
+
+          <!-- White Container Card -->
+          <div class="bg-white dark:bg-slate-800 rounded-2xl card-shadow border border-slate-100 dark:border-slate-700">
+            <!-- Search and Filter (INSIDE container) -->
+            <div class="p-6 border-b border-slate-50 dark:border-slate-700 flex flex-col sm:flex-row gap-4 items-center justify-between">
+              <div class="searchBarWrapper relative w-full sm:w-96">
+                <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+                <input class="searchBar w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-700/50 border-none rounded-xl text-sm focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-slate-400 font-medium" type="text" placeholder="Search patients..." />
+              </div>
+              <div class="w-full sm:w-auto">
+                <select id="sortDate" class="w-full sm:w-48 py-3 px-4 bg-slate-50 dark:bg-slate-700/50 border-none rounded-xl text-sm font-bold text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-primary/20">
+                  <option value="desc">Nearest Schedule</option>
+                  <option value="asc">Furthest Schedule</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Table Section with rounded border container (matching Archive) -->
+            <div class="px-6">
+              <div class="overflow-x-auto rounded-xl border border-slate-100 dark:border-slate-700">
+                <table id="appointmentsTable" class="w-full border-collapse min-w-[700px]">
+                  <thead>
+                    <tr class="bg-gradient-to-r from-emerald-100 to-rose-100">
+                      <th class="px-6 py-4 text-left text-[11px] font-extrabold text-slate-700 uppercase tracking-widest">Appointment ID</th>
+                      <th class="px-6 py-4 text-left text-[11px] font-extrabold text-slate-700 uppercase tracking-widest">Patient Name</th>
+                      <th class="px-6 py-4 text-left text-[11px] font-extrabold text-slate-700 uppercase tracking-widest">Date & Time</th>
+                      <th class="px-6 py-4 text-left text-[11px] font-extrabold text-slate-700 uppercase tracking-widest">Doctor</th>
+                      <th class="px-6 py-4 text-left text-[11px] font-extrabold text-slate-700 uppercase tracking-widest">Service</th>
+                      <th class="px-6 py-4 text-left text-[11px] font-extrabold text-slate-700 uppercase tracking-widest">Status</th>
+                      <th class="px-6 py-4 text-center text-[11px] font-extrabold text-slate-700 uppercase tracking-widest">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-50 dark:divide-slate-700/50">
+                    <tr>
+                      <td colspan="7" class="text-center py-8 text-slate-400">Loading appointments...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Bottom Section -->
+            <div class="px-6 py-6 border-t border-slate-50 dark:border-slate-700 flex items-center justify-between flex-wrap gap-4 mt-6">
+              <p class="text-sm font-bold text-slate-400">
+                <span id="appointmentCount">Showing 0 of 0 appointments</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Notification dropdown (matching Archive.html) -->
+    <div id="notificationDropdown" class="fixed flex flex-col bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl overflow-hidden" style="display: none; top: 88px; right: 40px; width: 400px; max-width: calc(100vw - 320px); max-height: 500px; z-index: 9999;">
+      <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+        <h3 class="text-primary font-semibold text-lg m-0">Notifications</h3>
+        <button type="button" id="clearAllNotifications" class="bg-transparent border-none text-slate-500 dark:text-slate-400 cursor-pointer text-sm py-1 px-2 hover:text-slate-700 dark:hover:text-slate-200">Clear All</button>
+      </div>
+      <div id="notificationList" class="max-h-[440px] overflow-y-auto p-3">
+        <p class="text-center text-slate-400 py-5">No notifications</p>
+      </div>
+    </div>
+
+    <!-- View Appointment Modal - Preserved exactly as original -->
+    <div id="viewModal" class="fixed inset-0 z-[1000] bg-black/60 flex justify-center items-center" style="display: none;">
+      <div class="appointment-modal bg-white dark:bg-slate-800 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-xl p-6 border border-slate-100 dark:border-slate-700">
+        <div class="modal-header flex items-center justify-between relative mb-4">
+          <h2 class="text-lg font-bold text-slate-800 dark:text-white">Appointment Details</h2>
+          <span class="status-badge absolute right-9 bg-green-600 text-white text-xs font-semibold px-2.5 py-1 rounded-full" id="modalStatus">Upcoming</span>
+          <span class="close-btn absolute top-0 right-2 text-xl text-slate-500 cursor-pointer hover:text-slate-800 dark:hover:text-white" id="closeModal">&times;</span>
+        </div>
+
+        <div class="modal-section border border-slate-100 dark:border-slate-700 rounded-xl p-4 mt-4">
+          <h3 class="text-primary font-semibold text-lg mb-3 flex items-center gap-2">
+            <span class="material-symbols-outlined text-xl">calendar_today</span>
+            <span>Appointment Overview</span>
+          </h3>
+          <div class="overview-grid grid grid-cols-2 gap-3 pt-1">
+            <div><p class="label text-slate-400 text-xs mb-0.5">Date</p><p class="value font-semibold text-sm text-slate-800 dark:text-white" id="modalDate"></p></div>
+            <div><p class="label text-slate-400 text-xs mb-0.5">Service</p><p class="value font-semibold text-sm text-slate-800 dark:text-white" id="modalType"></p></div>
+            <div><p class="label text-slate-400 text-xs mb-0.5">Time</p><p class="value font-semibold text-sm text-slate-800 dark:text-white" id="modalTime">08:00 AM</p></div>
+            <div><p class="label text-slate-400 text-xs mb-0.5">Doctor</p><p class="value font-semibold text-sm text-slate-800 dark:text-white" id="modalDoctor"></p></div>
+            <div><p class="label text-slate-400 text-xs mb-0.5">Duration</p><p class="value font-semibold text-sm text-slate-800 dark:text-white" id="modalDuration">30 minutes</p></div>
+          </div>
+        </div>
+
+        <div class="modal-section border border-slate-100 dark:border-slate-700 rounded-xl p-4 mt-4">
+          <p class="label text-slate-400 text-xs mb-1">Reason for Visit</p>
+          <div class="text-box bg-slate-50 dark:bg-slate-700/50 border border-slate-100 dark:border-slate-600 rounded-lg px-3 py-2 text-slate-800 dark:text-slate-200 text-sm min-h-[2.5rem] flex items-center" id="modalReason">Regular health check-up</div>
+        </div>
+
+        <div class="modal-section border border-slate-100 dark:border-slate-700 rounded-xl p-4 mt-4">
+          <p class="label text-slate-400 text-xs mb-1">Additional Notes</p>
+          <div class="text-box bg-slate-50 dark:bg-slate-700/50 border border-slate-100 dark:border-slate-600 rounded-lg px-3 py-2 text-slate-800 dark:text-slate-200 text-sm min-h-[2.5rem] flex items-center" id="modalNotes">Patient requested morning appointment</div>
+        </div>
+
+        <div class="buttonCon flex justify-between mt-5">
+          <a class="editApp inline-block py-2.5 px-5 rounded-xl text-sm font-semibold border border-slate-500 dark:border-slate-400 text-slate-600 dark:text-slate-300 hover:bg-slate-500 hover:text-white dark:hover:bg-slate-400 dark:hover:text-slate-900 transition-colors" href="#" id="editAppointmentBtn">Edit</a>
+          <a class="cancelApp inline-block py-2.5 px-5 rounded-xl text-sm font-semibold border border-red-600 text-red-600 hover:bg-red-600 hover:text-white transition-colors" href="#" id="cancelAppointmentBtn">Cancel</a>
+        </div>
+        <div class="buttonCon flex flex-row justify-around mt-3">
+          <a class="enterApp hidden py-2.5 px-5 rounded-xl text-white font-semibold bg-blue-600 hover:bg-blue-700 transition-colors" href="#" id="enterAppointmentBtn">Admit</a>
+          <a class="completeApp inline-block py-2.5 px-5 rounded-xl text-sm font-semibold border-2 border-primary text-primary hover:bg-primary hover:text-white transition-colors" href="#" id="completeAppointmentBtn">Complete</a>
+          <a class="patientInfoBtn hidden py-2.5 px-5 rounded-xl text-white font-semibold bg-primary hover:bg-primary/90 transition-colors flex items-center gap-2" href="#" id="patientInfoBtn">
+            <span class="material-symbols-outlined text-lg">person</span>
+            <span>Patient Info</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts in same order as original Appointments.html to preserve functionality -->
+    <script src="JS/appointment_monitor.js"></script>
+    <script src="JS/appointment_time_notifications.js"></script>
+    <script src="JS/nurse_notifications.js"></script>
+    <script src="JS/doctor_notifications.js"></script>
+    <script src="JS/appointments.js"></script>
+    <script src="JS/header.js"></script>
+    <script>
+      // Notification bell handler (matching Archive.html)
+      (function() {
+        function ensureNotificationBell() {
+          var bell = document.getElementById("notificationBell");
+          var dropdown = document.getElementById("notificationDropdown");
+          if (!bell || !dropdown) return;
+          if (window._appointmentsNotificationBound) return;
+          window._appointmentsNotificationBound = true;
+          bell.addEventListener("click", function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var show = dropdown.style.display !== "flex";
+            dropdown.style.display = show ? "flex" : "none";
+            if (show && typeof loadNotifications === "function") loadNotifications();
+          });
+          document.addEventListener("click", function(e) {
+            if (!bell.contains(e.target) && !dropdown.contains(e.target))
+              dropdown.style.display = "none";
+          });
+        }
+        if (document.readyState === "loading")
+          document.addEventListener("DOMContentLoaded", ensureNotificationBell);
+        else
+          ensureNotificationBell();
+      })();
+    </script>
+    <script src="JS/auto_refresh.js"></script>
+    <script src="JS/session_checker.js"></script>
+  </body>
+</html>

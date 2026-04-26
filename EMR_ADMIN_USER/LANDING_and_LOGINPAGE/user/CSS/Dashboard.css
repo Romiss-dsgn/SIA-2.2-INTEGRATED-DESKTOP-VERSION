@@ -1,0 +1,301 @@
+:root {
+    --primary-color: #005a32;    /* Forest Green */
+    --secondary-color: #d62828;  /* Vibrant Red */
+    --accent-color: #8b5a2b;     /* Brown Accent */
+    --off-white: #ffffff;
+    --bg-neutral: #f1f5f9;       /* Light gray background */
+}
+
+*{
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body{
+        display: flex;
+        height: 100vh;
+        background-color: var(--bg-neutral);
+        font-weight: 500;
+    }
+    
+    a{
+        text-decoration: none;
+        color: inherit;
+    }
+    .sideBar{
+        width: 100%;
+        max-width: 250px;
+        background-color: white;
+        display: flex;
+        flex-direction: column;
+        padding: 15px;
+        border-right: 1px solid #ddd;
+    }
+    .logoCon{
+        display: flex;
+        align-items: center;
+        padding-bottom: 20px;
+        gap: 10px;
+        border-bottom: 1px solid #ddd;
+        margin-bottom: 20px;
+    }
+    .logo{
+        font-size: 30px;
+        padding: 10px;
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: 10px;
+    }
+    .title{
+        font-size: 24px;
+        color: #333;
+        font-weight: 600;
+    }
+    .subTitle{
+        font-size: 14px;
+        color: #777;
+        font-weight: 600;
+    }
+    .accountCon{
+        display: flex;
+        align-items: center;
+        padding-bottom: 20px;
+        gap: 10px;
+        border-bottom: 1px solid #ddd;
+    }
+    .userPic{
+        width: 40px;
+        height: 40px;
+        background-color: var(--accent-color);
+        border-radius: 50%;
+        margin-bottom: 10px;
+        font-weight: 600;
+    }
+    .accountInfo{
+        margin-left: 10px;
+    }
+    .accountName{
+        font-size: 18px;
+        color: #333;
+    }
+    .role{
+        font-size: 14px;
+        color: #777;
+        font-weight: 600;
+    }
+    .navBar{
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin-top: 20px;
+    }
+    .navBar a, .logoutCon a{
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding: 10px;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+    .navBar img{
+        width: 20px;
+        height: 20px;
+    }
+    .navBar a:hover, .logoutCon a:hover{
+        background-color: #f0f0f0;
+    }
+   
+    .dashboard{
+        font-size: 16px;
+        font-weight: 500;
+        color: #504f4f;
+    }
+    
+    .logoutCon{
+        border-top: 1px solid #ddd;
+        padding-top: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+     .logoutCon .logout:hover{
+        background-color: #f5bcbc;
+    }
+    main{
+        display: flex;
+        flex-direction: column;
+        padding: 20px;
+    }
+    
+    .topSection{
+        margin-bottom: 20px;
+    }
+    .greet{
+        font-size: 30px;
+        color: var(--primary-color);
+        font-weight: 600;
+    }
+    .subGreet{
+        font-size: 16px;
+        color: #777;
+        margin-top: 5px;
+        font-weight: 400;
+    }
+    .wrapper{
+        display: flex;
+        flex-wrap: wrap;
+        gap: 50px;
+        margin-bottom: 20px;
+        align-items: stretch;
+        justify-content: space-between;
+    }
+    .statsCon{
+        flex: 1;
+        min-width: 300px;
+        max-width: 100%;
+        max-height: 370px;
+        display: flex;
+        flex-direction: column;
+        background-color: white;
+        padding: 20px;
+        border-radius: 12px;
+        border: #c7c6c6 1px solid;
+        margin-bottom: 20px;
+    }
+.appointmentsContainer .appointmentSched {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 15px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.appointmentsContainer{
+    overflow-y: auto;
+        overflow-x: hidden;
+        scrollbar-width: thin;
+}
+
+
+    .statsCon h2{
+        font-size: 20px;
+        color: var(--accent-color);
+        margin-bottom: 15px;
+        font-weight: 600;
+        
+    }
+    .appointmentSched{
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #eee;
+    }
+    .schedTime{
+        font-size: 18px;
+        font-weight: 600;
+    }
+    .schedName, .schedDoc, .patientID, .statusText{
+        font-size: 16px;
+        font-weight: 400;
+        color: #333;
+    }
+    .schedName, .patientName{
+        font-size: 16px;
+        color: #333;
+    }
+    .statusNum{
+        font-size: 30px;
+        font-weight: 600;
+        color: var(--primary-color);
+    }
+    .status{
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .recentPatients{
+        display: flex;
+        flex-direction: column;
+        margin-top: 20px;
+        gap: 20px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        scrollbar-width: thin;
+    }
+    .patientList{
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+    }
+    .patientPic{
+        width: 40px;
+        height: 40px;
+        text-align: center;
+        padding-top: 5px;
+        color: white;
+        font-size: 20px;
+        background-color: var(--primary-color);
+        border-radius: 50%;
+    }
+    .viewCon{
+        margin-top: 50px;
+        width: 100%;
+        border: var(--primary-color) 1px solid;
+        text-align: center;
+        padding: 5px 0px;
+        border-radius: 10px;
+    }
+    .viewCon:hover {
+    background-color: var(--primary-color);
+}
+
+.viewCon:hover .viewAll {
+    color: white;
+}
+
+.viewAll {
+    font-size: 14px;
+    color: var(--primary-color);
+    font-weight: 600;
+}
+    .bottomSection{
+        padding: 20px;
+        border-radius: 5px;
+    }
+    .bottomSection h1{
+        font-size: 20px;
+        color: #333;
+        margin-bottom: 15px;
+    }
+    .bottomSection div{
+        display: flex;
+        gap: 20px;
+    }
+    .bottomSection a{
+        flex: 1;
+        max-width: 100%;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        padding: 15px 10px;
+        border-radius: 10px;
+        background-color: #f9f9f9;
+        transition: background-color 0.3s;
+        border: var(--primary-color) 1px solid;
+        
+    }
+    .bottomSection a:hover {
+    background-color: var(--bg-neutral);
+    border-color: var(--primary-color);
+}
+    .bottomSection i{
+        font-size: 20px;
+        color: var(--primary-color);
+    }
+    .bottomSection h3{
+        font-size: 14px;
+        color: var(--primary-color);
+    }

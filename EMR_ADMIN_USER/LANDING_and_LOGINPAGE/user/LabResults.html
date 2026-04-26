@@ -1,0 +1,2017 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab Results - WellServed</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="CSS/Global.css" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#065f46",
+            secondary: "#8B5A2B",
+            "brand-light": "#f0fdf4",
+            "background-light": "#f8fafc",
+          },
+          fontFamily: {
+            sans: ["'Plus Jakarta Sans'", "sans-serif"],
+            display: ["'Plus Jakarta Sans'", "sans-serif"],
+          },
+          borderRadius: { "3xl": "24px", "4xl": "32px" },
+        },
+      },
+    };
+  </script>
+  <style type="text/tailwindcss">
+    @layer base { body { font-feature-settings: "cv02","cv03","cv04","cv11"; } }
+    .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+    .material-symbols-outlined { font-variation-settings: "FILL" 0,"wght" 400,"GRAD" 0,"opsz" 24; display: inline-block; vertical-align: middle; }
+    .card-shadow { box-shadow: 0 4px 20px -2px rgba(0,0,0,0.05); }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: #065f46 !important; box-shadow: 0 0 0 3px rgba(6,95,70,0.08); }
+    .autofilled { background-color: #f0fdf4 !important; border-color: #6ee7b7 !important; color: #065f46 !important; font-weight: 600 !important; }
+    .dark .autofilled { background-color: rgba(6,95,70,0.15) !important; border-color: #065f46 !important; color: #34d399 !important; }
+    .tab-active { background: #065f46 !important; color: #fff !important; border-color: #065f46 !important; }
+    .form-section { display: none; }
+    .form-section.active { display: block; }
+    .result-card:hover { border-color: #065f46; box-shadow: 0 8px 25px -5px rgba(6,95,70,0.12); }
+  </style>
+</head>
+<body class="bg-[#F3F4F6] dark:bg-slate-900 dark:text-slate-100 text-slate-900 transition-colors duration-200 flex h-screen overflow-hidden">
+  <script src="JS/Sidebar.js"></script>
+  <script src="JS/recent_patients.js"></script>
+  <script>loadSidebar("Patients.html");</script>
+
+  <!-- ═══════════════ FIXED TOP HEADER ═══════════════ -->
+  <header id="topHeader" class="fixed top-0 left-64 right-0 h-20 flex items-center justify-end px-10 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-100 dark:border-slate-700 z-40">
+    <div class="flex items-center gap-6">
+      <div class="flex items-center gap-4 bg-slate-50 dark:bg-slate-700 px-4 py-2 rounded-2xl border border-slate-100 dark:border-slate-600">
+        <div class="flex flex-col items-end">
+          <span id="clockDisplay" class="text-sm font-bold text-slate-700 dark:text-slate-200">12:00:00 PM</span>
+          <span id="headerDateDisplay" class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">—</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-6">
+        <div class="relative">
+          <button type="button" id="notificationBell" class="relative flex items-center justify-center w-12 h-12 text-primary hover:opacity-90 transition-opacity rounded-full hover:bg-slate-100 dark:hover:bg-slate-700/50 border-0 cursor-pointer z-50">
+            <span class="material-symbols-outlined text-[28px] select-none">notifications</span>
+            <span id="notificationBadge" class="absolute top-0.5 right-0.5 w-5 h-5 bg-red-500 border-2 border-white dark:border-slate-800 rounded-full hidden items-center justify-center text-[10px] font-bold text-white"></span>
+          </button>
+        </div>
+        <div id="headerUserAvatar" class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm ring-4 ring-primary/5">—</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══════════════ MAIN CONTENT ═══════════════ -->
+  <div class="mainContainer flex-1 ml-64 p-5 overflow-y-auto" style="margin-top: 80px;">
+
+    <!-- Page Header -->
+    <header class="flex justify-between items-center mb-6">
+      <div class="flex items-center gap-4">
+        <a href="Patients.html" class="flex items-center justify-center w-9 h-9 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-500 hover:text-primary hover:border-primary hover:bg-brand-light transition-all shadow-sm shrink-0">
+          <span class="material-symbols-outlined text-xl">arrow_back</span>
+        </a>
+        <div>
+          <h1 class="text-2xl font-bold text-primary">Patient Information</h1>
+          <p id="patientSubtitle" class="text-sm text-slate-400 font-medium mt-0.5">Loading...</p>
+        </div>
+      </div>
+      <!-- Add Lab Result button — shown only for Medtech -->
+      <button id="addLabResultBtn" class="hidden items-center gap-2 px-4 py-3 rounded-xl bg-primary text-white font-semibold hover:bg-primary/90 transition-all shadow-md hover:shadow-lg active:scale-95">
+        <span class="material-symbols-outlined text-xl">add_circle</span>
+        <span>Add Lab Result</span>
+      </button>
+    </header>
+
+    <div class="space-y-5">
+
+      <!-- ── SINGLE NAV BAR ── -->
+      <div class="bg-white dark:bg-slate-800 rounded-2xl card-shadow border border-slate-100 dark:border-slate-700 px-6 py-3">
+        <nav class="flex flex-wrap gap-2">
+          <a id="nav-personal"     class="px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 font-medium text-sm" href="PatientInfo.html">Personal Info</a>
+          <a id="nav-prescription" class="px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 font-medium text-sm" href="PrescriptionHistory.html">Prescription History</a>
+          <a id="nav-allergies"    class="px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 font-medium text-sm" href="Allergies.html">Allergies</a>
+          <a id="nav-vitals"       class="px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 font-medium text-sm" href="VitalSigns.html">Vital Signs</a>
+          <a id="nav-lab"          class="px-4 py-2 rounded-lg bg-white border border-primary text-primary font-semibold text-sm" href="LabResults.html">Lab Results</a>
+        </nav>
+      </div>
+
+      <!-- ── RESULTS CARD ── -->
+      <div class="bg-white dark:bg-slate-800 rounded-3xl card-shadow border border-slate-100 dark:border-slate-700 p-8">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="flex items-center gap-2 text-lg font-semibold text-primary">
+            <span class="material-symbols-outlined">labs</span>
+            Laboratory Results
+          </h2>
+        </div>
+
+        <!-- Loading -->
+        <div id="loadingState" class="flex flex-col items-center justify-center py-16">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
+          <p class="text-slate-500 font-medium">Loading laboratory results...</p>
+        </div>
+
+        <!-- Empty -->
+        <div id="emptyState" class="hidden flex-col items-center justify-center py-16">
+          <div class="w-20 h-20 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center mb-4">
+            <i class="fa-solid fa-flask text-4xl text-slate-400"></i>
+          </div>
+          <h3 class="text-lg font-extrabold text-slate-700 dark:text-slate-300 mb-1">No Laboratory Results Yet</h3>
+          <p class="text-slate-400 text-sm text-center max-w-sm">Results will appear here once a medical technologist adds them.</p>
+        </div>
+
+        <!-- Grid -->
+        <div id="labResultsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 hidden"></div>
+      </div>
+
+    </div>
+  </div>
+<div id="choiceModal" class="fixed inset-0 z-[1001] bg-black/60 hidden items-center justify-center p-4">
+  <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-lg shadow-2xl">
+    
+    <!-- Modal Header -->
+    <div class="px-8 py-6 border-b border-slate-100 dark:border-slate-700">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-2xl font-extrabold text-slate-800 dark:text-white">Add Lab Result</h2>
+          <p class="text-slate-400 text-sm mt-1">Choose how you want to add the result</p>
+        </div>
+        <button id="closeChoiceModal" class="flex items-center justify-center w-9 h-9 rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-primary hover:border-primary hover:bg-brand-light transition-all shadow-sm">
+          <span class="material-symbols-outlined text-xl">close</span>
+        </button>
+      </div>
+    </div>
+ 
+    <!-- Options -->
+    <div class="p-8 space-y-4">
+      
+      <!-- Upload File Option -->
+      <button id="chooseUploadFile" class="w-full group relative overflow-hidden rounded-2xl border-2 border-slate-200 dark:border-slate-700 hover:border-primary transition-all p-6 text-left bg-white dark:bg-slate-800 hover:shadow-xl">
+        <div class="flex items-start gap-4">
+          <div class="w-14 h-14 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center shrink-0 group-hover:bg-blue-100 transition-colors">
+            <span class="material-symbols-outlined text-3xl text-blue-600">upload_file</span>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-lg font-extrabold text-slate-800 dark:text-white mb-1">Upload File</h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+              Upload an existing lab result document from your computer
+            </p>
+            <div class="flex flex-wrap gap-2 mt-3">
+              <span class="text-xs font-bold text-blue-600 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-lg">PDF</span>
+              <span class="text-xs font-bold text-blue-600 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-lg">DOCX</span>
+              <span class="text-xs font-bold text-blue-600 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-lg">XLSX</span>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-slate-300 group-hover:text-primary transition-colors">arrow_forward</span>
+        </div>
+      </button>
+ 
+      <!-- Create Lab Result Option -->
+      <button id="chooseCreateForm" class="w-full group relative overflow-hidden rounded-2xl border-2 border-slate-200 dark:border-slate-700 hover:border-primary transition-all p-6 text-left bg-white dark:bg-slate-800 hover:shadow-xl">
+        <div class="flex items-start gap-4">
+          <div class="w-14 h-14 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center shrink-0 group-hover:bg-emerald-100 transition-colors">
+            <span class="material-symbols-outlined text-3xl text-primary">edit_document</span>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-lg font-extrabold text-slate-800 dark:text-white mb-1">Create Lab Result</h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+              Fill out a structured form to enter laboratory test results
+            </p>
+            <div class="flex flex-wrap gap-2 mt-3">
+              <span class="text-xs font-bold text-primary bg-emerald-50 dark:bg-emerald-900/30 px-2 py-1 rounded-lg">Urinalysis</span>
+              <span class="text-xs font-bold text-primary bg-emerald-50 dark:bg-emerald-900/30 px-2 py-1 rounded-lg">Blood Typing</span>
+              <span class="text-xs font-bold text-primary bg-emerald-50 dark:bg-emerald-900/30 px-2 py-1 rounded-lg">Chemistry</span>
+              <span class="text-xs font-bold text-primary bg-emerald-50 dark:bg-emerald-900/30 px-2 py-1 rounded-lg">+ More</span>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-slate-300 group-hover:text-primary transition-colors">arrow_forward</span>
+        </div>
+      </button>
+ 
+    </div>
+  </div>
+</div>
+ 
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- ✅ NEW: FILE UPLOAD MODAL -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div id="uploadFileModal" class="fixed inset-0 z-[1000] bg-black/60 hidden items-center justify-center p-4">
+  <div class="bg-[#F3F4F6] dark:bg-slate-900 rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
+    
+    <!-- Modal Header (Sticky) -->
+    <div class="bg-white dark:bg-slate-800 px-6 py-4 border-b border-slate-100 flex items-center gap-3 shrink-0">
+      <button id="closeUploadModal" class="flex items-center justify-center w-9 h-9 rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-primary hover:border-primary hover:bg-brand-light transition-all shadow-sm shrink-0">
+        <span class="material-symbols-outlined text-xl">close</span>
+      </button>
+      <div>
+        <h2 class="text-lg font-extrabold tracking-tight text-slate-800 dark:text-white">Upload Lab Result</h2>
+        <p class="text-slate-400 text-xs font-medium mt-0.5">Upload a PDF, Word, or Excel document</p>
+      </div>
+    </div>
+ 
+    <!-- Scrollable Content -->
+    <div class="overflow-y-auto custom-scrollbar flex-1 p-6 space-y-5">
+ 
+      <!-- Patient Info (Autofilled) - Compact -->
+      <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 p-4">
+        <div class="flex items-center gap-2 mb-3 pb-2 border-b border-slate-100">
+          <span class="material-symbols-outlined text-primary text-lg">person</span>
+          <h3 class="font-bold text-slate-700 text-xs uppercase tracking-wider">Patient Information</h3>
+          <span class="ml-auto inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+            <span class="material-symbols-outlined text-[12px]">check_circle</span> Autofilled
+          </span>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 block">Patient Name</label>
+            <input type="text" id="uploadPatientName" readonly class="autofilled w-full px-3 py-2 rounded-lg border text-xs" />
+          </div>
+          <div>
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 block">Patient ID</label>
+            <input type="text" id="uploadPatientId" readonly class="autofilled w-full px-3 py-2 rounded-lg border text-xs" />
+          </div>
+        </div>
+      </div>
+ 
+      <!-- Test Details - Compact -->
+      <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 p-4">
+        <div class="flex items-center gap-2 mb-3 pb-2 border-b border-slate-100">
+          <span class="material-symbols-outlined text-secondary text-lg">science</span>
+          <h3 class="font-bold text-slate-700 text-xs uppercase tracking-wider">Test Details</h3>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 block">Test Name <span class="text-red-400">*</span></label>
+            <input type="text" id="uploadTestName" placeholder="e.g. Complete Blood Count" class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-800 text-xs font-medium transition-all" required />
+          </div>
+          <div>
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 block">Test Date <span class="text-red-400">*</span></label>
+            <input type="date" id="uploadTestDate" class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-800 text-xs font-medium transition-all" required />
+           </div>
+        </div>
+        <div class="mt-3">
+          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 block flex items-center gap-2">
+            Requesting Physician
+            <span id="uploadPhysicianBadge" class="hidden items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+              <span class="material-symbols-outlined text-[11px]">check_circle</span> Autofilled
+            </span>
+          </label>
+          <input type="text" id="uploadPhysician" placeholder="Dr. " class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-800 text-xs font-medium transition-all" />
+        </div>
+      </div>
+ 
+      <!-- File Upload Area - Compact -->
+      <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 p-4">
+        <div class="flex items-center gap-2 mb-3 pb-2 border-b border-slate-100">
+          <span class="material-symbols-outlined text-secondary text-lg">attach_file</span>
+          <h3 class="font-bold text-slate-700 text-xs uppercase tracking-wider">Upload File <span class="text-red-400">*</span></h3>
+        </div>
+ 
+        <!-- Compact Drop Zone -->
+        <div id="dropZone" class="relative border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl p-6 text-center hover:border-primary hover:bg-brand-light/30 transition-all cursor-pointer">
+          <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+          
+          <div id="dropZoneContent">
+            <div class="w-14 h-14 mx-auto rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center mb-2">
+              <span class="material-symbols-outlined text-3xl text-slate-400">upload_file</span>
+            </div>
+            <h4 class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Drop file or click to browse</h4>
+            <p class="text-xs text-slate-500 mb-2">PDF, DOCX, XLSX, PNG, JPG (Max 10MB)</p>
+            <button type="button" class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-all">
+              <span class="material-symbols-outlined text-base">folder_open</span>
+              Choose File
+            </button>
+          </div>
+ 
+          <!-- File Preview (hidden by default) -->
+          <div id="filePreview" class="hidden">
+            <div class="flex items-center gap-3 p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg border border-emerald-200">
+              <div class="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-xl text-emerald-600">description</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p id="fileName" class="font-bold text-slate-800 dark:text-white text-xs truncate"></p>
+                <p id="fileSize" class="text-[10px] text-slate-500 mt-0.5"></p>
+              </div>
+              <button type="button" id="removeFile" class="flex items-center justify-center w-7 h-7 rounded-lg bg-red-100 hover:bg-red-200 text-red-600 transition-all shrink-0">
+                <span class="material-symbols-outlined text-base">close</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+ 
+      <!-- Notes (Optional) - Compact -->
+      <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 p-4">
+        <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-100">
+          <span class="material-symbols-outlined text-secondary text-lg">notes</span>
+          <h3 class="font-bold text-slate-700 text-xs uppercase tracking-wider">Notes (Optional)</h3>
+        </div>
+        <textarea id="uploadNotes" rows="2" placeholder="Add any additional notes..." class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-xs resize-none"></textarea>
+      </div>
+ 
+    </div>
+ 
+    <!-- Footer Actions (Sticky) -->
+    <div class="bg-white dark:bg-slate-800 px-6 py-4 border-t border-slate-100 flex gap-3 shrink-0">
+      <button type="button" id="cancelUploadModal" class="flex-1 px-5 py-2.5 rounded-xl border-2 border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all text-sm">
+        Cancel
+      </button>
+      <button type="button" id="uploadFileBtn" class="flex-1 px-5 py-2.5 rounded-xl bg-primary text-white font-extrabold hover:bg-[#054a37] transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/20 text-sm" disabled>
+        <span class="material-symbols-outlined text-base">cloud_upload</span>
+        <span>Upload Result</span>
+      </button>
+    </div>
+ 
+  </div>
+</div>
+ 
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- ✅ UPDATED STYLES - Add to your <style> section if needed -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<style type="text/tailwindcss">
+  /* Ensure scrollbar styling */
+  .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+  .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+  .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
+</style>
+ 
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- ADD LAB RESULT MODAL                                    -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div id="addLabModal" class="fixed inset-0 z-[1000] bg-black/60 hidden items-center justify-center p-4">
+    <div class="bg-[#F3F4F6] dark:bg-slate-900 rounded-3xl w-full max-w-4xl max-h-[95vh] overflow-y-auto shadow-2xl custom-scrollbar">
+
+      <!-- Modal Header -->
+      <div class="bg-white dark:bg-slate-800 px-8 py-5 border-b border-slate-100 sticky top-0 z-10 flex items-center gap-4 rounded-t-3xl">
+        <button id="closeAddModal" class="flex items-center justify-center w-9 h-9 rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-primary hover:border-primary hover:bg-brand-light transition-all shadow-sm shrink-0">
+          <span class="material-symbols-outlined text-xl">close</span>
+        </button>
+        <div>
+          <h2 class="text-xl font-extrabold tracking-tight text-slate-800 dark:text-white">Create Lab Result</h2>
+          <p class="text-slate-400 text-xs font-medium mt-0.5">Select a test type and fill in the results.</p>
+        </div>
+      </div>
+
+      <div class="p-8 space-y-6">
+
+        <!-- Clinic Header Preview -->
+        <div class="bg-white dark:bg-slate-800 rounded-3xl card-shadow border border-slate-100 p-6">
+          <div class="flex items-center justify-center gap-3 mb-3">
+            <img src="../user/Assets/wellserved_logo.jpg" alt="WellServed" class="w-16 h-16 rounded-full border-[3px] border-primary object-cover shrink-0" style="box-shadow:0 2px 8px rgba(6,95,70,0.15);">
+            <div class="text-center">
+              <div class="text-[20px] font-black text-primary tracking-[4px]" style="font-family:'Arial Black',Arial,sans-serif;line-height:1;">WELLSERVED</div>
+              <div class="text-[9px] font-bold text-[#064e3b] tracking-[1px] mt-0.5">INFIRMARY &amp; DRUGSTORE INC.</div>
+              <div class="text-[7.5px] font-bold text-secondary leading-relaxed mt-1">
+                &bull; MEDICAL &nbsp;&bull; PEDIA &nbsp;&bull; OB GYNE &nbsp;&bull; MINOR SURGERY<br>
+                &bull; X-RAY &nbsp;&bull; ECG &nbsp;&bull; LABORATORY &nbsp;&bull; ULTRASOUND &nbsp;&bull; DRUGSTORE
+              </div>
+            </div>
+          </div>
+          <div class="flex justify-between text-[8px] text-slate-400 italic border-t border-primary pt-2">
+            <span>📍 #26 Steve St. cor Villiongco St., Brgy. Commonwealth, Quezon City &nbsp;|&nbsp; Tel: 8 952-77-79 / 514-3869</span>
+            <span>📧 drtiga@yahoo.com</span>
+          </div>
+          <p class="text-[9px] font-extrabold text-primary text-center mt-1 tracking-wider">DOH LICENSE: 13-1576-17-CL-2</p>
+        </div>
+
+        <!-- Test Type Selector -->
+        <div class="bg-white dark:bg-slate-800 rounded-3xl card-shadow border border-slate-100 p-6">
+          <div class="flex items-center gap-2 mb-5 pb-3 border-b border-slate-100">
+            <span class="material-symbols-outlined text-secondary text-xl">science</span>
+            <h3 class="font-extrabold text-slate-700 text-sm uppercase tracking-widest">Select Test Type <span class="text-red-400">*</span></h3>
+          </div>
+          <div class="flex flex-wrap gap-2" id="testTypeTabs">
+            <button class="test-tab px-4 py-2.5 rounded-xl border border-slate-300 text-slate-600 font-bold text-sm hover:border-primary hover:text-primary transition-all" data-test="UA">Urinalysis</button>
+            <button class="test-tab px-4 py-2.5 rounded-xl border border-slate-300 text-slate-600 font-bold text-sm hover:border-primary hover:text-primary transition-all" data-test="BT">Blood Typing</button>
+            <button class="test-tab px-4 py-2.5 rounded-xl border border-slate-300 text-slate-600 font-bold text-sm hover:border-primary hover:text-primary transition-all" data-test="PT">Pregnancy Test</button>
+            <button class="test-tab px-4 py-2.5 rounded-xl border border-slate-300 text-slate-600 font-bold text-sm hover:border-primary hover:text-primary transition-all" data-test="DVT">Dengue Rapid Test</button>
+            <button class="test-tab px-4 py-2.5 rounded-xl border border-slate-300 text-slate-600 font-bold text-sm hover:border-primary hover:text-primary transition-all" data-test="FA">Fecalysis</button>
+            <button class="test-tab px-4 py-2.5 rounded-xl border border-slate-300 text-slate-600 font-bold text-sm hover:border-primary hover:text-primary transition-all" data-test="SEROLOGY">Serology (HBsAg/VDRL)</button>
+            <button class="test-tab px-4 py-2.5 rounded-xl border border-slate-300 text-slate-600 font-bold text-sm hover:border-primary hover:text-primary transition-all" data-test="CHEM">Clinical Chemistry</button>
+          </div>
+        </div>
+
+        <!-- Basic Info -->
+        <div class="bg-white dark:bg-slate-800 rounded-3xl card-shadow border border-slate-100 p-6">
+          <div class="flex items-center gap-2 mb-5 pb-3 border-b border-slate-100">
+            <span class="material-symbols-outlined text-secondary text-xl">edit_document</span>
+            <h3 class="font-extrabold text-slate-700 text-sm uppercase tracking-widest">Basic Information</h3>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Date <span class="text-red-400">*</span></label>
+              <input type="date" id="commonDate" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 text-sm font-medium transition-all" />
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                Requesting Physician
+                <span id="physicianAutofillBadge" class="hidden items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                  <span class="material-symbols-outlined text-[12px]">check_circle</span> Autofilled
+                </span>
+              </label>
+              <input type="text" id="commonPhysician" placeholder="Dr. " class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 text-sm font-medium transition-all" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Patient Details -->
+        <div class="bg-white dark:bg-slate-800 rounded-3xl card-shadow border border-slate-100 p-6">
+          <div class="flex items-center gap-2 mb-5 pb-3 border-b border-slate-100">
+            <span class="material-symbols-outlined text-secondary text-xl">person</span>
+            <h3 class="font-extrabold text-slate-700 text-sm uppercase tracking-widest">Patient Details</h3>
+            <span class="ml-auto inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">
+              <span class="material-symbols-outlined text-[14px]">check_circle</span> Autofilled
+            </span>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Patient Name</label>
+              <input type="text" id="formPatientName" readonly class="autofilled w-full px-4 py-3 rounded-xl border text-sm transition-all" />
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Age / Sex</label>
+              <input type="text" id="formPatientAgeSex" readonly class="autofilled w-full px-4 py-3 rounded-xl border text-sm transition-all" />
+            </div>
+          </div>
+        </div>
+
+        <!-- No Test Selected Placeholder -->
+        <div id="noTestSelected" class="bg-white dark:bg-slate-800 rounded-3xl card-shadow border-2 border-dashed border-slate-200 p-12 flex flex-col items-center gap-3">
+          <span class="material-symbols-outlined text-6xl text-slate-200">science</span>
+          <p class="font-bold text-slate-400 text-sm">Please select a test type above to begin entering results.</p>
+        </div>
+
+        <!-- ══ URINALYSIS ══ -->
+        <div id="form-UA" class="form-section bg-white dark:bg-slate-800 rounded-3xl card-shadow border border-slate-100 p-6 space-y-5">
+          <div class="flex items-center gap-2 pb-3 border-b border-slate-100">
+            <span class="material-symbols-outlined text-secondary">water_drop</span>
+            <h3 class="font-extrabold text-slate-700 text-sm uppercase tracking-widest">Urinalysis</h3>
+          </div>
+          <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Macroscopic Examination</p>
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-slate-500">Color</label><input type="text" id="ua_color" placeholder="e.g. Yellow" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm" /></div>
+            <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-slate-500">Transparency</label>
+              <select id="ua_transparency" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm"><option value="">—</option><option>Clear</option><option>Slightly Turbid</option><option>Turbid</option><option>Cloudy</option></select></div>
+            <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-slate-500">Specific Gravity</label><input type="text" id="ua_sg" placeholder="e.g. 1.015" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm" /></div>
+          </div>
+          <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mt-2">Chemical Analysis</p>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-slate-500">pH</label><input type="text" id="ua_ph" placeholder="e.g. 6.0" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm" /></div>
+            <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-slate-500">Glucose</label>
+              <select id="ua_glucose" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm"><option value="">—</option><option>Negative</option><option>Trace</option><option>1+</option><option>2+</option><option>3+</option><option>4+</option></select></div>
+            <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-slate-500">Protein</label>
+              <select id="ua_protein" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm"><option value="">—</option><option>Negative</option><option>Trace</option><option>1+</option><option>2+</option><option>3+</option><option>4+</option></select></div>
+            <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-slate-500">Blood</label>
+              <select id="ua_blood" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm"><option value="">—</option><option>Negative</option><option>Trace</option><option>1+</option><option>2+</option><option>3+</option></select></div>
+            <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-slate-500">Ketone</label>
+              <select id="ua_ketone" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm"><option value="">—</option><option>Negative</option><option>Trace</option><option>1+</option><option>2+</option><option>3+</option></select></div>
+            <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-slate-500">Nitrite</label>
+              <select id="ua_nitrite" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm"><option value="">—</option><option>Negative</option><option>Positive</option></select></div>
+            <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-slate-500">Urobilinogen</label>
+              <select id="ua_urobilinogen" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm"><option value="">—</option><option>Normal</option><option>2 EU/dL</option><option>4 EU/dL</option><option>8 EU/dL</option></select></div>
+          </div>
+          <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mt-2">Microscopic Examination</p>
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-slate-500">WBC</label><input type="text" id="ua_wbc" placeholder="e.g. 0-2/hpf" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm" /></div>
+            <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-slate-500">RBC</label><input type="text" id="ua_rbc" placeholder="e.g. 0-1/hpf" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm" /></div>
+            <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-slate-500">Epithelial Cells</label><input type="text" id="ua_epithelial" placeholder="e.g. Few" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm" /></div>
+            <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-slate-500">Bacteria</label>
+              <select id="ua_bacteria" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm"><option value="">—</option><option>None</option><option>Rare</option><option>Few</option><option>Moderate</option><option>Many</option></select></div>
+            <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-slate-500">Renal Cells</label><input type="text" id="ua_renal" placeholder="e.g. None" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm" /></div>
+            <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-slate-500">Crystals</label><input type="text" id="ua_crystals" placeholder="e.g. None" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm" /></div>
+            <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-slate-500">Mucus Threads</label>
+              <select id="ua_mucus" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm"><option value="">—</option><option>None</option><option>Rare</option><option>Few</option><option>Moderate</option><option>Many</option></select></div>
+            <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-slate-500">Amorphous Type</label>
+  <select id="ua_amorphous_type" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm"><option value="">—</option><option>Amorphous Urates</option><option>Amorphous Phosphates</option></select></div>
+<div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-slate-500">Amorphous Result</label>
+  <select id="ua_amorphous_result" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm"><option value="">—</option><option>None</option><option>Rare</option><option>Few</option><option>Moderate</option><option>Many</option></select></div>
+            <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-slate-500">Others</label><input type="text" id="ua_others" placeholder="Optional" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm" /></div>
+          </div>
+        </div>
+
+        <!-- ══ BLOOD TYPING ══ -->
+        <div id="form-BT" class="form-section bg-white dark:bg-slate-800 rounded-3xl card-shadow border border-slate-100 p-6 space-y-5">
+          <div class="flex items-center gap-2 pb-3 border-b border-slate-100">
+            <span class="material-symbols-outlined text-secondary">bloodtype</span>
+            <h3 class="font-extrabold text-slate-700 text-sm uppercase tracking-widest">Blood Typing</h3>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Blood Type <span class="text-red-400">*</span></label>
+              <select id="bt_type" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm"><option value="">— Select —</option><option>A</option><option>B</option><option>AB</option><option>O</option></select></div>
+            <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Rh Factor <span class="text-red-400">*</span></label>
+              <select id="bt_rh" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm"><option value="">— Select —</option><option>Positive (+)</option><option>Negative (-)</option></select></div>
+            <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Method</label>
+              <select id="bt_method" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm"><option value="">— Select —</option><option>Tile Method</option><option>Tube Method</option><option>Gel Method</option></select></div>
+          </div>
+        </div>
+
+        <!-- ══ PREGNANCY TEST ══ -->
+        <div id="form-PT" class="form-section bg-white dark:bg-slate-800 rounded-3xl card-shadow border border-slate-100 p-6 space-y-5">
+          <div class="flex items-center gap-2 pb-3 border-b border-slate-100">
+            <span class="material-symbols-outlined text-secondary">pregnant_woman</span>
+            <h3 class="font-extrabold text-slate-700 text-sm uppercase tracking-widest">Pregnancy Test</h3>
+          </div>
+          <div class="flex flex-col gap-1.5 max-w-xs">
+            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Result <span class="text-red-400">*</span></label>
+            <select id="pt_result" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold">
+              <option value="">— Select —</option><option>Positive</option><option>Negative</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- ══ DENGUE RAPID TEST ══ -->
+        <div id="form-DVT" class="form-section bg-white dark:bg-slate-800 rounded-3xl card-shadow border border-slate-100 p-6 space-y-5">
+          <div class="flex items-center gap-2 pb-3 border-b border-slate-100">
+            <span class="material-symbols-outlined text-secondary">coronavirus</span>
+            <h3 class="font-extrabold text-slate-700 text-sm uppercase tracking-widest">Dengue Rapid Test</h3>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Dengue NS1</label>
+              <select id="dvt_ns1" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm"><option value="">— Select —</option><option>Positive</option><option>Negative</option></select></div>
+            <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Dengue Duo IgG</label>
+              <select id="dvt_igg" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm"><option value="">— Select —</option><option>Positive</option><option>Negative</option></select></div>
+            <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Dengue Duo IgM</label>
+              <select id="dvt_igm" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm"><option value="">— Select —</option><option>Positive</option><option>Negative</option></select></div>
+          </div>
+        </div>
+
+        <!-- ══ FECALYSIS ══ -->
+        <div id="form-FA" class="form-section bg-white dark:bg-slate-800 rounded-3xl card-shadow border border-slate-100 p-6 space-y-5">
+          <div class="flex items-center gap-2 pb-3 border-b border-slate-100">
+            <span class="material-symbols-outlined text-secondary">straighten</span>
+            <h3 class="font-extrabold text-slate-700 text-sm uppercase tracking-widest">Fecalysis</h3>
+          </div>
+          <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">A. Gross</p>
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-slate-500">Consistency</label>
+              <select id="fa_consistency" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm"><option value="">—</option><option>Formed</option><option>Semi-formed</option><option>Soft</option><option>Loose</option><option>Liquid</option><option>Watery</option></select></div>
+            <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-slate-500">Color</label><input type="text" id="fa_color" placeholder="e.g. Brown" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm" /></div>
+            <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-slate-500">Occult Blood</label>
+              <select id="fa_occult" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm"><option value="">—</option><option>Negative</option><option>Positive</option></select></div>
+            <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-slate-500">Ova / Parasite</label><input type="text" id="fa_ova" placeholder="e.g. None seen" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm" /></div>
+            <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-slate-500">Fat Globules</label>
+              <select id="fa_fat" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm"><option value="">—</option><option>None</option><option>Few</option><option>Moderate</option><option>Many</option></select></div>
+            <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-slate-500">Others (Gross)</label><input type="text" id="fa_others" placeholder="Optional" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm" /></div>
+          </div>
+          <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mt-2">B. Microscopic</p>
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-slate-500">Pus Cells</label><input type="text" id="fa_pus" placeholder="e.g. 0-2/hpf" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm" /></div>
+            <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-slate-500">RBC</label><input type="text" id="fa_rbc" placeholder="e.g. None" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm" /></div>
+          </div>
+          <label class="flex items-center gap-3 cursor-pointer mt-1 p-3 bg-emerald-50 rounded-xl border border-emerald-100">
+            <input type="checkbox" id="fa_noParasite" checked class="w-5 h-5 rounded border-slate-300 accent-primary" />
+            <span class="text-sm font-bold text-emerald-700">NO INTESTINAL PARASITE SEEN.</span>
+          </label>
+        </div>
+
+        <!-- ══ SEROLOGY ══ -->
+        <div id="form-SEROLOGY" class="form-section bg-white dark:bg-slate-800 rounded-3xl card-shadow border border-slate-100 p-6 space-y-5">
+          <div class="flex items-center gap-2 pb-3 border-b border-slate-100">
+            <span class="material-symbols-outlined text-secondary">vaccines</span>
+            <h3 class="font-extrabold text-slate-700 text-sm uppercase tracking-widest">Serology (HBsAg / VDRL)</h3>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">HBsAg Screening (Qualitative)</label>
+              <select id="sero_hbsag" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold"><option value="">— Select —</option><option>Reactive</option><option>Non-Reactive</option></select></div>
+            <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-slate-500 uppercase tracking-wider">VDRL Screening (Qualitative)</label>
+              <select id="sero_vdrl" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold"><option value="">— Select —</option><option>Reactive</option><option>Non-Reactive</option></select></div>
+          </div>
+        </div>
+
+        <!-- ══ CLINICAL CHEMISTRY ══ -->
+        <div id="form-CHEM" class="form-section bg-white dark:bg-slate-800 rounded-3xl card-shadow border border-slate-100 p-6 space-y-5">
+          <div class="flex items-center gap-2 pb-3 border-b border-slate-100">
+            <span class="material-symbols-outlined text-secondary">labs</span>
+            <h3 class="font-extrabold text-slate-700 text-sm uppercase tracking-widest">Clinical Chemistry</h3>
+          </div>
+          <div class="overflow-x-auto rounded-2xl border border-slate-100">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="bg-slate-50 border-b border-slate-200">
+                  <th class="text-left py-3 px-4 text-[10px] font-extrabold uppercase tracking-widest text-slate-500">Test</th>
+                  <th class="text-center py-3 px-3 text-[10px] font-extrabold uppercase text-primary">SI Result</th>
+                  <th class="text-center py-3 px-3 text-[10px] font-bold uppercase text-slate-400">SI Unit</th>
+                  <th class="text-center py-3 px-3 text-[10px] font-bold uppercase text-slate-400">SI Ref</th>
+                  <th class="text-center py-3 px-3 text-[10px] font-extrabold uppercase text-secondary">Conv.</th>
+                  <th class="text-center py-3 px-3 text-[10px] font-bold uppercase text-slate-400">Conv Unit</th>
+                  <th class="text-center py-3 px-3 text-[10px] font-bold uppercase text-slate-400">Conv Ref</th>
+                </tr>
+              </thead>
+              <tbody id="chemTableBody" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Remarks</label>
+            <input type="text" id="chem_remarks" placeholder="Optional remarks for chemistry panel..." class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm" />
+          </div>
+        </div>
+
+        <!-- General Remarks -->
+        <div id="remarksSection" class="hidden bg-white dark:bg-slate-800 rounded-3xl card-shadow border border-slate-100 p-6">
+          <div class="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
+            <span class="material-symbols-outlined text-secondary text-xl">notes</span>
+            <h3 class="font-extrabold text-slate-700 text-sm uppercase tracking-widest">General Remarks</h3>
+          </div>
+          <textarea id="generalRemarks" rows="3" placeholder="Enter any general remarks or observations..." class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm resize-none"></textarea>
+        </div>
+
+        <!-- Medical Technologist Info -->
+        <div class="bg-white dark:bg-slate-800 rounded-3xl card-shadow border border-slate-100 p-6">
+          <div class="flex items-center gap-2 mb-5 pb-3 border-b border-slate-100">
+            <span class="material-symbols-outlined text-secondary text-xl">badge</span>
+            <h3 class="font-extrabold text-slate-700 text-sm uppercase tracking-widest">Medical Technologist</h3>
+            <span class="ml-auto inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">
+              <span class="material-symbols-outlined text-[14px]">check_circle</span> Autofilled
+            </span>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Name</label>
+              <input type="text" id="formMedtech" readonly class="autofilled w-full px-4 py-3 rounded-xl border text-sm transition-all" />
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">License No.</label>
+              <input type="text" id="formMedtechLic" readonly class="autofilled w-full px-4 py-3 rounded-xl border text-sm transition-all" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div id="formActions" class="hidden flex gap-3 pb-2">
+          <button type="button" id="cancelAddModal" class="flex-1 px-6 py-3.5 rounded-2xl border-2 border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all">
+            Cancel
+          </button>
+          <button type="button" id="saveLabResult" class="flex-1 px-6 py-3.5 rounded-2xl bg-primary text-white font-extrabold hover:bg-[#054a37] transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/20">
+            <span class="material-symbols-outlined text-[18px]">save</span>
+            <span>Save Result</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- VIEW LAB RESULT MODAL                                   -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div id="viewLabModal" class="fixed inset-0 z-[1000] bg-black/60 hidden items-center justify-center p-4">
+    <div class="bg-[#F3F4F6] dark:bg-slate-900 rounded-3xl w-full max-w-4xl max-h-[95vh] overflow-y-auto shadow-2xl custom-scrollbar">
+      <div class="bg-white dark:bg-slate-800 px-8 py-5 border-b border-slate-100 sticky top-0 z-10 flex items-center gap-4 rounded-t-3xl">
+        <button id="closeViewModal" class="flex items-center justify-center w-9 h-9 rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-primary hover:border-primary hover:bg-brand-light transition-all shadow-sm shrink-0">
+          <span class="material-symbols-outlined text-xl">close</span>
+        </button>
+        <div class="flex-1">
+          <h2 id="viewModalTitle" class="text-xl font-extrabold tracking-tight text-slate-800 dark:text-white">Lab Result</h2>
+          <p class="text-slate-400 text-xs font-medium mt-0.5">Laboratory result details</p>
+        </div>
+        <button id="printResultBtn" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white font-bold text-sm hover:bg-[#054a37] transition-all shadow-md">
+          <span class="material-symbols-outlined text-[18px]">print</span>
+          Print
+        </button>
+      </div>
+      <div id="viewModalContent" class="p-8 space-y-4"></div>
+    </div>
+  </div>
+
+  <!-- NOTIFICATION DROPDOWN -->
+  <div id="notificationDropdown" class="fixed flex flex-col bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl overflow-hidden" style="display:none;top:88px;right:40px;width:400px;max-width:calc(100vw - 320px);max-height:500px;z-index:9999;">
+    <div class="px-5 py-4 border-b border-slate-100 flex justify-between items-center">
+      <h3 class="text-primary font-semibold text-lg m-0">Notifications</h3>
+      <button type="button" id="clearAllNotifications" class="bg-transparent border-none text-slate-500 cursor-pointer text-sm py-1 px-2 hover:text-slate-700">Clear All</button>
+    </div>
+    <div id="notificationList" class="max-h-[440px] overflow-y-auto p-3"><p class="text-center text-slate-400 py-5">No notifications</p></div>
+  </div>
+
+  
+  <script src="JS/header.js"></script>
+  <script src="JS/auto_refresh.js"></script>
+  <script>
+  // ════════════════════════════════════════════════════════════
+  // CLINICAL CHEMISTRY TEST DEFINITIONS
+  // ════════════════════════════════════════════════════════════
+  const CHEM_TESTS = [
+    {key:"fbs", label:"Fasting Blood Sugar",   siUnit:"mmol/L", siRef:"3.90 - 6.40",   convUnit:"mg/dL", convRef:"70.30 - 115.32",  factor:0.0555, op:"div"},
+    {key:"bun", label:"Blood Urea Nitrogen",    siUnit:"mmol/L", siRef:"2.50 - 7.50",   convUnit:"mg/dL", convRef:"7.00 - 21.00",    factor:0.357,  op:"div"},
+    {key:"crea",label:"Creatinine",              siUnit:"umol/L", siRef:"53.0 - 115.0",  convUnit:"mg/dL", convRef:"0.60 - 1.30",     factor:88.4,   op:"div"},
+    {key:"ua",  label:"Blood Uric Acid",         siUnit:"umol/L", siRef:"208 - 428",     convUnit:"mg/dL", convRef:"3.50 - 7.20",     factor:59.48,  op:"div"},
+    {key:"chol",label:"Total Cholesterol",       siUnit:"mmol/L", siRef:"3.23 - 5.20",   convUnit:"mg/dL", convRef:"125.00 - 200.00", factor:0.026,  op:"div"},
+    {key:"trig",label:"Triglycerides",            siUnit:"mmol/L", siRef:"0.40 - 1.52",   convUnit:"mg/dL", convRef:"35.43 - 134.62",  factor:88.57,  op:"mul"},
+    {key:"hdl", label:"HDL-Cholesterol",          siUnit:"mmol/L", siRef:"1.03 - 1.68",   convUnit:"mg/dL", convRef:"39.83 - 64.97",   factor:38.67,  op:"mul"},
+    {key:"ldl", label:"LDL-Cholesterol",          siUnit:"mmol/L", siRef:"0.20 - 3.37",   convUnit:"mg/dL", convRef:"7.73 - 130.32",   factor:38.67,  op:"mul", computed:true},
+    {key:"vldl",label:"VLDL-Cholesterol",         siUnit:"mmol/L", siRef:"0.18 - 0.69",   convUnit:"mg/dL", convRef:"6.92 - 26.54",    factor:0.026,  op:"div", computed:true},
+    {key:"sgot",label:"SGOT/AST",                 siUnit:"U/L",    siRef:"0 - 38",        convUnit:"U/L",   convRef:"0 - 38",          factor:1,      op:"same"},
+    {key:"sgpt",label:"SGPT/ALT",                 siUnit:"U/L",    siRef:"0 - 40",        convUnit:"U/L",   convRef:"0 - 40",          factor:1,      op:"same"},
+  ];
+
+  const TEST_LABELS = {UA:"Urinalysis",BT:"Blood Typing",PT:"Pregnancy Test",DVT:"Dengue Rapid Test",FA:"Fecalysis",SEROLOGY:"Serology (HBsAg/VDRL)",CHEM:"Clinical Chemistry"};
+  const TEST_ICONS  = {UA:"water_drop",BT:"bloodtype",PT:"pregnant_woman",DVT:"coronavirus",FA:"straighten",SEROLOGY:"vaccines",CHEM:"labs"};
+
+  let _patientId = "", _patientName = "", _patientAge = "", _patientSex = "",
+      _patientPhysician = "",
+      _currentTest = null, _viewResult = null;
+
+  // ════════════════════════════════════════════════════════════
+  // DOMContentLoaded
+  // ════════════════════════════════════════════════════════════
+  document.addEventListener("DOMContentLoaded", async () => {
+    buildChemTable();
+    checkAccess();
+
+    await initPatient();
+    setupRoleBasedUI();
+    autofillMedtech();
+    await loadLabResults();
+
+    document.getElementById("commonDate").value = new Date().toISOString().split("T")[0];
+
+    // Test tab switching
+    document.querySelectorAll(".test-tab").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".test-tab").forEach(b => b.classList.remove("tab-active"));
+        btn.classList.add("tab-active");
+        _currentTest = btn.dataset.test;
+        document.querySelectorAll(".form-section").forEach(s => s.classList.remove("active"));
+        document.getElementById("noTestSelected").style.display = "none";
+        document.getElementById("form-" + _currentTest)?.classList.add("active");
+        document.getElementById("remarksSection").classList.remove("hidden");
+        document.getElementById("formActions").classList.remove("hidden");
+      });
+    });
+
+    // Modal buttons
+    document.getElementById("addLabResultBtn")?.addEventListener("click",  openAddModal);
+    document.getElementById("closeAddModal")?.addEventListener("click",    closeAddModal);
+    document.getElementById("cancelAddModal")?.addEventListener("click",   closeAddModal);
+    document.getElementById("saveLabResult")?.addEventListener("click",    saveLabResult);
+    document.getElementById("closeViewModal")?.addEventListener("click",   closeViewModal);
+    document.getElementById("printResultBtn")?.addEventListener("click",   printCurrentResult);
+
+    // Notification bell
+    (function() {
+      const bell = document.getElementById("notificationBell");
+      const drop = document.getElementById("notificationDropdown");
+      if (!bell || !drop) return;
+      bell.addEventListener("click", e => {
+        e.preventDefault(); e.stopPropagation();
+        const show = drop.style.display !== "flex";
+        drop.style.display = show ? "flex" : "none";
+        if (show && typeof loadNotifications === "function") loadNotifications();
+      });
+      document.addEventListener("click", e => {
+        if (!bell.contains(e.target) && !drop.contains(e.target)) drop.style.display = "none";
+      });
+    })();
+
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape") { closeAddModal(); closeViewModal(); }
+    });
+  });
+
+  // ════════════════════════════════════════════════════════════
+  // ACCESS CONTROL
+  // ════════════════════════════════════════════════════════════
+  function checkAccess() {
+    const r = sessionStorage.getItem("role");
+    if (r !== "Doctor" && r !== "Medtech") {
+      alert("Access Denied: Only doctors and medical technologists can view this page.");
+      window.location.href = "PatientInfo.html" + window.location.search;
+    }
+  }
+
+  // ════════════════════════════════════════════════════════════
+  // ROLE-BASED UI (only Medtech sees Add button)
+  // ════════════════════════════════════════════════════════════
+  function setupRoleBasedUI() {
+    if (sessionStorage.getItem("role") === "Medtech") {
+      const b = document.getElementById("addLabResultBtn");
+      b?.classList.remove("hidden");
+      b?.classList.add("inline-flex");
+    }
+  }
+
+  // ════════════════════════════════════════════════════════════
+  // PATIENT INIT
+  // ════════════════════════════════════════════════════════════
+  async function initPatient() {
+    const params = new URLSearchParams(window.location.search);
+    _patientId = params.get("patientId") || "";
+    if (!_patientId) return;
+
+    ["nav-personal","nav-prescription","nav-allergies","nav-vitals","nav-lab"].forEach(id => {
+      const a = document.getElementById(id);
+      if (!a) return;
+      const h = a.getAttribute("href");
+      if (h && !h.includes("?patientId=")) a.setAttribute("href", h + "?patientId=" + _patientId);
+    });
+
+    try {
+      const res = await fetch("http://localhost:5000/api/patients/" + _patientId);
+      if (!res.ok) return;
+      const p = await res.json();
+      _patientName = ((p.firstname || "") + " " + (p.lastname || "")).trim();
+      _patientAge  = p.age || "";
+      _patientSex  = p.sex || p.gender || "";
+
+      _patientPhysician = p.physician
+        || p.requestingPhysician
+        || p.assignedDoctor
+        || p.doctor
+        || p.attendingPhysician
+        || "";
+
+      const subtitle = document.getElementById("patientSubtitle");
+      if (subtitle) subtitle.textContent = _patientName;
+    } catch (_) {}
+  }
+
+  // ════════════════════════════════════════════════════════════
+  // ✅ FIX: AUTOFILL — Medtech name/license + Physician field
+  //
+  //   Priority order for Requesting Physician:
+  //   1. If role is Doctor  → use logged-in doctor's own name
+  //   2. If role is Medtech → patient record → notification data (pendingPhysician)
+  //   3. Fallback           → leave blank
+  // ════════════════════════════════════════════════════════════
+  function autofillMedtech() {
+    const name = sessionStorage.getItem("name")
+               || sessionStorage.getItem("fullName")
+               || sessionStorage.getItem("rf_physicianName")
+               || "";
+    const lic  = sessionStorage.getItem("licenseNo")
+               || sessionStorage.getItem("prcLicense")
+               || sessionStorage.getItem("licNo")
+               || "";
+    const role = sessionStorage.getItem("role");
+
+    // Autofill Medtech name & license
+    const el1 = document.getElementById("formMedtech");
+    const el2 = document.getElementById("formMedtechLic");
+    if (el1) el1.value = name;
+    if (el2) el2.value = lic ? "PRC Lic.#" + lic : "";
+
+    // Autofill Requesting Physician
+    const physicianEl    = document.getElementById("commonPhysician");
+    const physicianBadge = document.getElementById("physicianAutofillBadge");
+
+    if (!physicianEl) return;
+
+    let drName = "";
+
+    if (role === "Doctor" && name) {
+      // Logged-in user IS the doctor — use their own name
+      drName = name.toLowerCase().startsWith("dr.") ? name : "Dr. " + name;
+
+    } else if (role === "Medtech") {
+      // ✅ FIX: Priority → patient record first, then notification data (pendingPhysician)
+      const source = _patientPhysician
+        || sessionStorage.getItem("pendingPhysician")
+        || "";
+      if (source) {
+        drName = source.toLowerCase().startsWith("dr.")
+          ? source
+          : "Dr. " + source;
+      }
+    }
+
+    if (drName) {
+      physicianEl.value = drName;
+      physicianEl.classList.add("autofilled");
+      if (physicianBadge) {
+        physicianBadge.classList.remove("hidden");
+        physicianBadge.classList.add("inline-flex");
+      }
+    } else {
+      // No physician found — clear any stale autofill state
+      physicianEl.classList.remove("autofilled");
+      if (physicianBadge) {
+        physicianBadge.classList.add("hidden");
+        physicianBadge.classList.remove("inline-flex");
+      }
+    }
+  }
+
+  // ════════════════════════════════════════════════════════════
+  // BUILD CHEMISTRY TABLE
+  // ════════════════════════════════════════════════════════════
+  function buildChemTable() {
+    const tb = document.getElementById("chemTableBody");
+    if (!tb) return;
+    CHEM_TESTS.forEach(t => {
+      const tr = document.createElement("tr");
+      tr.className = "hover:bg-slate-50 transition-colors";
+      tr.innerHTML = `
+        <td class="py-3 pr-4 font-semibold text-slate-700 text-sm">${t.label}</td>
+        <td class="py-3 px-2 text-center">
+          ${t.computed
+            ? `<span id="si_${t.key}" class="text-primary font-bold text-xs italic px-3 py-1 bg-emerald-50 rounded-lg">auto</span>`
+            : `<input type="number" step="0.01" id="si_${t.key}" oninput="computeChem()" class="w-24 px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-sm text-center font-medium" />`
+          }
+        </td>
+        <td class="py-3 px-2 text-center text-xs text-slate-400 font-medium">${t.siUnit}</td>
+        <td class="py-3 px-2 text-center text-xs text-slate-400">${t.siRef}</td>
+        <td class="py-3 px-2 text-center"><span id="conv_${t.key}" class="font-extrabold text-secondary text-sm">—</span></td>
+        <td class="py-3 px-2 text-center text-xs text-slate-400 font-medium">${t.convUnit}</td>
+        <td class="py-3 px-2 text-center text-xs text-slate-400">${t.convRef}</td>`;
+      tb.appendChild(tr);
+    });
+  }
+
+  function computeChem() {
+    const g  = k => parseFloat(document.getElementById("si_" + k)?.value) || null;
+    const sc = (k, v) => { const e = document.getElementById("conv_" + k); if (e) e.textContent = v !== null && !isNaN(v) ? v.toFixed(2) : "—"; };
+    const ss = (k, v) => { const e = document.getElementById("si_" + k); if (e && e.tagName === "SPAN") e.textContent = v !== null && !isNaN(v) ? v.toFixed(4) : "auto"; };
+
+    CHEM_TESTS.forEach(t => {
+      if (t.computed) return;
+      const si = g(t.key);
+      if (si === null) { sc(t.key, null); return; }
+      sc(t.key, t.op === "div" ? si / t.factor : t.op === "mul" ? si * t.factor : si);
+    });
+
+    const chol = g("chol"), hdl = g("hdl"), trig = g("trig");
+    const vldl = trig !== null ? trig / 2.2 : null;
+    ss("vldl", vldl); sc("vldl", vldl !== null ? vldl / 0.026 : null);
+    const ldl = (chol !== null && hdl !== null && vldl !== null) ? chol - hdl - vldl : null;
+    ss("ldl", ldl); sc("ldl", ldl !== null ? ldl * 38.67 : null);
+  }
+
+  // ════════════════════════════════════════════════════════════
+  // LOAD LAB RESULTS
+  // ════════════════════════════════════════════════════════════
+  async function loadLabResults() {
+  if (!_patientId) {
+    _patientId = new URLSearchParams(window.location.search).get("patientId") || "";
+    if (!_patientId) return;
+  }
+ 
+  const loading = document.getElementById("loadingState");
+  const empty   = document.getElementById("emptyState");
+  const grid    = document.getElementById("labResultsGrid");
+ 
+  // ✅ Use style.display exclusively — no classList toggling
+  loading.style.display = "flex";
+  empty.style.display   = "none";   // ← was: empty.classList.add("hidden")
+  grid.style.display    = "none";   // ← was: grid.classList.add("hidden")
+  grid.innerHTML = "";
+ 
+  try {
+    const res  = await fetch("http://localhost:5000/api/lab-results/patient/" + _patientId);
+    if (!res.ok) throw new Error(res.status);
+    const raw  = await res.json();
+    const list = Array.isArray(raw) ? raw : (raw.results || raw.data || []);
+ 
+    loading.style.display = "none";
+ 
+    if (!list.length) {
+      empty.style.display = "flex";  // ← was: empty.classList.remove("hidden") + style.display="flex"
+      return;
+    }
+ 
+    // ✅ Show grid using style.display — overrides any previous state cleanly
+    grid.style.display = "grid";    // ← was: grid.classList.remove("hidden")
+ 
+    list.forEach(r => {
+      const d = document.createElement("div");
+      d.innerHTML = buildCard(r);
+      d.firstElementChild.querySelector(".view-btn")
+        ?.addEventListener("click", () => openViewModal(r));
+      grid.appendChild(d.firstElementChild);
+    });
+ 
+  } catch (err) {
+    loading.style.display = "none";
+    grid.style.display    = "grid";
+    grid.innerHTML = `
+      <div class="col-span-full bg-white rounded-3xl border border-red-100 p-10 flex flex-col items-center gap-3">
+        <div class="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center">
+          <i class="fa-solid fa-exclamation-triangle text-3xl text-red-400"></i>
+        </div>
+        <p class="font-extrabold text-slate-700">Error Loading Results</p>
+        <button onclick="loadLabResults()" class="px-5 py-2 bg-primary text-white font-bold rounded-2xl text-sm hover:bg-[#054a37]">
+          <span class="material-symbols-outlined text-sm">refresh</span> Retry
+        </button>
+      </div>`;
+  }
+}
+
+  function buildCard(r) {
+  // ✅ Detect uploaded file by fileName only (fileData absent in list API)
+  const isUploadedFile = !!r.fileName;
+ 
+  // ✅ Always prefer testName; fall back to TEST_LABELS for structured tests
+  const label = r.testName
+    || TEST_LABELS[r.testType]
+    || r.testType
+    || "Lab Result";
+ 
+  const type = r.testType || "UA";
+  const icon = TEST_ICONS[type] || "science";
+ 
+  // ✅ For uploaded files, use a document icon
+  const displayIcon = isUploadedFile ? "description" : icon;
+  
+  const date = r.uploadDate || r.createdAt || r.testDate;
+  const fd = date ? new Date(date).toLocaleDateString("en-US", {
+    year: "numeric", 
+    month: "short", 
+    day: "numeric", 
+    hour: "2-digit", 
+    minute: "2-digit"
+  }) : "—";
+  
+  return `
+    <div class="result-card bg-white dark:bg-slate-800 rounded-3xl border-2 border-slate-100 dark:border-slate-700 p-5 transition-all duration-200">
+      <div class="flex items-start gap-3 mb-4">
+        <div class="w-12 h-12 rounded-2xl ${isUploadedFile ? 'bg-blue-50' : 'bg-brand-light'} flex items-center justify-center shrink-0">
+          <span class="material-symbols-outlined ${isUploadedFile ? 'text-blue-600' : 'text-primary'} text-2xl">${displayIcon}</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <h3 class="font-extrabold text-slate-800 dark:text-slate-100 text-sm">${escapeHtml(label)}</h3>
+          <p class="text-xs text-slate-400 mt-1 font-medium">
+            <i class="fa-solid fa-calendar-alt mr-1 text-primary/60"></i>${fd}
+          </p>
+          ${isUploadedFile ? `
+          <div class="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 border border-blue-100">
+            <span class="material-symbols-outlined text-blue-600 text-xs">attach_file</span>
+            <span class="text-[10px] font-bold text-blue-600">Uploaded File</span>
+          </div>
+          ` : ''}
+        </div>
+      </div>
+      <div class="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-700">
+        <div class="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
+          <i class="fa-solid fa-user-nurse text-primary/60"></i>
+          <span class="truncate max-w-[120px]">${escapeHtml(r.uploadedBy || "Medical Technologist")}</span>
+        </div>
+        <button class="view-btn inline-flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-primary text-white text-xs font-extrabold hover:bg-[#054a37] transition-all shadow-md shadow-primary/10">
+          <span class="material-symbols-outlined text-[14px]">visibility</span>View
+        </button>
+      </div>
+    </div>`;
+}
+
+  // ════════════════════════════════════════════════════════════
+  // ✅ FIX: OPEN / CLOSE MODALS
+  // ════════════════════════════════════════════════════════════
+  function openAddModal() {
+    const m = document.getElementById("addLabModal");
+    m.classList.remove("hidden");
+    m.classList.add("flex");
+
+    // Set static fields first
+    document.getElementById("formPatientName").value   = _patientName;
+    document.getElementById("formPatientAgeSex").value = _patientAge + (_patientAge && _patientSex ? " / " : "") + _patientSex;
+    document.getElementById("commonDate").value        = new Date().toISOString().split("T")[0];
+
+    // ✅ FIX: autofillMedtech() runs AFTER fields are set so pendingPhysician is read correctly
+    autofillMedtech();
+
+    // ✅ FIX: Clear pendingPhysician after use so it doesn't carry over to other patients
+    sessionStorage.removeItem("pendingPhysician");
+  }
+
+  function closeAddModal() {
+    const m = document.getElementById("addLabModal");
+    m.classList.add("hidden");
+    m.classList.remove("flex");
+
+    document.querySelectorAll(".test-tab").forEach(b => b.classList.remove("tab-active"));
+    document.querySelectorAll(".form-section").forEach(s => s.classList.remove("active"));
+    document.getElementById("noTestSelected").style.display = "";
+    document.getElementById("remarksSection").classList.add("hidden");
+    document.getElementById("formActions").classList.add("hidden");
+    _currentTest = null;
+
+    // Reset all inputs
+    m.querySelectorAll("input:not([readonly]), select, textarea").forEach(el => {
+      if (el.type === "checkbox") el.checked = (el.id === "fa_noParasite");
+      else if (el.id !== "commonDate") el.value = "";
+    });
+    document.getElementById("commonDate").value = new Date().toISOString().split("T")[0];
+
+    // Reset physician autofill badge
+    const badge = document.getElementById("physicianAutofillBadge");
+    badge?.classList.add("hidden");
+    badge?.classList.remove("inline-flex");
+    document.getElementById("commonPhysician")?.classList.remove("autofilled");
+
+    // Reset chem computed cells
+    document.querySelectorAll("[id^='conv_'],[id^='si_']").forEach(el => {
+      if (el.tagName === "SPAN") el.textContent = el.id.startsWith("si_") ? "auto" : "—";
+    });
+  }
+
+  function openViewModal(result) {
+  const modal   = document.getElementById("viewLabModal");
+  const content = document.getElementById("viewModalContent");
+  document.getElementById("viewModalTitle").textContent =
+    TEST_LABELS[result.testType] || result.testName || "Lab Result";
+  modal.classList.remove("hidden");
+  modal.classList.add("flex");
+  content.innerHTML = '<div class="flex items-center justify-center py-12"><div class="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div></div>';
+
+    const isUploadedFile = !!result.fileName;
+  const hasTestData    = result.testData && Object.keys(result.testData).length > 0;
+ 
+  if (isUploadedFile || hasTestData) {
+    // Render immediately — no fetch needed
+    _viewResult = result;
+    content.innerHTML = buildViewHTML(result);
+    _applyPrintBtnState(result);
+    return;
+  }
+ 
+  // Structured test without testData yet — fetch full record
+  fetch("http://localhost:5000/api/lab-results/" + (result.id || result._id))
+    .then(r => r.ok ? r.json() : Promise.reject())
+    .then(full => { result = full; })
+    .catch(() => {})
+    .finally(() => {
+      _viewResult = result;
+      content.innerHTML = buildViewHTML(result);
+      _applyPrintBtnState(result);
+    });
+}
+ 
+// ✅ Helper — centralise print button state logic
+function _applyPrintBtnState(result) {
+  const printBtn = document.getElementById("printResultBtn");
+  if (!printBtn) return;
+  if (!!result.fileName) {
+    printBtn.disabled = true;
+    printBtn.classList.add("opacity-40", "cursor-not-allowed");
+    printBtn.classList.remove("hover:bg-[#054a37]");
+    printBtn.title = "Print is not available for uploaded files";
+  } else {
+    printBtn.disabled = false;
+    printBtn.classList.remove("opacity-40", "cursor-not-allowed");
+    printBtn.classList.add("hover:bg-[#054a37]");
+    printBtn.title = "";
+  }
+}
+
+  function closeViewModal() {
+    const m = document.getElementById("viewLabModal");
+    m.classList.add("hidden");
+    m.classList.remove("flex");
+    document.getElementById("viewModalContent").innerHTML = "";
+    _viewResult = null;
+    // ✅ Reset print button state
+    const printBtn = document.getElementById("printResultBtn");
+    if (printBtn) {
+      printBtn.disabled = false;
+      printBtn.classList.remove("opacity-40", "cursor-not-allowed");
+      printBtn.classList.add("hover:bg-[#054a37]");
+      printBtn.title = "";
+    }
+  }
+
+  // ════════════════════════════════════════════════════════════
+  // COLLECT FORM DATA
+  // ════════════════════════════════════════════════════════════
+  function collectFormData() {
+    const v  = id => document.getElementById(id)?.value?.trim() || "";
+    const vc = id => document.getElementById(id)?.checked;
+    switch (_currentTest) {
+      case "UA":
+        return {color:v("ua_color"),transparency:v("ua_transparency"),specificGravity:v("ua_sg"),ph:v("ua_ph"),glucose:v("ua_glucose"),protein:v("ua_protein"),blood:v("ua_blood"),ketone:v("ua_ketone"),nitrite:v("ua_nitrite"),urobilinogen:v("ua_urobilinogen"),wbc:v("ua_wbc"),rbc:v("ua_rbc"),epithelialCells:v("ua_epithelial"),bacteria:v("ua_bacteria"),renalCells:v("ua_renal"),crystals:v("ua_crystals"),mucusThreads:v("ua_mucus"),amorphousType:v("ua_amorphous_type"),amorphousResult:v("ua_amorphous_result"),others:v("ua_others")};
+      case "BT":
+        return {bloodType:v("bt_type"),rhFactor:v("bt_rh"),method:v("bt_method")};
+      case "PT":
+        return {result:v("pt_result")};
+      case "DVT":
+        return {ns1:v("dvt_ns1"),igg:v("dvt_igg"),igm:v("dvt_igm")};
+      case "FA":
+        return {consistency:v("fa_consistency"),color:v("fa_color"),occultBlood:v("fa_occult"),ovaParasite:v("fa_ova"),fatGlobules:v("fa_fat"),others:v("fa_others"),pusCells:v("fa_pus"),rbc:v("fa_rbc"),noIntestinalParasite:vc("fa_noParasite")};
+      case "SEROLOGY":
+        return {hbsag:v("sero_hbsag"),vdrl:v("sero_vdrl")};
+      case "CHEM": {
+        const tests = {};
+        CHEM_TESTS.forEach(t => {
+          const se = document.getElementById("si_" + t.key);
+          tests[t.key] = {siResult:se?(se.tagName==="INPUT"?se.value:se.textContent):"",convResult:document.getElementById("conv_"+t.key)?.textContent||"—",siUnit:t.siUnit,convUnit:t.convUnit,siRef:t.siRef,convRef:t.convRef,label:t.label};
+        });
+        return {tests, remarks: v("chem_remarks")};
+      }
+      default: return {};
+    }
+  }
+
+  // ════════════════════════════════════════════════════════════
+  // SAVE LAB RESULT
+  // ════════════════════════════════════════════════════════════
+  async function saveLabResult() {
+    if (!_currentTest) { alert("Please select a test type first."); return; }
+    const date = document.getElementById("commonDate").value;
+    if (!date) { alert("Please enter the date."); return; }
+
+    const payload = {
+      patientId:    _patientId,
+      patientName:  _patientName,
+      testType:     _currentTest,
+      testName:     TEST_LABELS[_currentTest],
+      testDate:     date,
+      physician:    document.getElementById("commonPhysician").value.trim(),
+      remarks:      document.getElementById("generalRemarks")?.value?.trim() || "",
+      testData:     collectFormData(),
+      uploadedBy:   document.getElementById("formMedtech")?.value || sessionStorage.getItem("name") || "Medical Technologist",
+      uploadedById: sessionStorage.getItem("userId") || "",
+    };
+
+    const btn = document.getElementById("saveLabResult");
+    btn.disabled = true;
+    btn.innerHTML = '<span class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span><span>Saving...</span>';
+
+    try {
+      const res = await fetch("http://localhost:5000/api/lab-results/upload", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).message || "Save failed.");
+      alert("Lab result saved successfully!");
+      const pendingRequestId = sessionStorage.getItem('pendingRequestId');
+    
+    if (pendingRequestId) {
+      try {
+        console.log('🔄 Marking request as completed:', pendingRequestId);
+        
+        const completeRes = await fetch(
+          `http://localhost:5000/api/request-forms/${pendingRequestId}/complete`,
+          {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              completedBy: sessionStorage.getItem('name') || 'Medical Technologist'
+            })
+          }
+        );
+        
+        if (completeRes.ok) {
+          const result = await completeRes.json();
+          console.log('✅ Request marked as completed:', result);
+        } else {
+          console.warn('⚠️ Failed to mark request as completed:', completeRes.status);
+        }
+      } catch (completeErr) {
+        console.error('❌ Error marking request complete:', completeErr);
+        // Don't show error to user - lab result was still saved successfully
+      }
+      
+      // Clean up session storage
+      sessionStorage.removeItem('pendingRequestId');
+      sessionStorage.removeItem('pendingPhysician');
+    }
+      closeAddModal();
+      await loadLabResults();
+    } catch (err) {
+      alert("Failed to save: " + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">save</span><span>Save Result</span>';
+    }
+  }
+
+  // ════════════════════════════════════════════════════════════
+  // BUILD VIEW HTML
+  // ════════════════════════════════════════════════════════════
+  function buildViewHTML(r) {
+  const H = s => escapeHtml(s || "");
+  const date = r.testDate ? new Date(r.testDate).toLocaleDateString("en-PH", {year:"numeric", month:"long", day:"numeric"}) : "—";
+  
+  // ✅ Check if this is an uploaded file (has fileName field)
+  const isUploadedFile = !!r.fileName;
+  
+  let html = `
+    <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 p-5 grid grid-cols-2 gap-3">
+      <div><p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-0.5">Patient</p><p class="font-extrabold text-slate-800 text-sm">${H(r.patientName || _patientName)}</p></div>
+      <div><p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-0.5">Test</p><p class="font-extrabold text-slate-800 text-sm">${H(r.testName)}</p></div>
+      <div><p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-0.5">Date</p><p class="font-extrabold text-slate-800 text-sm">${H(date)}</p></div>
+      <div><p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-0.5">Requesting Physician</p><p class="font-extrabold text-slate-800 text-sm">${H(r.physician) || "—"}</p></div>
+    </div>`;
+  
+  // ✅ IF UPLOADED FILE: Show file info instead of test data
+  if (isUploadedFile) {
+    html += `
+      <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 p-6">
+        <div class="flex items-center gap-4 mb-6">
+          <div class="w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined text-4xl text-blue-600">description</span>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-1">Uploaded Document</h3>
+            <p class="text-sm text-slate-500">This lab result was uploaded as a file</p>
+          </div>
+        </div>
+        
+        <div class="bg-slate-50 dark:bg-slate-700 rounded-2xl p-5 space-y-3">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-600">
+            <div class="flex items-center gap-3">
+              <span class="material-symbols-outlined text-2xl text-primary">attach_file</span>
+              <div>
+                <p class="font-bold text-slate-800 dark:text-white text-sm">${H(r.fileName)}</p>
+                <p class="text-xs text-slate-400 mt-0.5">File Type: ${H(getFileTypeName(r.fileType))}</p>
+              </div>
+            </div>
+            <button onclick="viewUploadedFile('${r._id || r.id}', '${r.fileType || ''}')" ...>
+  <span class="material-symbols-outlined text-lg">open_in_new</span>
+  View
+</button>
+          </div>
+          
+          ${r.notes ? `
+          <div class="pt-2">
+            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Notes</p>
+            <p class="text-sm text-slate-700 dark:text-slate-300">${H(r.notes)}</p>
+          </div>
+          ` : ''}
+        </div>
+        
+        <div class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800">
+          <div class="flex items-start gap-3">
+            <span class="material-symbols-outlined text-blue-600 text-xl">info</span>
+            <div class="flex-1">
+              <p class="text-xs font-bold text-blue-800 dark:text-blue-300 mb-1">About Uploaded Files</p>
+              <p class="text-xs text-blue-600 dark:text-blue-400">This document was uploaded from an external source. Click the view button above to view the full file.</p>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  } else {
+    // ✅ IF STRUCTURED TEST: Show test data as before
+    html += `
+      <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 overflow-hidden">
+        ${buildTestView(r.testType, r.testData || {})}
+      </div>`;
+  }
+  
+  if (r.remarks) {
+    html += `<div class="bg-amber-50 rounded-3xl border border-amber-200 p-5"><p class="text-[10px] font-extrabold text-amber-600 uppercase tracking-widest mb-1">Remarks</p><p class="text-sm font-semibold text-slate-700">${H(r.remarks)}</p></div>`;
+  }
+  
+  html += `
+    <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 p-5 flex justify-between">
+      <div class="text-center min-w-[160px]"><div class="h-8"></div><div class="border-t border-slate-400 pt-2"><p class="font-extrabold text-slate-800 text-xs">${H(r.uploadedBy || "Medical Technologist")}</p><p class="text-[10px] text-slate-400">Medical Technologist, PRC Lic.#0130020</p></div></div>
+      <div class="text-center min-w-[180px]"><div class="h-8"></div><div class="border-t border-slate-400 pt-2"><p class="font-extrabold text-slate-800 text-xs">HORACIO A. SAGUIL, JR. MD, FPSP</p><p class="text-[10px] text-slate-400">Pathologist, Lic.#: 0103226</p></div></div>
+    </div>`;
+  
+  return html;
+}
+ 
+// ✅ NEW: Helper function to get file type display name
+function getFileTypeName(fileType) {
+  if (!fileType) return "Document";
+  
+  const typeMap = {
+    "application/pdf": "PDF Document",
+    "application/msword": "Word Document (.doc)",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "Word Document (.docx)",
+    "application/vnd.ms-excel": "Excel Spreadsheet (.xls)",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "Excel Spreadsheet (.xlsx)",
+    "image/png":  "PNG Image",
+    "image/jpeg": "JPEG Image",
+    "image/jpg":  "JPEG Image"
+  };
+  
+  return typeMap[fileType] || "Document";
+}
+ 
+async function viewUploadedFile(resultId, fileType) {
+  if (!resultId) {
+    alert("Cannot open file: Invalid result ID");
+    return;
+  }
+ 
+  try {
+    const res = await fetch(`http://localhost:5000/api/lab-results/${resultId}`);
+    if (!res.ok) throw new Error("Failed to fetch result");
+ 
+    const result = await res.json();
+ 
+    if (!result.fileData || !result.fileName) {
+      alert("This result does not have an attached file.");
+      return;
+    }
+ 
+    // Convert base64 → Blob
+    const byteCharacters = atob(result.fileData);
+    const byteArray = new Uint8Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteArray[i] = byteCharacters.charCodeAt(i);
+    }
+    const mimeType = result.fileType || fileType || "application/octet-stream";
+    const blob = new Blob([byteArray], { type: mimeType });
+    const url  = window.URL.createObjectURL(blob);
+ 
+    // ✅ FIX: Check if it's a PDF
+    const isPdf = mimeType === "application/pdf" || result.fileName.toLowerCase().endsWith(".pdf");
+    
+    // ✅ FIX: Check if it's an image (PNG, JPG, JPEG, GIF, WEBP)
+    const isImage = mimeType.startsWith("image/") || 
+                    result.fileName.toLowerCase().match(/\.(png|jpg|jpeg|gif|webp)$/);
+ 
+    if (isPdf || isImage) {
+      // ✅ FIX: Open PDF or IMAGE in a new tab for inline viewing
+      const win = window.open(url, "_blank");
+      if (!win) {
+        alert("Pop-up blocked. Please allow pop-ups and try again.");
+      }
+      // Revoke after a short delay so the tab has time to load
+      setTimeout(() => window.URL.revokeObjectURL(url), 10000);
+    } else {
+      // DOCX / XLSX cannot render in-browser — download instead and inform user
+      alert("ℹ️ This file type (" + result.fileName.split(".").pop().toUpperCase() + ") cannot be previewed in the browser and will be downloaded instead.");
+      const a = document.createElement("a");
+      a.style.display = "none";
+      a.href = url;
+      a.download = result.fileName;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      }, 1000);
+    }
+ 
+  } catch (err) {
+    console.error("View file error:", err);
+    alert("Failed to open file: " + err.message);
+  }
+}
+  // ════════════════════════════════════════════════════════════
+  // PRINT
+  // ════════════════════════════════════════════════════════════
+  function printCurrentResult() {
+    if (!_viewResult) return;
+    const r    = _viewResult;
+    const H    = s => escapeHtml(s || "");
+    const win  = window.open("", "_blank", "width=900,height=1200");
+    if (!win) { alert("Pop-up blocked. Please allow pop-ups and try again."); return; }
+    const date = r.testDate ? new Date(r.testDate).toLocaleDateString("en-PH",{year:"numeric",month:"long",day:"numeric"}) : "—";
+
+    win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"/><title>Lab Result - ${H(TEST_LABELS[r.testType]||r.testType)}</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Plus Jakarta Sans',Arial,sans-serif;background:#fff;padding:24px 32px;color:#111;font-size:11px;}
+@media print{body{padding:10mm 12mm;}@page{margin:0;size:A4 portrait;}}
+.clinic-header{text-align:center;border-bottom:3px solid #065f46;padding-bottom:10px;margin-bottom:14px;}
+.logo-center{display:flex;flex-direction:column;align-items:center;gap:4px;}
+.logo-inner{display:flex;align-items:center;justify-content:center;gap:10px;}
+.logo-img{width:56px;height:56px;border-radius:50%;border:3px solid #065f46;object-fit:cover;flex-shrink:0;box-shadow:0 2px 8px rgba(6,95,70,0.15);}
+.clinic-text{text-align:center;}
+.clinic-name{font-size:18px;font-weight:900;color:#065f46;letter-spacing:4px;font-family:"Arial Black",Arial,sans-serif;}
+.clinic-sub{font-size:8px;font-weight:700;color:#064e3b;text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.clinic-svc{font-size:7.5px;color:#8B5A2B;margin-top:3px;line-height:1.6;}
+.clinic-addr-row{font-size:7.5px;color:#6b7280;margin-top:4px;font-style:italic;}
+.clinic-doh{font-size:8px;font-weight:800;color:#065f46;margin-top:2px;letter-spacing:1px;}
+.info-strip{display:grid;grid-template-columns:1fr 1fr;gap:4px 20px;border:1px solid #d1fae5;border-radius:6px;padding:8px 12px;background:#f0fdf4;margin-bottom:12px;}
+.info-label{font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#6b7280;}
+.info-value{font-size:11px;font-weight:700;color:#111;}
+.test-title{text-align:center;font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:#065f46;padding:5px;margin:0 0 12px;}
+table{width:100%;border-collapse:collapse;margin-bottom:10px;}
+.sec{background:#f0fdf4;color:#065f46;font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;padding:5px 10px;text-align:left;border-bottom:1px solid #d1fae5;}
+.rl{width:50%;padding:5px 10px;font-size:10px;color:#6b7280;border-bottom:1px solid #f1f5f9;}
+.rv{padding:5px 10px;font-size:11px;font-weight:700;color:#065f46;border-bottom:1px solid #f1f5f9;}
+.cth{background:#f0fdf4;color:#374151;font-size:8px;font-weight:700;text-transform:uppercase;padding:4px 6px;text-align:center;border:1px solid #e2e8f0;}.cth:first-child{text-align:left;}
+.ctd{padding:4px 6px;border:1px solid #e2e8f0;font-size:10px;}.ctd.c{text-align:center;}.cconv{font-weight:800;color:#8B5A2B;}.csi{font-weight:800;color:#065f46;}
+.remarks-box{border:1px solid #e2e8f0;border-radius:4px;padding:6px 10px;font-size:10px;color:#374151;margin-top:8px;}
+.footer-row{display:flex;justify-content:space-between;margin-top:16px;}
+.sig-block{text-align:center;min-width:180px;}
+.sig-line{border-top:1.5px solid #374151;margin-bottom:4px;}
+.sig-name{font-size:11px;font-weight:700;}
+.sig-title{font-size:8.5px;color:#6b7280;}
+.print-footer{text-align:center;margin-top:12px;font-style:italic;font-size:9px;color:#6b7280;border-top:1px solid #e2e8f0;padding-top:8px;}
+</style></head><body>
+<div class="clinic-header">
+  <div class="logo-center">
+    <div class="logo-inner">
+      <img src="../user/Assets/wellserved_logo.jpg" alt="WellServed" class="logo-img" />
+      <div class="clinic-text">
+        <div class="clinic-name">WELLSERVED</div>
+        <div class="clinic-sub">INFIRMARY &amp; DRUGSTORE INC.</div>
+        <div class="clinic-svc">&bull; MEDICAL &nbsp;&bull; PEDIA &nbsp;&bull; OB GYNE &nbsp;&bull; MINOR SURGERY<br>&bull; X-RAY &nbsp;&bull; ECG &nbsp;&bull; LABORATORY &nbsp;&bull; ULTRASOUND &nbsp;&bull; DRUGSTORE</div>
+      </div>
+    </div>
+    <div class="clinic-addr-row">
+      📍 #26 Steve St. cor Villiongco St., Brgy. Commonwealth, Quezon City &nbsp;|&nbsp; Tel: 8 952-77-79 / 514-3869 &nbsp;|&nbsp; 📧 drtiga@yahoo.com
+    </div>
+    <div class="clinic-doh">DOH LICENSE: 13-1576-17-CL-2</div>
+  </div>
+</div>
+<div class="test-title">${H(TEST_LABELS[r.testType]||r.testType)}</div>
+<div class="info-strip">
+  <div><div class="info-label">Patient</div><div class="info-value">${H(r.patientName||_patientName)}</div></div>
+  <div><div class="info-label">Test</div><div class="info-value">${H(TEST_LABELS[r.testType]||r.testType)}</div></div>
+  <div><div class="info-label">Date</div><div class="info-value">${H(date)}</div></div>
+  <div><div class="info-label">Requesting Physician</div><div class="info-value">${H(r.physician)||"—"}</div></div>
+</div>
+${buildPrintTable(r.testType, r.testData||{})}
+${r.remarks?`<div class="remarks-box"><strong>Remarks:</strong> ${H(r.remarks)}</div>`:""}
+<div class="footer-row">
+  <div class="sig-block"><div style="height:32px;"></div><div class="sig-line"></div><div class="sig-name">${H(r.uploadedBy||"Medical Technologist")}</div><div class="sig-title">Medical Technologist, PRC Lic.#0130020</div></div>
+  <div class="sig-block"><div style="height:32px;"></div><div class="sig-line"></div><div class="sig-name">HORACIO A. SAGUIL, JR. MD, FPSP</div><div class="sig-title">Pathologist, Lic.#: 0103226</div></div>
+</div>
+<p class="print-footer">"PLEASE FORWARD RESULT DIRECTLY TO YOUR PHYSICIAN"</p>
+</body></html>`);
+    win.document.close();
+    win.focus();
+    setTimeout(() => win.print(), 600);
+  }
+
+  function buildPrintTable(type, d) {
+    const H   = s => escapeHtml(s || "");
+    const row = (l, v) => `<tr><td class="rl">${H(l)}</td><td class="rv">${H(v)||"—"}</td></tr>`;
+    const sec = l => `<tr><th colspan="2" class="sec">${l}</th></tr>`;
+    switch (type) {
+      case "UA": return `<table>${sec("Macroscopic Examination")}${row("Color",d.color)}${row("Transparency",d.transparency)}${row("Specific Gravity",d.specificGravity)}${sec("Chemical Analysis")}${row("pH",d.ph)}${row("Glucose",d.glucose)}${row("Protein",d.protein)}${row("Blood",d.blood)}${row("Ketone",d.ketone)}${row("Nitrite",d.nitrite)}${row("Urobilinogen",d.urobilinogen)}${sec("Microscopic Examination")}${row("WBC",d.wbc)}${row("RBC",d.rbc)}${row("Epithelial Cells",d.epithelialCells)}${row("Bacteria",d.bacteria)}${row("Renal Cells",d.renalCells)}${row("Crystals",d.crystals)}${row("Mucus Threads",d.mucusThreads)}${d.amorphousType||d.amorphousResult ? row("Amorphous",d.amorphousType&&d.amorphousResult ? d.amorphousType+" – "+d.amorphousResult : d.amorphousType||d.amorphousResult) : ""}${d.others?row("Others",d.others):""}</table>`;
+      case "BT": return `<table>${row("Blood Type",d.bloodType)}${row("Rh Factor",d.rhFactor)}${row("Method",d.method)}</table>`;
+      case "PT": return `<table>${row("Pregnancy Test (Urine)",d.result)}</table>`;
+      case "DVT": return `<table>${row("Dengue NS1",d.ns1)}${row("Dengue Duo IgG",d.igg)}${row("Dengue Duo IgM",d.igm)}</table>`;
+      case "FA": return `<table>${sec("A. Gross")}${row("Consistency",d.consistency)}${row("Color",d.color)}${row("Occult Blood",d.occultBlood)}${row("Ova / Parasite",d.ovaParasite)}${row("Fat Globules",d.fatGlobules)}${d.others?row("Others",d.others):""}${sec("B. Microscopic")}${row("Pus Cells",d.pusCells)}${row("Red Blood Cells",d.rbc)}${d.noIntestinalParasite?row("","NO INTESTINAL PARASITE SEEN."):""}</table>`;
+      case "SEROLOGY": return `<table>${row("HBsAg Screening (Qualitative)",d.hbsag)}${row("VDRL Screening (Qualitative)",d.vdrl)}</table>`;
+      case "CHEM": {
+        const tests = d.tests || {};
+        let t = `<table><thead><tr><th class="cth" style="text-align:left">Test</th><th class="cth">Conv.</th><th class="cth">Unit</th><th class="cth">Ref Range</th><th class="cth">SI</th><th class="cth">Unit</th><th class="cth">Ref Range</th></tr></thead><tbody>`;
+        CHEM_TESTS.forEach(ct => {
+          const rr = tests[ct.key] || {};
+          t += `<tr><td class="ctd">${H(ct.label)}</td><td class="ctd c cconv">${H(rr.convResult||"—")}</td><td class="ctd c">${H(ct.convUnit)}</td><td class="ctd c">${H(ct.convRef)}</td><td class="ctd c csi">${H(rr.siResult||"—")}</td><td class="ctd c">${H(ct.siUnit)}</td><td class="ctd c">${H(ct.siRef)}</td></tr>`;
+        });
+        t += `</tbody></table>`;
+        if (d.remarks) t += `<div class="remarks-box"><strong>Remarks:</strong> ${H(d.remarks)}</div>`;
+        return t;
+      }
+      default: return "";
+    }
+  }
+
+  function buildTestView(type, d) {
+  const H   = s => escapeHtml(s || "");
+  const row = (l, v) => `<tr class="border-b border-slate-100 last:border-0"><td class="py-2.5 px-5 text-sm text-slate-500 w-1/2">${H(l)}</td><td class="py-2.5 px-5 text-sm font-bold text-slate-800">${H(v) || "—"}</td></tr>`;
+  const sec = l  => `<tr><th colspan="2" class="px-5 py-3 bg-slate-50 text-left text-[10px] font-extrabold uppercase tracking-widest text-slate-400">${l}</th></tr>`;
+ 
+  switch (type) {
+    case "UA":
+      return `<table class="w-full">
+        ${sec("Macroscopic Examination")}
+        ${row("Color", d.color)}
+        ${row("Transparency", d.transparency)}
+        ${row("Specific Gravity", d.specificGravity)}
+        ${sec("Chemical Analysis")}
+        ${row("pH", d.ph)}
+        ${row("Glucose", d.glucose)}
+        ${row("Protein", d.protein)}
+        ${row("Blood", d.blood)}
+        ${row("Ketone", d.ketone)}
+        ${row("Nitrite", d.nitrite)}
+        ${row("Urobilinogen", d.urobilinogen)}
+        ${sec("Microscopic Examination")}
+        ${row("WBC", d.wbc)}
+        ${row("RBC", d.rbc)}
+        ${row("Epithelial Cells", d.epithelialCells)}
+        ${row("Bacteria", d.bacteria)}
+        ${row("Renal Cells", d.renalCells)}
+        ${row("Crystals", d.crystals)}
+        ${row("Mucus Threads", d.mucusThreads)}
+        ${d.amorphousType || d.amorphousResult
+          ? row("Amorphous", d.amorphousType && d.amorphousResult
+              ? d.amorphousType + " – " + d.amorphousResult
+              : d.amorphousType || d.amorphousResult)
+          : ""}
+        ${d.others ? row("Others", d.others) : ""}
+      </table>`;
+ 
+    case "BT":
+      return `<table class="w-full"><tbody>
+        ${row("Blood Type", d.bloodType)}
+        ${row("Rh Factor", d.rhFactor)}
+        ${row("Method", d.method)}
+      </tbody></table>`;
+ 
+    case "PT":
+      return `<table class="w-full"><tbody>
+        ${row("Pregnancy Test (Urine)", d.result)}
+      </tbody></table>`;
+ 
+    case "DVT":
+      return `<table class="w-full"><tbody>
+        ${row("Dengue NS1", d.ns1)}
+        ${row("Dengue Duo IgG", d.igg)}
+        ${row("Dengue Duo IgM", d.igm)}
+      </tbody></table>`;
+ 
+    case "FA":
+      return `<table class="w-full">
+        ${sec("A. Gross")}
+        ${row("Consistency", d.consistency)}
+        ${row("Color", d.color)}
+        ${row("Occult Blood", d.occultBlood)}
+        ${row("Ova / Parasite", d.ovaParasite)}
+        ${row("Fat Globules", d.fatGlobules)}
+        ${d.others ? row("Others", d.others) : ""}
+        ${sec("B. Microscopic")}
+        ${row("Pus Cells", d.pusCells)}
+        ${row("Red Blood Cells", d.rbc)}
+        ${d.noIntestinalParasite ? row("", "NO INTESTINAL PARASITE SEEN.") : ""}
+      </table>`;
+ 
+    case "SEROLOGY":
+      return `<table class="w-full"><tbody>
+        ${row("HBsAg Screening (Qualitative)", d.hbsag)}
+        ${row("VDRL Screening (Qualitative)", d.vdrl)}
+      </tbody></table>`;
+ 
+    case "CHEM": {
+      const tests = d.tests || {};
+      let t = `<div class="overflow-x-auto"><table class="w-full text-sm">
+        <thead><tr class="bg-slate-50 border-b-2 border-slate-200">
+          <th class="text-left py-3 px-4 text-[10px] font-extrabold uppercase tracking-widest text-slate-500">Test</th>
+          <th class="text-center py-3 px-3 text-[10px] font-extrabold uppercase text-secondary">Conv.</th>
+          <th class="text-center py-3 px-3 text-[10px] font-bold uppercase text-slate-400">Unit</th>
+          <th class="text-center py-3 px-3 text-[10px] font-bold uppercase text-slate-400">Ref</th>
+          <th class="text-center py-3 px-3 text-[10px] font-extrabold uppercase text-primary">SI</th>
+          <th class="text-center py-3 px-3 text-[10px] font-bold uppercase text-slate-400">Unit</th>
+          <th class="text-center py-3 px-3 text-[10px] font-bold uppercase text-slate-400">Ref</th>
+        </tr></thead>
+        <tbody class="divide-y divide-slate-100">`;
+      CHEM_TESTS.forEach(ct => {
+        const rr = tests[ct.key] || {};
+        t += `<tr class="hover:bg-slate-50">
+          <td class="py-2.5 px-4 font-semibold text-slate-700 text-sm">${H(ct.label)}</td>
+          <td class="py-2.5 px-3 text-center font-extrabold text-secondary text-sm">${H(rr.convResult || "—")}</td>
+          <td class="py-2.5 px-3 text-center text-xs text-slate-400">${H(ct.convUnit)}</td>
+          <td class="py-2.5 px-3 text-center text-xs text-slate-400">${H(ct.convRef)}</td>
+          <td class="py-2.5 px-3 text-center font-extrabold text-primary text-sm">${H(rr.siResult || "—")}</td>
+          <td class="py-2.5 px-3 text-center text-xs text-slate-400">${H(ct.siUnit)}</td>
+          <td class="py-2.5 px-3 text-center text-xs text-slate-400">${H(ct.siRef)}</td>
+        </tr>`;
+      });
+      t += `</tbody></table></div>`;
+      if (d.remarks) t += `<div class="px-5 py-3 bg-slate-50 border-t border-slate-100 text-sm text-slate-600"><strong>Remarks:</strong> ${H(d.remarks)}</div>`;
+      return t;
+    }
+ 
+    default:
+      return `<p class="p-5 text-slate-400 text-sm">No data available.</p>`;
+  }
+}
+
+  // ════════════════════════════════════════════════════════════
+  // UTILITY
+  // ════════════════════════════════════════════════════════════
+  function escapeHtml(str) {
+    if (!str && str !== 0) return "";
+    return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+  }
+
+  // Auto-refresh every 10s (only when modals are closed)
+
+  let _uploadedFile = null;
+ 
+// ✅ MODIFY: Update openAddModal to show choice modal instead
+function openAddModal() {
+  const role = sessionStorage.getItem("role");
+  
+  // ✅ Only show choice modal for Medtech
+  if (role === "Medtech") {
+    openChoiceModal();
+  } else {
+    // For doctors, open form directly (shouldn't happen as button is hidden)
+    openFormModal();
+  }
+}
+ 
+// ✅ NEW: Open choice modal
+function openChoiceModal() {
+  const modal = document.getElementById("choiceModal");
+  modal.classList.remove("hidden");
+  modal.classList.add("flex");
+}
+ 
+// ✅ NEW: Close choice modal
+function closeChoiceModal() {
+  const modal = document.getElementById("choiceModal");
+  modal.classList.add("hidden");
+  modal.classList.remove("flex");
+}
+ 
+// ✅ NEW: Open upload file modal
+function openUploadFileModal() {
+  closeChoiceModal();
+  
+  const modal = document.getElementById("uploadFileModal");
+  modal.classList.remove("hidden");
+  modal.classList.add("flex");
+  
+  // Autofill patient info
+  document.getElementById("uploadPatientName").value = _patientName;
+  document.getElementById("uploadPatientId").value = _patientId;
+  document.getElementById("uploadTestDate").value = new Date().toISOString().split("T")[0];
+}
+ 
+// ✅ NEW: Close upload file modal
+function closeUploadFileModal() {
+  const modal = document.getElementById("uploadFileModal");
+  modal.classList.add("hidden");
+  modal.classList.remove("flex");
+  
+  // Reset form
+  document.getElementById("uploadTestName").value = "";
+  document.getElementById("uploadTestDate").value = new Date().toISOString().split("T")[0];
+  document.getElementById("uploadNotes").value = "";
+  document.getElementById("uploadPhysician").value = "";
+  document.getElementById("fileInput").value = "";
+  _uploadedFile = null;
+  const badge = document.getElementById("uploadPhysicianBadge");
+  badge?.classList.add("hidden");
+  badge?.classList.remove("inline-flex");
+  document.getElementById("uploadPhysician")?.classList.remove("autofilled");
+  
+  // Reset drop zone
+  document.getElementById("dropZoneContent").classList.remove("hidden");
+  document.getElementById("filePreview").classList.add("hidden");
+  document.getElementById("uploadFileBtn").disabled = true;
+}
+ 
+// ✅ NEW: Open form modal (existing functionality)
+function openFormModal() {
+  closeChoiceModal();
+  
+  const m = document.getElementById("addLabModal");
+  m.classList.remove("hidden");
+  m.classList.add("flex");
+ 
+  // Set static fields first
+  document.getElementById("formPatientName").value   = _patientName;
+  document.getElementById("formPatientAgeSex").value = _patientAge + (_patientAge && _patientSex ? " / " : "") + _patientSex;
+  document.getElementById("commonDate").value        = new Date().toISOString().split("T")[0];
+ 
+  autofillMedtech();
+  sessionStorage.removeItem("pendingPhysician");
+}
+ 
+// ✅ NEW: File input handling
+document.addEventListener("DOMContentLoaded", () => {
+  const fileInput = document.getElementById("fileInput");
+  const dropZone = document.getElementById("dropZone");
+  const uploadBtn = document.getElementById("uploadFileBtn");
+  
+  // Choice modal buttons
+  document.getElementById("chooseUploadFile")?.addEventListener("click", openUploadFileModal);
+  document.getElementById("chooseCreateForm")?.addEventListener("click", openFormModal);
+  document.getElementById("closeChoiceModal")?.addEventListener("click", closeChoiceModal);
+  
+  // Upload modal buttons
+  document.getElementById("closeUploadModal")?.addEventListener("click", closeUploadFileModal);
+  document.getElementById("cancelUploadModal")?.addEventListener("click", closeUploadFileModal);
+  document.getElementById("uploadFileBtn")?.addEventListener("click", uploadLabResultFile);
+  document.getElementById("removeFile")?.addEventListener("click", () => {
+    fileInput.value = "";
+    _uploadedFile = null;
+    document.getElementById("dropZoneContent").classList.remove("hidden");
+    document.getElementById("filePreview").classList.add("hidden");
+    uploadBtn.disabled = true;
+  });
+  
+  // File input change
+  fileInput?.addEventListener("change", handleFileSelect);
+  
+  // Drag and drop
+  dropZone?.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    dropZone.classList.add("border-primary", "bg-brand-light/50");
+  });
+  
+  dropZone?.addEventListener("dragleave", () => {
+    dropZone.classList.remove("border-primary", "bg-brand-light/50");
+  });
+  
+  dropZone?.addEventListener("drop", (e) => {
+    e.preventDefault();
+    dropZone.classList.remove("border-primary", "bg-brand-light/50");
+    
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      fileInput.files = files;
+      handleFileSelect();
+    }
+  });
+});
+ 
+// ✅ NEW: Handle file selection
+function handleFileSelect() {
+  const fileInput = document.getElementById("fileInput");
+  const file = fileInput.files[0];
+  
+  if (!file) return;
+  
+  // Validate file type
+  const allowedTypes = [
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/vnd.ms-excel",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "image/png",
+    "image/jpeg",
+    "image/jpg"
+  ];
+  
+  if (!allowedTypes.includes(file.type)) {
+    alert("❌ Invalid file type. Please upload a PDF, Word document, or Excel file.");
+    fileInput.value = "";
+    return;
+  }
+  
+  // Validate file size (10MB max)
+  const maxSize = 10 * 1024 * 1024; // 10MB
+  if (file.size > maxSize) {
+    alert("❌ File too large. Maximum size is 10MB.");
+    fileInput.value = "";
+    return;
+  }
+  
+  _uploadedFile = file;
+  
+  // Show file preview
+  document.getElementById("dropZoneContent").classList.add("hidden");
+  document.getElementById("filePreview").classList.remove("hidden");
+  document.getElementById("fileName").textContent = file.name;
+  document.getElementById("fileSize").textContent = formatFileSize(file.size);
+  
+  // Enable upload button if test name is filled
+  validateUploadForm();
+}
+ 
+// ✅ NEW: Validate upload form
+function validateUploadForm() {
+  const testName = document.getElementById("uploadTestName").value.trim();
+  const testDate = document.getElementById("uploadTestDate").value;
+  const uploadBtn = document.getElementById("uploadFileBtn");
+  
+  uploadBtn.disabled = !(testName && testDate && _uploadedFile);
+}
+ 
+// Listen to test name changes
+document.getElementById("uploadTestName")?.addEventListener("input", validateUploadForm);
+document.getElementById("uploadTestDate")?.addEventListener("change", validateUploadForm);
+ 
+// ✅ NEW: Upload lab result file
+async function uploadLabResultFile() {
+  if (!_uploadedFile) {
+    alert("Please select a file to upload.");
+    return;
+  }
+  
+  const testName = document.getElementById("uploadTestName").value.trim();
+  const testDate = document.getElementById("uploadTestDate").value;
+  const notes = document.getElementById("uploadNotes").value.trim();
+  
+  if (!testName || !testDate) {
+    alert("Please fill in all required fields.");
+    return;
+  }
+  
+  const btn = document.getElementById("uploadFileBtn");
+  btn.disabled = true;
+  btn.innerHTML = '<span class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span><span>Uploading...</span>';
+  
+  try {
+    // Convert file to base64
+    const base64File = await fileToBase64(_uploadedFile);
+    
+    const payload = {
+      patientId:    _patientId,
+      patientName:  _patientName,
+      testName:     testName,
+      testDate:     testDate,
+      physician:    document.getElementById("uploadPhysician")?.value?.trim() || "",
+      notes:        notes,
+      fileName:     _uploadedFile.name,
+      fileData:     base64File,
+      fileType:     _uploadedFile.type,
+      uploadedBy:   sessionStorage.getItem("name") || "Medical Technologist",
+      uploadedById: sessionStorage.getItem("userId") || "",
+    };
+    
+    const res = await fetch("http://localhost:5000/api/lab-results/upload", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}));
+      throw new Error(error.message || "Upload failed");
+    }
+    
+    alert("✅ Lab result uploaded successfully!");
+    
+    // ✅ NEW: Mark the corresponding lab request as completed
+    const pendingRequestId = sessionStorage.getItem('pendingRequestId');
+    
+    if (pendingRequestId) {
+      try {
+        console.log('🔄 Marking request as completed:', pendingRequestId);
+        
+        const completeRes = await fetch(
+          `http://localhost:5000/api/request-forms/${pendingRequestId}/complete`,
+          {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              completedBy: sessionStorage.getItem('name') || 'Medical Technologist'
+            })
+          }
+        );
+        
+        if (completeRes.ok) {
+          const result = await completeRes.json();
+          console.log('✅ Request marked as completed:', result);
+        } else {
+          console.warn('⚠️ Failed to mark request as completed:', completeRes.status);
+        }
+      } catch (completeErr) {
+        console.error('❌ Error marking request complete:', completeErr);
+        // Don't show error to user - lab result was still saved successfully
+      }
+      
+      // Clean up session storage
+      sessionStorage.removeItem('pendingRequestId');
+      sessionStorage.removeItem('pendingPhysician');
+    }
+    
+    closeUploadFileModal();
+    await loadLabResults();
+    
+  } catch (err) {
+    console.error("Upload error:", err);
+    alert("❌ Failed to upload: " + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">cloud_upload</span><span>Upload Result</span>';
+  }
+}
+ 
+// ✅ NEW: Convert file to base64
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(",")[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+ 
+// ✅ NEW: Format file size (if not already in lab_results.js)
+function formatFileSize(bytes) {
+  if (!bytes || bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
+}
+
+async function markRequestComplete() {
+  const requestId = sessionStorage.getItem("pendingRequestId");
+  if (!requestId) return; // No pending request — result was added manually
+ 
+  try {
+    const res = await fetch(
+      "http://localhost:5000/api/request-forms/" + requestId,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status:      "Completed",
+          completedAt: new Date().toISOString(),
+          completedBy: sessionStorage.getItem("name") || "Medical Technologist",
+        }),
+      }
+    );
+    if (!res.ok) {
+      console.warn("Could not mark request complete:", res.status);
+    } else {
+      console.log("✅ Request", requestId, "marked as Completed");
+    }
+  } catch (err) {
+    console.warn("markRequestComplete error:", err);
+  } finally {
+    // Always clear so it doesn't carry over to the next patient
+    sessionStorage.removeItem("pendingRequestId");
+  }
+}
+  </script>
+</body>
+</html>

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard - WellServed</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="CSS/Global.css" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#065f46",
+              secondary: "#8B5A2B",
+              "brand-light": "#f0fdf4",
+              "background-light": "#f8fafc",
+            },
+            fontFamily: {
+              sans: ["'Plus Jakarta Sans'", "sans-serif"],
+              display: ["'Plus Jakarta Sans'", "sans-serif"],
+            },
+            borderRadius: {
+              "3xl": "24px",
+              "4xl": "32px",
+            },
+          },
+        },
+      };
+    </script>
+    <style type="text/tailwindcss">
+      @layer base {
+        body {
+          font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+        }
+      }
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 5px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #e2e8f0;
+        border-radius: 10px;
+      }
+      .material-symbols-outlined {
+        font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+        display: inline-block;
+        vertical-align: middle;
+      }
+      .card-shadow {
+        box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+      }
+      .stat-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+      .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px -2px rgba(0, 0, 0, 0.1);
+      }
+      .appointmentsContainer::-webkit-scrollbar,
+      .recentPatients::-webkit-scrollbar {
+        width: 5px;
+      }
+      .appointmentsContainer::-webkit-scrollbar-track,
+      .recentPatients::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .appointmentsContainer::-webkit-scrollbar-thumb,
+      .recentPatients::-webkit-scrollbar-thumb {
+        background: #e2e8f0;
+        border-radius: 10px;
+      }
+    </style>
+  </head>
+  <body class="bg-[#F3F4F6] dark:bg-slate-900 dark:text-slate-100 text-slate-900 transition-colors duration-200 flex h-screen overflow-hidden" data-notification-handler="page">
+    <script src="JS/Sidebar.js"></script>
+    <script src="JS/recent_patients.js"></script>
+    <script>loadSidebar("Dashboard.html");</script>
+
+    <main class="flex-1 flex flex-col overflow-hidden relative ml-64">
+      <!-- Header -->
+      <header id="topHeader" class="h-20 flex items-center justify-end px-10 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-100 dark:border-slate-700 sticky top-0 z-40 shrink-0">
+        <div class="flex items-center gap-6">
+          <div class="flex items-center gap-4 bg-slate-50 dark:bg-slate-700 px-4 py-2 rounded-2xl border border-slate-100 dark:border-slate-600">
+            <div class="flex flex-col items-end">
+              <span id="clockDisplay" class="text-sm font-bold text-slate-700 dark:text-slate-200">12:00:00 PM</span>
+              <span id="headerDateDisplay" class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">—</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-6">
+            <div class="relative">
+              <button type="button" id="notificationBell" aria-label="Notifications" class="relative flex items-center justify-center w-12 h-12 text-primary hover:opacity-90 transition-opacity rounded-full hover:bg-slate-100 dark:hover:bg-slate-700/50 border-0 cursor-pointer z-50">
+                <span class="material-symbols-outlined text-[28px] select-none">notifications</span>
+                <span id="notificationBadge" class="absolute top-0.5 right-0.5 w-5 h-5 bg-red-500 border-2 border-white dark:border-slate-800 rounded-full hidden items-center justify-center text-[10px] font-bold text-white"></span>
+              </button>
+            </div>
+            <div id="headerUserAvatar" class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm ring-4 ring-primary/5">—</div>
+          </div>
+        </div>
+      </header>
+
+      <div class="flex-1 overflow-y-auto p-10 custom-scrollbar">
+        <div class="max-w-7xl mx-auto space-y-8">
+
+          <!-- HERO WELCOME BANNER -->
+          <div class="relative overflow-hidden bg-primary text-white rounded-3xl p-10 shadow-xl shadow-primary/10">
+            <div class="relative z-10 max-w-2xl">
+              <h2 class="text-4xl font-extrabold mb-3 tracking-tight greet"></h2>
+              <p class="text-emerald-50/80 text-lg font-medium">
+                You have <span class="text-white font-bold" id="todayAppointmentCount">0</span> appointments scheduled for today.
+              </p>
+              <div class="mt-10 flex flex-wrap gap-4">
+                <button onclick="window.location.href='Appointments.html'" id="viewFullScheduleBtn" class="px-8 py-3 bg-white text-primary font-extrabold rounded-2xl hover:bg-[#005a32] hover:text-white transition-smooth flex items-center gap-3 shadow-lg shadow-black/5">
+                  <span class="material-symbols-outlined">calendar_month</span>
+                  View Full Schedule
+                </button>
+                <button onclick="window.location.href='AddPatient.html'" id="addNewPatientBtn" class="px-8 py-3 bg-white text-primary font-bold rounded-2xl hover:bg-[#005a32] hover:text-white transition-smooth">
+                  New Patient Record
+                </button>
+              </div>
+            </div>
+            <div class="absolute -right-20 -top-20 w-80 h-80 bg-emerald-500/20 rounded-full blur-3xl"></div>
+            <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-emerald-400/10 rounded-full blur-2xl"></div>
+          </div>
+
+          <!-- THREE COLUMN LAYOUT -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            <!-- UPCOMING APPOINTMENTS CARD -->
+            <div class="bg-white dark:bg-slate-800 rounded-3xl card-shadow border border-slate-100 dark:border-slate-700 flex flex-col">
+              <div class="p-6 border-b border-slate-50 dark:border-slate-700 flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-2">
+                  <span class="material-symbols-outlined text-secondary">event_upcoming</span>
+                  <h3 class="font-extrabold text-slate-800 dark:text-white">Upcoming Appointments</h3>
+                </div>
+              </div>
+              <!-- ✅ Fixed height showing ~4 items, scrollable beyond that -->
+              <div class="p-4 space-y-3 appointmentsContainer overflow-y-auto custom-scrollbar" style="max-height: 320px; min-height: 320px;">
+                <div class="text-center py-8 text-slate-400">
+                  <span class="material-symbols-outlined text-4xl mb-2">event_busy</span>
+                  <p>Loading appointments...</p>
+                </div>
+              </div>
+              <div class="p-4 shrink-0 border-t border-slate-50 dark:border-slate-700">
+                <button onclick="window.location.href='AddAppointment.html'" id="viewAppointmentsBtn" class="w-full py-3 bg-primary text-white font-bold rounded-2xl hover:bg-gray-700 hover:text-white transition-smooth shadow-md shadow-primary/10">
+                  Create New Appointment
+                </button>
+              </div>
+            </div>
+
+            <!-- RECENT PATIENTS CARD -->
+            <div class="bg-white dark:bg-slate-800 rounded-3xl card-shadow border border-slate-100 dark:border-slate-700 flex flex-col">
+              <div class="p-6 border-b border-slate-50 dark:border-slate-700 flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-2">
+                  <span class="material-symbols-outlined text-secondary">person_search</span>
+                  <h3 class="font-extrabold text-slate-800 dark:text-white">Recent Patients</h3>
+                </div>
+              </div>
+              <!-- ✅ Fixed height showing ~4 items, scrollable beyond that -->
+              <div class="p-4 space-y-2 recentPatients overflow-y-auto custom-scrollbar" style="max-height: 320px; min-height: 320px;">
+                <div class="text-center py-8 text-slate-400">
+                  <span class="material-symbols-outlined text-4xl mb-2">person_off</span>
+                  <p>Loading patients...</p>
+                </div>
+              </div>
+              <div class="p-4 shrink-0 border-t border-slate-50 dark:border-slate-700">
+                <button onclick="window.location.href='Patients.html'" class="w-full py-3 text-white bg-primary font-bold rounded-2xl hover:bg-gray-700 hover:text-white transition-smooth">
+                  Go to Patients List
+                </button>
+              </div>
+            </div>
+
+            <!-- WEEKLY PERFORMANCE CARD -->
+            <div class="bg-white dark:bg-slate-800 rounded-3xl card-shadow border border-slate-100 dark:border-slate-700 flex flex-col">
+              <div class="p-6 border-b border-slate-50 dark:border-slate-700 flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-2">
+                  <span class="material-symbols-outlined text-secondary">monitoring</span>
+                  <h3 class="font-extrabold text-slate-800 dark:text-white">Weekly Performance</h3>
+                </div>
+              </div>
+              <div class="p-8 flex-1 flex flex-col justify-center items-center text-center">
+                <div class="relative w-40 h-40 mb-8">
+                  <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                    <circle class="text-slate-100 dark:text-slate-700" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" stroke-width="10"></circle>
+                    <circle id="weeklyProgressCircle" class="text-secondary transition-all duration-500" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" stroke-dasharray="251.2" stroke-dashoffset="251.2" stroke-linecap="round" stroke-width="10"></circle>
+                  </svg>
+                  <div class="absolute inset-0 flex flex-col items-center justify-center">
+                    <span id="weeklyCompletedCount" class="text-5xl font-extrabold text-slate-800 dark:text-white">0</span>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase">Appointments</span>
+                  </div>
+                </div>
+                <div class="space-y-2">
+                  <p class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Appointments this Week</p>
+                </div>
+              </div>
+              <div class="p-6 grid grid-cols-2 gap-3 shrink-0 border-t border-slate-50 dark:border-slate-700">
+                <div class="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-2xl text-center">
+                  <p class="text-[10px] font-bold text-slate-400 uppercase">Active Patients</p>
+                  <p class="text-lg font-extrabold text-primary dark:text-white" id="activePatients">0</p>
+                </div>
+                <div class="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-2xl text-center">
+                  <p class="text-[10px] font-bold text-slate-400 uppercase">This Week</p>
+                  <p class="text-lg font-extrabold text-secondary dark:text-white" id="appointmentsThisWeek">0</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Notification dropdown -->
+    <div id="notificationDropdown" class="fixed flex flex-col bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl overflow-hidden" style="display: none; top: 88px; right: 40px; width: 400px; max-width: calc(100vw - 320px); max-height: 500px; z-index: 9999;">
+      <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+        <h3 class="text-primary font-semibold text-lg m-0">Notifications</h3>
+        <button type="button" id="clearAllNotifications" class="bg-transparent border-none text-slate-500 dark:text-slate-400 cursor-pointer text-sm py-1 px-2 hover:text-slate-700 dark:hover:text-slate-200">Clear All</button>
+      </div>
+      <div id="notificationList" class="max-h-[440px] overflow-y-auto p-3">
+        <p class="text-center text-slate-400 py-5">No notifications</p>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="JS/appointment_monitor.js"></script>
+    <script src="JS/dashboard.js"></script>
+    <script src="JS/appointment_time_notifications.js"></script>
+    <script src="JS/nurse_notifications.js"></script>
+    <script src="JS/doctor_notifications.js"></script>
+    <script src="JS/header.js"></script>
+    <script>
+      (function() {
+        function ensureNotificationBell() {
+          var bell = document.getElementById("notificationBell");
+          var dropdown = document.getElementById("notificationDropdown");
+          if (!bell || !dropdown) return;
+          if (window._dashboardNotificationBound) return;
+          window._dashboardNotificationBound = true;
+          bell.addEventListener("click", function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var show = dropdown.style.display !== "flex";
+            dropdown.style.display = show ? "flex" : "none";
+            if (show && typeof loadNotifications === "function") loadNotifications();
+          });
+          document.addEventListener("click", function(e) {
+            if (!bell.contains(e.target) && !dropdown.contains(e.target))
+              dropdown.style.display = "none";
+          });
+        }
+        if (document.readyState === "loading")
+          document.addEventListener("DOMContentLoaded", ensureNotificationBell);
+        else
+          ensureNotificationBell();
+      })();
+    </script>
+    <script src="JS/auto_refresh.js"></script>
+    <script src="JS/session_checker.js"></script>
+  </body>
+</html>

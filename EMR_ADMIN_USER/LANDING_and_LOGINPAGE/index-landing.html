@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Integrated Hospital Management System</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#439A86",
+              "background-light": "#F8F9FA",
+              "background-dark": "#121212",
+              "card-light": "#FFFFFF",
+              "card-dark": "#1E1E1E",
+              "text-light": "#212529",
+              "text-dark": "#E9ECEF",
+              "text-secondary-light": "#6C757D",
+              "text-secondary-dark": "#ADB5BD",
+            },
+            fontFamily: {
+              display: ["Inter", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "0.75rem",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body
+    class="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark"
+  >
+    <div class="flex flex-col min-h-screen">
+      <header class="py-6 px-8 flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+          <svg
+            class="text-primary"
+            fill="none"
+            height="24"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M12 2L2 7L12 12L22 7L12 2Z"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+            ></path>
+            <path
+              d="M2 17L12 22L22 17"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+            ></path>
+            <path
+              d="M2 12L12 17L22 12"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+            ></path>
+          </svg>
+          <span class="font-bold text-xl text-text-light dark:text-text-dark"
+            >TLC WellServed</span
+          >
+        </div>
+      </header>
+      <main class="flex-grow flex flex-col items-center justify-center px-4">
+        <div class="text-center max-w-4xl mx-auto mb-12">
+          <h1
+            class="text-4xl font-bold text-text-light dark:text-text-dark mb-4"
+          >
+            TLC WellServed Infirmary & Drugstore Inc.
+          </h1>
+          <p
+            class="text-lg text-text-secondary-light dark:text-text-secondary-dark"
+          >
+            Phil health Accredited
+          </p>
+        </div>
+        <div
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full max-w-6xl"
+        >
+          <div
+            class="bg-card-light dark:bg-card-dark rounded-lg shadow-md p-8 flex flex-col items-center text-center"
+          >
+            <div class="bg-primary/10 dark:bg-primary/20 rounded-full p-4 mb-6">
+              <span class="material-icons text-primary text-3xl">science</span>
+            </div>
+            <h2
+              class="text-2xl font-bold mb-2 text-text-light dark:text-text-dark"
+            >
+              Pharmacy
+            </h2>
+            <p
+              class="text-text-secondary-light dark:text-text-secondary-dark mb-6 flex-grow"
+            >
+              Manage medication inventory, prescriptions, and patient medication
+              history.
+            </p>
+            <button
+              class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-lg transition-colors"
+            >
+              Access Pharmacy
+            </button>
+          </div>
+          <div
+            class="bg-card-light dark:bg-card-dark rounded-lg shadow-md p-8 flex flex-col items-center text-center"
+          >
+            <div class="bg-primary/10 dark:bg-primary/20 rounded-full p-4 mb-6">
+              <span class="material-icons text-primary text-3xl"
+                >favorite_border</span
+              >
+            </div>
+            <h2
+              class="text-2xl font-bold mb-2 text-text-light dark:text-text-dark"
+            >
+              APR
+            </h2>
+            <p
+              class="text-text-secondary-light dark:text-text-secondary-dark mb-6 flex-grow"
+            >
+              Access and manage patient electronic medical records, including
+              medical history, diagnoses, and treatments.
+            </p>
+            <button
+              onclick="window.location.href='\emrLogin.html'"
+              class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-lg transition-colors"
+            >
+              Access APR
+            </button>
+          </div>
+          <div
+            class="bg-card-light dark:bg-card-dark rounded-lg shadow-md p-8 flex flex-col items-center text-center"
+          >
+            <div class="bg-primary/10 dark:bg-primary/20 rounded-full p-4 mb-6">
+              <span class="material-icons text-primary text-3xl"
+                >receipt_long</span
+              >
+            </div>
+            <h2
+              class="text-2xl font-bold mb-2 text-text-light dark:text-text-dark"
+            >
+              Billing
+            </h2>
+            <p
+              class="text-text-secondary-light dark:text-text-secondary-dark mb-6 flex-grow"
+            >
+              Manage patient billing, insurance claims, and payment processing.
+            </p>
+            <button
+              class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-lg transition-colors"
+            >
+              Access Billing
+            </button>
+          </div>
+        </div>
+      </main>
+      <footer class="text-center py-6 px-4">
+        <p
+          class="text-sm text-text-secondary-light dark:text-text-secondary-dark"
+        >
+          © TLC Well Served Infirmary & Drugstore Inc. Since 1994. All Right Reserved
+        </p>
+      </footer>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>User Accounts</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#005a32",
+              "primary-light": "#f0fdf4",
+              secondary: "#d62828",
+              accent: "#8b5a2b",
+              "background-light": "#f1f5f9",
+              "background-dark": "#0F172A",
+              "sidebar-light": "#FFFFFF",
+              "sidebar-dark": "#0F172A",
+              "text-light": "#1E293B",
+              "text-dark": "#E2E8F0",
+              "border-light": "#E2E8F0",
+              "border-dark": "#334155",
+              "card-light": "#FFFFFF",
+              "card-dark": "#1E293B",
+            },
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+              display: ["'Plus Jakarta Sans'", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      tbody tr:hover { background-color: rgba(0, 90, 50, 0.05); }
+      .search-input-no-focus:focus {
+        --tw-ring-color: transparent !important;
+        outline: 0 !important;
+        box-shadow: none !important;
+        border-color: transparent !important;
+      }
+      .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+      .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+      .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+    </style>
+  </head>
+  <body
+    class="bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark font-sans h-screen overflow-hidden"
+  >
+    <div class="flex h-full">
+      <!-- ✅ SIDEBAR — matching sidebar.js style -->
+      <aside class="w-64 flex flex-col bg-white border-r border-slate-200 h-screen" style="box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <!-- Logo -->
+        <div class="p-6 mb-2">
+          <div class="flex items-center gap-3">
+            <img src="../user/Assets/wellserved_logo.jpg" alt="Well Served Logo" class="w-12 h-12 rounded-full object-cover"/>
+            <div>
+              <h1 class="text-lg font-extrabold leading-none" style="color:#065f46;">WellServed</h1>
+              <p class="text-[10px] font-bold tracking-widest mt-0.5 uppercase" style="color:#8b5a2b;">Admin Portal</p>
+            </div>
+          </div>
+        </div>
+        <!-- Nav Links -->
+        <nav class="flex-1 px-4 space-y-1">
+          <a href="emrAdmin.html"
+             class="navLink flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold transition-all text-slate-500 hover:text-[#065f46] hover:bg-slate-50">
+            <span class="material-symbols-outlined">grid_view</span>
+            <span>Dashboard</span>
+          </a>
+          <a href="adminUsersAccount.html"
+             class="navLink flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold transition-all"
+             style="background-color:#f0fdf4; color:#065f46;">
+            <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">group</span>
+            <span>Users Account</span>
+          </a>
+          <a href="adminBackup.html"
+             class="navLink flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold transition-all text-slate-500 hover:text-[#065f46] hover:bg-slate-50">
+            <span class="material-symbols-outlined">description</span>
+            <span>Backup Logs</span>
+          </a>
+          <a href="adminArchive.html"
+             class="navLink flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold transition-all text-slate-500 hover:text-[#065f46] hover:bg-slate-50">
+            <span class="material-symbols-outlined">history</span>
+            <span>Archive</span>
+          </a>
+          <a href="adminSettings.html"
+             class="navLink flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold transition-all text-slate-500 hover:text-[#065f46] hover:bg-slate-50">
+            <span class="material-symbols-outlined">settings</span>
+            <span>Settings</span>
+          </a>
+        </nav>
+        <!-- Logout -->
+        <div class="p-4 mt-auto border-t border-slate-200">
+          <button onclick="showLogoutModal()"
+                  class="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold transition-all text-red-500 hover:bg-red-50">
+            <span class="material-symbols-outlined">logout</span>
+            <span class="text-sm">Logout</span>
+          </button>
+        </div>
+      </aside>
+
+      <!-- Main Content Area -->
+      <div class="flex-1 flex flex-col overflow-hidden">
+
+        <!-- ✅ HEADER (matching dashboard) -->
+        <header id="topHeader" class="h-20 flex items-center justify-end px-10 bg-white/80 backdrop-blur-md border-b border-slate-100 sticky top-0 z-40 shrink-0">
+          <div class="flex items-center gap-6">
+            <!-- Clock Display -->
+            <div class="flex items-center gap-4 bg-slate-50 px-4 py-2 rounded-2xl border border-slate-100">
+              <div class="flex flex-col items-end">
+                <span id="clockDisplay" class="text-sm font-bold text-slate-700">12:00:00 PM</span>
+                <span id="headerDateDisplay" class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">—</span>
+              </div>
+            </div>
+
+            <!-- User Info & Avatar -->
+            <div class="flex items-center gap-3">
+              <div id="headerUserInfo" class="flex flex-col items-end">
+                <span class="text-sm font-bold text-slate-700 leading-tight">Admin</span>
+                <span class="text-xs font-semibold text-primary leading-tight">Administrator</span>
+              </div>
+              <div id="headerUserAvatar" class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm ring-4 ring-primary/5">
+                A
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <!-- Scrollable Main Content -->
+        <main class="flex-1 p-8 overflow-y-auto custom-scrollbar">
+          <div
+            class="bg-card-light dark:bg-card-dark p-6 rounded-lg border border-border-light dark:border-border-dark shadow-md"
+          >
+            <!-- Header Row -->
+            <div class="flex justify-between items-center mb-4">
+              <h2 class="text-3xl font-bold text-[#005a32]">User Accounts</h2>
+              <button
+                onclick="openAddModal()"
+                class="bg-[#005a32] hover:opacity-90 text-white font-semibold py-2 px-4 rounded-lg flex items-center transition-all"
+              >
+                <span class="material-symbols-outlined mr-2" style="font-size:20px;">add</span> Add New User
+              </button>
+            </div>
+
+            <!-- Search Bar and Filters Row -->
+            <div class="flex justify-between items-center gap-3 mb-6">
+              <div class="flex items-center w-6/12 h-10 gap-2 px-3 rounded-lg bg-gray-100 dark:bg-gray-700 shadow-inner border border-gray-200 dark:border-gray-600">
+                <i class="fa-solid fa-magnifying-glass text-gray-500 dark:text-gray-400 text-sm"></i>
+                <input
+                  id="userSearchBar"
+                  class="w-full bg-transparent outline-none border-none search-input-no-focus text-text-light dark:text-text-dark placeholder-gray-500 dark:placeholder-gray-400"
+                  type="text"
+                  placeholder="Search users by Name or ID..."
+                  onkeyup="filterUsers()"
+                />
+              </div>
+              <div class="flex gap-3">
+                <select 
+                  id="roleFilter" 
+                  onchange="applyFilters()"
+                  class="h-10 px-3 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-text-light dark:text-text-dark text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  style="min-width: 120px;">
+                  <option value="all">All Roles</option>
+                  <option value="Admin">Admin</option>
+                  <option value="Doctor">Doctor</option>
+                  <option value="Nurse">Nurse</option>
+                  <option value="Medtech">Medtech</option>
+                </select>
+                <select 
+                  id="statusFilter" 
+                  onchange="applyFilters()"
+                  class="h-10 px-3 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-text-light dark:text-text-dark text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  style="min-width: 120px;">
+                  <option value="all">All Status</option>
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                </select>
+                <select 
+                  id="sortFilter" 
+                  onchange="applyFilters()"
+                  class="h-10 px-3 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-text-light dark:text-text-dark text-sm focus:outline-none focus:ring-2 focus:ring-primary" 
+                  style="min-width: 140px;">
+                  <option value="">Sort by Login</option>
+                  <option value="latest">Latest Login</option>
+                  <option value="oldest">Oldest Login</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Table -->
+            <div class="overflow-x-auto">
+              <table class="w-full text-center border-collapse">
+                <thead>
+                  <tr class="border-b text-sm">
+                    <th class="py-3 px-4">ID</th>
+                    <th class="py-3 px-4">Name</th>
+                    <th class="py-3 px-4">Email</th>
+                    <th class="py-3 px-4">Role</th>
+                    <th class="py-3 px-4">Status</th>
+                    <th class="py-3 px-4">Last Login</th>
+                    <th class="py-3 px-4">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="usersTable" class="divide-y"></tbody>
+              </table>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <!-- Admin Auth Before Creating New User -->
+    <div id="adminAuthModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] transition-opacity">
+      <div class="bg-card-light dark:bg-card-dark p-6 rounded-lg w-96 shadow-lg text-text-light dark:text-text-dark">
+        <h3 class="text-xl font-semibold mb-4 text-center text-[#005a32]">Admin Verification Required</h3>
+        <p class="mb-4 text-sm text-gray-700 dark:text-gray-300">
+          Please enter your password to authorize adding a new user.
+        </p>
+        <input
+          id="adminPasswordInput"
+          type="password"
+          placeholder="Admin Password"
+          class="w-full mb-4 p-2 border border-border-light dark:border-border-dark rounded-lg bg-gray-100 dark:bg-gray-700 text-text-light dark:text-text-dark focus:ring-2 focus:ring-primary"/>
+        <p id="authMessage" class="mb-4 text-sm text-secondary hidden"></p>
+        <div class="flex justify-end space-x-3">
+          <button onclick="closeAdminAuthModal()" class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 transition duration-150 ease-in-out"> Cancel</button>
+          <button onclick="verifyAdminPassword()" class="px-4 py-2 bg-[#005a32] text-white rounded-lg hover:opacity-90 transition duration-150 ease-in-out">Verify</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add User Modal -->
+    <div id="addUserModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] transition-opacity">
+      <div class="bg-card-light dark:bg-card-dark p-6 rounded-lg w-96 shadow-lg text-text-light dark:text-text-dark">
+        <h3 class="text-xl font-semibold mb-4 text-center text-[#005a32]">Add New User Account</h3>
+        <input id="name" placeholder="Name" class="w-full mb-3 p-2 border border-border-light dark:border-border-dark rounded-lg bg-gray-100 dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary" />
+        <input id="email" placeholder="Email (must be @gmail.com)" class="w-full mb-3 p-2 border border-border-light dark:border-border-dark rounded-lg bg-gray-100 dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary" />
+        <input id="password" type="password" placeholder="Password" class="w-full mb-3 p-2 border border-border-light dark:border-border-dark rounded-lg bg-gray-100 dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary" />
+        <select id="role" class="w-full mb-4 p-2 border border-border-light dark:border-border-dark rounded-lg bg-gray-100 dark:bg-gray-700 text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary">
+          <option value="Doctor">Doctor</option>
+          <option value="Nurse">Nurse</option>
+          <option value="Medtech">Medtech</option>
+        </select>
+        <p id="addUserErrorMessage" class="mb-4 text-sm text-secondary hidden"></p>
+        <div class="flex justify-end space-x-3">
+          <button onclick="closeAddModal()" class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 transition duration-150 ease-in-out">Cancel</button>
+          <button onclick="addUser()" class="px-4 py-2 bg-[#005a32] text-white rounded-lg hover:opacity-90 transition duration-150 ease-in-out">Add User</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Admin Auth Before Updating User -->
+    <div id="adminAuthUpdateModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] transition-opacity">
+      <div class="bg-card-light dark:bg-card-dark p-6 rounded-lg w-96 shadow-lg text-text-light dark:text-text-dark">
+        <h3 class="text-xl font-semibold mb-4 text-center text-[#005a32]">Admin Verification Required</h3>
+        <p class="mb-4 text-sm text-gray-700 dark:text-gray-300">
+          Please enter your password to proceed in updating a user's credentials.
+        </p>
+        <p class="text-sm text-gray-500 mb-2">Admin ID: <span id="authAdminIdUpdateDisplay" class="font-bold text-[#005a32]"></span></p>
+        <input
+          id="adminPasswordUpdateInput" 
+          type="password"
+          placeholder="Admin Password"
+          class="w-full mb-4 p-2 border border-border-light dark:border-border-dark rounded-lg bg-gray-100 dark:bg-gray-700 text-text-light dark:text-text-dark focus:ring-2 focus:ring-primary"
+        />
+        <p id="authUpdateMessage" class="mb-4 text-sm text-secondary hidden"></p> 
+        <div class="flex justify-end space-x-3">
+          <button onclick="closeAdminAuthUpdateModal()" class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 transition duration-150 ease-in-out"> Cancel</button>
+          <button onclick="verifyAdminPasswordForUpdate()" class="px-4 py-2 bg-[#005a32] text-white rounded-lg hover:opacity-90 transition duration-150 ease-in-out">Verify</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Update User Modal -->
+    <div id="updateUserModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
+      <div class="bg-card-light dark:bg-card-dark p-6 rounded-lg w-96 shadow-lg text-text-light dark:text-text-dark">
+        <h3 class="text-xl font-semibold mb-4 text-[#005a32]">Update User</h3>
+        <input id="updateName" placeholder="Name" class="w-full mb-2 p-2 border border-border-light rounded-lg bg-gray-100 focus:ring-2 focus:ring-primary" />
+        <input id="updateEmail" placeholder="Email" class="w-full mb-2 p-2 border border-border-light rounded-lg bg-gray-100 focus:ring-2 focus:ring-primary" />
+        <div class="w-full mb-2 p-2 border border-border-light rounded-lg bg-gray-100">
+          <p id="updateRoleDisplay" class="font-semibold text-gray-700"></p>
+        </div>
+        <select id="updateStatus" class="w-full mb-4 p-2 border border-border-light rounded-lg bg-gray-100 focus:ring-2 focus:ring-primary">
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
+        </select>
+        <p class="text-sm font-medium mb-1">Change password</p>
+        <input id="updatePassword" type="password" placeholder="Leave blank to keep old password" class="w-full mb-4 p-2 border border-border-light rounded-lg bg-gray-100 text-sm focus:ring-2 focus:ring-primary" />
+        <div class="flex justify-end space-x-2">
+          <button onclick="closeUpdateModal()" class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancel</button>
+          <button onclick="saveUserUpdate()" class="px-4 py-2 bg-[#005a32] text-white rounded-lg hover:opacity-90">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Logout Confirmation Modal -->
+    <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+          <div class="modal-header text-white" style="background-color: #005a32;">
+            <h5 class="modal-title font-bold" id="logoutModalLabel">Confirm Logout</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-center">
+            <p class="mb-3">Are you sure you want to log out of the admin portal?</p>
+          </div>
+          <div class="modal-footer justify-content-center">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn text-white" id="confirmLogoutBtn" style="background-color: #005a32; border: none;">Logout</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Admin Auth Before Archiving User -->
+    <div id="adminAuthArchiveModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] transition-opacity">
+      <div class="bg-card-light dark:bg-card-dark p-6 rounded-lg w-96 shadow-lg text-text-light dark:text-text-dark">
+        <h3 class="text-xl font-semibold mb-4 text-center text-secondary">Admin Verification Required</h3>
+        <p class="mb-4 text-sm text-gray-700 dark:text-gray-300">
+          Please enter your password to authorize archiving this user.
+        </p>
+        <p class="text-sm text-gray-500 mb-2">Admin ID: <span id="authAdminIdArchiveDisplay" class="font-bold text-[#005a32]"></span></p>
+        <p id="archiveUserNameDisplay" class="text-sm text-gray-700 dark:text-gray-300 mb-4 font-semibold"></p>
+        <input
+          id="adminPasswordArchiveInput" 
+          type="password"
+          placeholder="Admin Password"
+          class="w-full mb-4 p-2 border border-border-light dark:border-border-dark rounded-lg bg-gray-100 dark:bg-gray-700 text-text-light dark:text-text-dark focus:ring-2 focus:ring-secondary"
+        />
+        <p id="authArchiveMessage" class="mb-4 text-sm text-secondary hidden"></p>
+        <div class="flex justify-end space-x-3">
+          <button onclick="closeAdminAuthArchiveModal()" class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 transition duration-150 ease-in-out">Cancel</button>
+          <button onclick="verifyAdminPasswordForArchive()" class="px-4 py-2 bg-secondary text-white rounded-lg hover:opacity-90 transition duration-150 ease-in-out">Verify & Archive</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="../user/JS/auto_refresh.js"></script>
+    <script src="../admin/JS/admin_UserAccount.js"></script>
+
+    <!-- ✅ HEADER SCRIPT (matching dashboard) -->
+    <script>
+      function initializeHeader() {
+        updateClock();
+        setInterval(updateClock, 1000);
+        populateHeaderUserInfo();
+      }
+
+      function updateClock() {
+        const now = new Date();
+        const hours = now.getHours();
+        const minutes = String(now.getMinutes()).padStart(2, "0");
+        const seconds = String(now.getSeconds()).padStart(2, "0");
+        const ampm = hours >= 12 ? "PM" : "AM";
+        const h12 = hours % 12 || 12;
+        const hoursStr = String(h12).padStart(2, "0");
+        const timeStr = `${hoursStr}:${minutes}:${seconds} ${ampm}`;
+
+        const clockDisplay = document.getElementById("clockDisplay");
+        if (clockDisplay) clockDisplay.textContent = timeStr;
+
+        const dateDisplay = document.getElementById("headerDateDisplay");
+        if (dateDisplay) {
+          const months = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+          dateDisplay.textContent = months[now.getMonth()] + " " + now.getDate() + ", " + now.getFullYear();
+        }
+      }
+
+      function populateHeaderUserInfo() {
+        const headerAvatar = document.getElementById("headerUserAvatar");
+        const headerUserInfo = document.getElementById("headerUserInfo");
+
+        if (headerAvatar && headerUserInfo) {
+          const name = sessionStorage.getItem("name") || "Admin";
+          const role = sessionStorage.getItem("role") || "Administrator";
+          const initials = name.split(" ").map(function (n) { return n[0]; }).join("").toUpperCase().slice(0, 2);
+
+          headerAvatar.textContent = initials || "A";
+
+          headerUserInfo.innerHTML = `
+            <span class="text-sm font-bold text-slate-700 leading-tight">${name}</span>
+            <span class="text-xs font-semibold text-primary leading-tight">${role}</span>
+          `;
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        initializeHeader();
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,329 @@
+/* Theme variables for JS that sets inline styles (e.g. dashboard.js, Sidebar active link) */
+:root {
+  --primary-color: #005a32;
+  --accent-color: #8b5a2b;
+  --bg-neutral: #f1f5f9;
+}
+
+/* Modal styles for JS-created modals (completion-modal, prescription-modal) - keep for backend/JS compatibility */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(50px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Completion modal (appointment_monitor.js) */
+.completion-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease;
+}
+
+.completion-modal-content {
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  max-width: 500px;
+  width: 90%;
+  animation: slideUp 0.3s ease;
+}
+
+.completion-modal-content h2 {
+  color: #005a32;
+  margin-bottom: 20px;
+  font-size: 24px;
+}
+
+.completion-modal-content p {
+  margin: 10px 0;
+  font-size: 16px;
+  color: #555;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 15px;
+  margin-top: 25px;
+}
+
+.extend-btn, .complete-btn {
+  flex: 1;
+  padding: 14px 20px;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.extend-btn {
+  background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+  color: white;
+}
+
+.extend-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(243, 156, 18, 0.4);
+}
+
+.complete-btn {
+  background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+  color: white;
+}
+
+.complete-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+}
+
+/* Prescription modal */
+.prescription-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  animation: fadeIn 0.3s ease;
+}
+
+.prescription-modal-content {
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  max-width: 550px;
+  width: 90%;
+  animation: slideUp 0.3s ease;
+}
+
+.prescription-modal-content .modal-icon {
+  font-size: 48px;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.prescription-modal-content h2 {
+  color: #005a32;
+  margin-bottom: 10px;
+  font-size: 24px;
+  text-align: center;
+}
+
+.prescription-actions {
+  margin: 20px 0;
+  text-align: center;
+}
+
+.add-prescription-btn {
+  background: linear-gradient(135deg, #005a32 0%, #004426 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  justify-content: center;
+}
+
+.add-prescription-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 90, 50, 0.4);
+}
+
+.prescription-notes-section {
+  margin: 20px 0;
+}
+
+.prescription-notes-section label {
+  display: block;
+  color: #555;
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.prescription-notes-input {
+  width: 100%;
+  min-height: 120px;
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+}
+
+.prescription-notes-input:focus {
+  outline: none;
+  border-color: #005a32;
+}
+
+.prescription-modal-buttons {
+  display: flex;
+  gap: 15px;
+  margin-top: 25px;
+}
+
+.cancel-prescription-btn, .done-prescription-btn {
+  flex: 1;
+  padding: 14px 20px;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.cancel-prescription-btn {
+  background: #e0e0e0;
+  color: #555;
+}
+
+.cancel-prescription-btn:hover {
+  background: #d0d0d0;
+  transform: translateY(-2px);
+}
+
+.done-prescription-btn {
+  background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+  color: white;
+}
+
+.done-prescription-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+}
+
+/* Appointment table status badges (JS-injected) */
+.statusUpcoming {
+  background-color: #ecfdf5;
+  border: 1px solid #10b981;
+  color: #047857;
+  padding: 5px 12px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.statusOngoing {
+  background-color: #fffbeb;
+  border: 1px solid #8b5a2b;
+  color: #8b5a2b;
+  padding: 5px 12px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.statusCompleted {
+  background-color: #f0fdf4;
+  border: 1px solid #005a32;
+  color: #005a32;
+  padding: 5px 12px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.statusCanceled {
+  background-color: #fef2f2;
+  border: 1px solid #d62828;
+  color: #d62828;
+  padding: 5px 12px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.actionBtn {
+  border-radius: 8px;
+  border: 1px solid #8b5a2b;
+  color: #8b5a2b;
+  padding: 6px 12px;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+.actionBtn:hover {
+  background-color: #8b5a2b;
+  color: white;
+}
+.my-appointment {
+  background-color: #f0fdf4 !important;
+  border-left: 4px solid #005a32 !important;
+}
+
+/* Print prescription modal (Medications.html, Prescription.html) */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.5);
+  align-items: center;
+  justify-content: center;
+}
+.modal-content {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  max-width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+.modal-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  justify-content: flex-end;
+}
+.modal-buttons button {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+.modal-buttons #confirmPrint,
+.modal-buttons button:first-of-type {
+  background: #005a32;
+  color: white;
+}
+.modal-buttons #cancelPrint,
+.modal-buttons button:last-of-type {
+  background: #e5e7eb;
+  color: #374151;
+}
