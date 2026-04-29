@@ -16,7 +16,7 @@
   "keywords": [],
   "build": {
     "appId": "com.tlc.wellserved",
-    "productName": "TLC WellServed",
+    "productName": "TLC Well Served",
     "electronVersion": "40.8.0",
     "win": {
       "target": "nsis",

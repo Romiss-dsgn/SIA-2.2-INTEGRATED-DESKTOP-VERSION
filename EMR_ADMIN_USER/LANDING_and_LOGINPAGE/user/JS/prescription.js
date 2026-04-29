@@ -2054,7 +2054,7 @@ function setupPrintFunctionality(patientId, appointmentId) {
     <div class="header-top">
       ${logoHTML}
       <div class="clinic-info">
-        <div class="clinic-main-name">WELLSERVED</div>
+        <div class="clinic-main-name">WELL SERVED</div>
         <div class="clinic-full-name">INFIRMARY &amp; DRUGSTORE INC.</div>
         <div class="clinic-services">• MEDICAL &nbsp;• PEDIA &nbsp;• OB GYNE &nbsp;• MINOR SURGERY</div>
         <div class="clinic-services">• X-RAY &nbsp;• ECG &nbsp;• LABORATORY &nbsp;• ULTRASOUND &nbsp;• DRUGSTORE</div>
@@ -2113,7 +2113,7 @@ function setupPrintFunctionality(patientId, appointmentId) {
       </div>
     </div>
   </div>
-  <div class="rx-footer">This prescription is valid for 7 days from date of issue &nbsp;|&nbsp; WellServed Infirmary &amp; Drugstore Inc.</div>
+  <div class="rx-footer">This prescription is valid for 7 days from date of issue &nbsp;|&nbsp; Well Served Infirmary &amp; Drugstore Inc.</div>
 </div>
 </body>
 </html>`);

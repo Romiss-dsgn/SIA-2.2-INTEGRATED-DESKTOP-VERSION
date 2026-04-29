@@ -114,6 +114,7 @@ function createWindow() {
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
+    mainWindow.maximize();
   });
 
   mainWindow.loadFile(path.join(__dirname, 'EMR_ADMIN_USER', 'LANDING_and_LOGINPAGE', 'emrLogin.html'));

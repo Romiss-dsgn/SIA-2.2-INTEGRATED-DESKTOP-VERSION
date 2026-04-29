@@ -304,7 +304,7 @@ function printReferral() {
       <img src="../user/Assets/wellserved_logo.jpg" alt="WellServed Logo"
         style="width:54px;height:54px;border-radius:50%;border:3px solid #065f46;object-fit:cover;flex-shrink:0;box-shadow:0 2px 8px rgba(6,95,70,0.15);">
       <div class="clinic-info">
-        <div class="clinic-main-name">WELLSERVED</div>
+        <div class="clinic-main-name">WELL SERVED</div>
         <div class="clinic-full-name">INFIRMARY &amp; DRUGSTORE INC.</div>
         <div class="clinic-services">&bull; MEDICAL &nbsp;&bull; PEDIA &nbsp;&bull; OB GYNE &nbsp;&bull; MINOR SURGERY</div>
         <div class="clinic-services">&bull; X-RAY &nbsp;&bull; ECG &nbsp;&bull; LABORATORY &nbsp;&bull; ULTRASOUND &nbsp;&bull; DRUGSTORE</div>
