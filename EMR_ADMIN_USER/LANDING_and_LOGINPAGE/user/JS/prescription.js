@@ -1016,28 +1016,25 @@ async function loadPrescriptionMedications(patientId, appointmentId) {
                 <th class="px-6 py-4 text-left text-[11px] font-extrabold text-slate-700 uppercase tracking-widest">Duration</th>
                 <th class="px-6 py-4 text-left text-[11px] font-extrabold text-slate-700 uppercase tracking-widest">Indication</th>
                 <th class="px-6 py-4 text-left text-[11px] font-extrabold text-slate-700 uppercase tracking-widest">Notes</th>
+                <th class="px-6 py-4 text-left text-[11px] font-extrabold text-slate-700 uppercase tracking-widest">Action</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-50">
               ${appointmentMeds.map((m) => {
-                // ✅ Format duration display - CHECK DURATION FIELD FIRST
                 let durationDisplay = "—";
-                
                 if (m.duration) {
-                  // If duration field exists, use it directly
                   if (m.duration.toLowerCase() === "maintain") {
                     durationDisplay = '<span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">Maintain</span>';
                   } else {
                     durationDisplay = m.duration;
                   }
                 } else {
-                  // Fallback to old method
                   const isMaintain = m.durationMaintain === true || m.durationMaintain === "true" || m.durationMaintain === "on";
                   durationDisplay = isMaintain
                     ? '<span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">Maintain</span>'
                     : m.durationDays ? `${m.durationDays} day(s)` : "—";
                 }
-                
+
                 return `
                 <tr class="hover:bg-slate-50 transition-colors">
                   <td class="px-6 py-4 text-sm font-bold text-primary">${m.medicname || "N/A"}</td>
@@ -1047,6 +1044,13 @@ async function loadPrescriptionMedications(patientId, appointmentId) {
                   <td class="px-6 py-4 text-sm text-slate-700">${durationDisplay}</td>
                   <td class="px-6 py-4 text-sm text-slate-700">${m.indication || "—"}</td>
                   <td class="px-6 py-4 text-sm text-slate-700">${m.presNotes || "—"}</td>
+                  <td class="px-6 py-4">
+                    <button 
+                      onclick="deletePrescriptionMedication('${m.medId}', '${patientId}', '${appointmentId}')"
+                      class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-50 text-red-600 text-xs font-semibold hover:bg-red-100 border border-red-200 cursor-pointer transition-colors">
+                      <i class="fas fa-trash text-xs"></i> Remove
+                    </button>
+                  </td>
                 </tr>`;
               }).join("")}
             </tbody>
@@ -1063,6 +1067,21 @@ async function loadPrescriptionMedications(patientId, appointmentId) {
     console.error("Error loading prescription medications:", err);
   }
 }
+
+async function deletePrescriptionMedication(medId, patientId, appointmentId) {
+  if (!medId) { alert("Cannot delete: medication ID is missing."); return; }
+  if (!confirm("Remove this medication from the prescription?")) return;
+
+  try {
+    const res = await fetch(`http://localhost:5000/api/medications/${medId}`, { method: "DELETE" });
+    if (!res.ok) throw new Error(`Server returned ${res.status}`);
+    await loadPrescriptionMedications(patientId, appointmentId);
+  } catch (err) {
+    console.error("Error deleting medication:", err);
+    alert("Failed to remove medication: " + err.message);
+  }
+}
+window.deletePrescriptionMedication = deletePrescriptionMedication;
 
 // ============================================
 // MAIN DOCUMENT READY
@@ -1308,7 +1327,7 @@ if (saveBtn) {
         let patientName = "Unknown";
         try {
           const patientRes = await fetch(`http://localhost:5000/api/patients/${patientId}`);
-          if (patientRes.ok) { const patient = await patientRes.json(); patientName = `${patient.firstname || ""} ${patient.lastname || ""}`.trim(); }
+          if (patientRes.ok) { const patient = await patientRes.json(); patientName = formatPatientName(patient.firstname, patient.middlename, patient.lastname); }
         } catch (err) { console.warn("Could not fetch patient name:", err); }
 
         if (patientId && doctorId && followupValue && serviceValue) {
@@ -1420,7 +1439,7 @@ window.saveFollowUpAppointment = async function () {
     let patientName = "Unknown";
     try {
       const patientRes = await fetch(`http://localhost:5000/api/patients/${currentPatientId}`);
-      if (patientRes.ok) { const p = await patientRes.json(); patientName = `${p.firstname || ""} ${p.lastname || ""}`.trim(); }
+      if (patientRes.ok) { const p = await patientRes.json(); patientName = formatPatientName(p.firstname, p.middlename, p.lastname); }
     } catch (e) {}
 
     const appointmentData = {
@@ -1505,7 +1524,7 @@ window.completeAppointment = async function () {
           let patientName = "Unknown";
           try {
             const patientRes = await fetch(`http://localhost:5000/api/patients/${currentPatientId}`);
-            if (patientRes.ok) { const patient = await patientRes.json(); patientName = `${patient.firstname || ""} ${patient.lastname || ""}`.trim(); }
+            if (patientRes.ok) { const patient = await patientRes.json(); patientName = formatPatientName(patient.firstname, patient.middlename, patient.lastname); }
           } catch (err) { console.warn("Could not fetch patient name:", err); }
 
           if (currentPatientId && doctorId && followupValue && serviceValue) {
