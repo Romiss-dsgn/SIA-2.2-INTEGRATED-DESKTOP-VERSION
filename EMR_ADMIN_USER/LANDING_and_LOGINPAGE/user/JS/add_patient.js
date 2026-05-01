@@ -82,7 +82,6 @@ document.getElementById("addPatient").addEventListener("submit", async function(
     zipcode: zipcode,
     email: email.trim(),
     phone: phone,
-    insurance: document.getElementById("insurance").value.trim(),
     em_fullname: document.getElementById("em_fullname").value.trim(),
     em_phone: emPhone,
     relationship: document.getElementById("relationship").value.trim(),

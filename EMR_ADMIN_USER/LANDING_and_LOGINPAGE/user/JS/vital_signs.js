@@ -198,35 +198,65 @@ document.addEventListener("DOMContentLoaded", async () => {
             <input type="date" name="date" required
               class="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
           </div>
+
+          <!-- ✅ Heart Rate with bpm label + live status -->
           <div class="flex flex-col gap-1">
             <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Heart Rate</label>
-            <input type="text" name="heartrate" placeholder="e.g. 75 bpm" required
-              class="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
+            <div class="relative">
+              <input type="number" id="hrInput" name="heartrate" placeholder="e.g. 75" min="1" max="300" required
+                class="w-full px-4 py-2.5 pr-14 rounded-lg border border-slate-200 bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
+              <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 pointer-events-none select-none">bpm</span>
+            </div>
+            <span id="hrStatus" class="text-xs font-semibold mt-0.5" style="display:none;"></span>
           </div>
+
+          <!-- ✅ Temperature with fever status indicator -->
           <div class="flex flex-col gap-1">
-            <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Temperature</label>
-            <input type="text" name="temp" placeholder="e.g. 36.5°C" required
+            <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Temperature (°C)</label>
+            <input type="number" id="tempInput" name="temp" placeholder="e.g. 36.5" step="0.1" min="30" max="45" required
               class="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
+            <span id="tempStatus" class="text-xs font-semibold mt-0.5" style="display:none;"></span>
           </div>
+
+          <!-- Weight -->
           <div class="flex flex-col gap-1">
-            <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Weight</label>
-            <input type="text" name="weight" placeholder="e.g. 65 kg" required
+            <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Weight (kg)</label>
+            <input type="number" id="weightInput" name="weight" placeholder="e.g. 65" step="0.1" min="1" required
               class="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
           </div>
+
+          <!-- ✅ Blood Pressure — split Systolic / Diastolic with live AHA classification -->
           <div class="flex flex-col gap-1">
             <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Blood Pressure</label>
-            <input type="text" name="pressure" placeholder="e.g. 120/80 mmHg" required
-              class="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
+            <div class="flex items-center gap-2">
+              <input type="number" id="systolicInput" name="systolic" placeholder="Systolic" min="40" max="300" required
+                class="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
+              <span class="text-slate-400 font-bold text-base select-none">/</span>
+              <input type="number" id="diastolicInput" name="diastolic" placeholder="Diastolic" min="20" max="200" required
+                class="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
+              <span class="text-xs font-bold text-slate-400 whitespace-nowrap select-none">mmHg</span>
+            </div>
+            <span id="bpStatus" class="text-xs font-semibold mt-0.5" style="display:none;"></span>
+            <!-- hidden field that stores the combined value for FormData -->
+            <input type="hidden" id="pressureHidden" name="pressure" />
           </div>
+
+          <!-- Height with live cm → ft/in conversion -->
           <div class="flex flex-col gap-1">
-            <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Height</label>
-            <input type="text" name="height" placeholder="e.g. 170 cm" required
+            <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Height (cm)</label>
+            <input type="number" id="heightInput" name="height" placeholder="e.g. 170" step="0.1" min="1" required
               class="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
+            <span id="heightConvert" class="text-xs font-semibold mt-0.5 text-slate-400" style="display:none;"></span>
           </div>
+
+          <!-- ✅ BMI — auto-calculated, readonly -->
           <div class="flex flex-col gap-1 col-span-2 md:col-span-3">
-            <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide">BMI</label>
-            <input type="text" name="bmi" placeholder="e.g. 22.5" required
-              class="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
+            <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+              BMI <span class="normal-case font-normal text-slate-400">(auto-calculated from Weight &amp; Height)</span>
+            </label>
+            <input type="text" id="bmiInput" name="bmi" placeholder="Calculated automatically from Weight and Height" readonly
+              class="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-slate-100 text-sm text-slate-800 cursor-not-allowed" />
+            <span id="bmiStatus" class="text-xs font-semibold mt-0.5" style="display:none;"></span>
           </div>
         </form>
       `;
@@ -234,6 +264,126 @@ document.addEventListener("DOMContentLoaded", async () => {
       vitalSignsContainer.appendChild(newCard);
       buttonCon.style.display = "flex";
       addBtn.style.display = "none";
+
+      // ── Heart Rate: live bpm status ─────────────────────────────────
+      const hrInput   = document.getElementById("hrInput");
+      const hrStatus  = document.getElementById("hrStatus");
+      hrInput.addEventListener("input", () => {
+        const val = parseFloat(hrInput.value);
+        if (!hrInput.value || isNaN(val)) { hrStatus.style.display = "none"; return; }
+        let text, color;
+        if      (val < 60)  { text = "⚠️ Bradycardia – Below normal range";  color = "#f59e0b"; }
+        else if (val <= 100){ text = "✅ Normal heart rate";                  color = "#059669"; }
+        else                { text = "⚠️ Tachycardia – Above normal range";  color = "#ef4444"; }
+        hrStatus.textContent   = text;
+        hrStatus.style.color   = color;
+        hrStatus.style.display = "block";
+      });
+
+      // ── Temperature: live fever status ─────────────────────────────
+      const tempInput  = document.getElementById("tempInput");
+      const tempStatus = document.getElementById("tempStatus");
+      tempInput.addEventListener("input", () => {
+        const val = parseFloat(tempInput.value);
+        if (!tempInput.value || isNaN(val)) { tempStatus.style.display = "none"; return; }
+        let text, color;
+        if      (val < 36.0)  { text = "🥶 Hypothermia – Critically low temperature";  color = "#3b82f6"; }
+        else if (val <= 37.2) { text = "✅ Normal – No fever detected";                 color = "#059669"; }
+        else if (val <= 37.9) { text = "🌡️ Low-grade Fever – Mild elevation";           color = "#f59e0b"; }
+        else if (val <= 38.9) { text = "🔥 Fever – Patient has fever";                  color = "#f97316"; }
+        else                  { text = "🔥 High Fever – Requires immediate attention";  color = "#dc2626"; }
+        tempStatus.textContent   = text;
+        tempStatus.style.color   = color;
+        tempStatus.style.display = "block";
+      });
+
+      // ── BMI: auto-calculate from Weight & Height ────────────────────
+      const weightInput = document.getElementById("weightInput");
+      const heightInput = document.getElementById("heightInput");
+      const bmiInput    = document.getElementById("bmiInput");
+      const bmiStatus   = document.getElementById("bmiStatus");
+
+      function calcBMI() {
+        const w = parseFloat(weightInput.value);
+        const h = parseFloat(heightInput.value);
+        if (!w || !h || h <= 0) {
+          bmiInput.value          = "";
+          bmiStatus.style.display = "none";
+          return;
+        }
+        const bmi = w / Math.pow(h / 100, 2);
+        bmiInput.value = bmi.toFixed(1);
+        let label, color;
+        if      (bmi < 18.5) { label = "Underweight";     color = "#3b82f6"; }
+        else if (bmi < 25.0) { label = "✅ Normal weight"; color = "#059669"; }
+        else if (bmi < 30.0) { label = "⚠️ Overweight";   color = "#f59e0b"; }
+        else                 { label = "⚠️ Obese";         color = "#ef4444"; }
+        bmiStatus.textContent   = `BMI ${bmi.toFixed(1)} — ${label}`;
+        bmiStatus.style.color   = color;
+        bmiStatus.style.display = "block";
+      }
+
+      weightInput.addEventListener("input", calcBMI);
+      heightInput.addEventListener("input", calcBMI);
+
+      // ── Height: live cm → ft & in conversion ───────────────────────
+      const heightConvert = document.getElementById("heightConvert");
+      heightInput.addEventListener("input", () => {
+        const cm = parseFloat(heightInput.value);
+        if (!heightInput.value || isNaN(cm) || cm <= 0) {
+          heightConvert.style.display = "none"; return;
+        }
+        const totalInches = cm / 2.54;
+        const feet        = Math.floor(totalInches / 12);
+        const inches      = Math.round(totalInches % 12);
+        heightConvert.textContent   = `≈ ${feet}ft ${inches}in  (${totalInches.toFixed(1)} inches)`;
+        heightConvert.style.display = "block";
+      });
+
+      // ── Blood Pressure: live AHA classification ─────────────────────
+      const systolicInput  = document.getElementById("systolicInput");
+      const diastolicInput = document.getElementById("diastolicInput");
+      const pressureHidden = document.getElementById("pressureHidden");
+      const bpStatus       = document.getElementById("bpStatus");
+
+      function evalBP() {
+        const s = parseFloat(systolicInput.value);
+        const d = parseFloat(diastolicInput.value);
+        const hasS = systolicInput.value !== "" && !isNaN(s);
+        const hasD = diastolicInput.value !== "" && !isNaN(d);
+
+        // update hidden combined field whenever either changes
+        if (hasS && hasD) {
+          pressureHidden.value = `${s}/${d} mmHg`;
+        } else if (hasS) {
+          pressureHidden.value = `${s}/— mmHg`;
+        } else {
+          pressureHidden.value = "";
+        }
+
+        if (!hasS || !hasD) { bpStatus.style.display = "none"; return; }
+
+        let text, color;
+        if (s > 180 || d > 120) {
+          text  = "🚨 Hypertensive Crisis – Seek emergency care immediately"; color = "#dc2626";
+        } else if (s >= 140 || d >= 90) {
+          text  = "🔴 High BP Stage 2 – Consult a doctor";                   color = "#ef4444";
+        } else if ((s >= 130 && s <= 139) || (d >= 80 && d <= 89)) {
+          text  = "🟠 High BP Stage 1 – Monitor closely";                    color = "#f97316";
+        } else if (s >= 120 && s <= 129 && d < 80) {
+          text  = "🟡 Elevated – Lifestyle changes recommended";              color = "#f59e0b";
+        } else if (s < 90 || d < 60) {
+          text  = "🔵 Hypotension – Blood pressure is low";                  color = "#3b82f6";
+        } else {
+          text  = "✅ Normal blood pressure";                                 color = "#059669";
+        }
+        bpStatus.textContent   = text;
+        bpStatus.style.color   = color;
+        bpStatus.style.display = "block";
+      }
+
+      systolicInput.addEventListener("input", evalBP);
+      diastolicInput.addEventListener("input", evalBP);
     });
   }
 
@@ -255,7 +405,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!form) return alert("No form to save!");
     if (!form.checkValidity()) { form.reportValidity(); return; }
 
-    const data = Object.fromEntries(new FormData(form).entries());
+    const raw = Object.fromEntries(new FormData(form).entries());
+
+    // ✅ Format values with proper units before saving
+    const data = {
+      date:      raw.date,
+      heartrate: raw.heartrate ? `${raw.heartrate} bpm` : raw.heartrate,
+      temp:      raw.temp      ? `${raw.temp}°C`         : raw.temp,
+      weight:    raw.weight    ? `${raw.weight} kg`      : raw.weight,
+      height:    raw.height    ? `${raw.height} cm`      : raw.height,
+      pressure:  raw.pressure  || "",   // already "120/80 mmHg" from hidden field
+      bmi:       raw.bmi       || "",
+    };
 
     try {
       const res = await fetch(`http://localhost:5000/api/patients/${patientId}/vitalsigns`, {
