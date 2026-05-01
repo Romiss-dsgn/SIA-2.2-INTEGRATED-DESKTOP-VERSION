@@ -279,13 +279,13 @@ async function loadServicesDropdown() {
     const services = result.data;
 
     select.innerHTML = `<option value=""></option>` +
-      services.map(s => `<option value="${s.category}">${s.category}</option>`).join("");
+      services.map(s => `<option value="${s.name}">${s.name}</option>`).join("");
 
     const items = services.map(s => ({
-      value: s.category,
-      label: s.category,
+      value: s.name,
+      label: s.name,
       sub: [
-        s.category,
+        s.name,
         s.price ? `₱${Number(s.price).toFixed(2)}` : ""
       ].filter(Boolean).join(" · ")
     }));

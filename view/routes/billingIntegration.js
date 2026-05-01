@@ -55,11 +55,11 @@ async function getBillingConnection() {
     }
 
     // Define Billing Service schema (matching actual billing system structure)
-    // Based on example: { service, category, price, unit }
+    // Based on example: { service, name, price, unit }
     const billingServiceSchema = new mongoose.Schema(
       {
         service: { type: String, required: true },
-        category: { type: String, required: true },
+        name: { type: String, required: true },
         price: { type: Number, required: true },
         unit: { type: String, default: "unit" },
         code: { type: String }, // Optional field (may not exist in all documents)
@@ -158,10 +158,10 @@ router.get("/billing/services", async (req, res) => {
 
       // Fallback: return a small set of common services so the UI can continue to function.
       const fallbackServices = [
-        { service: 'General Consultation', category: 'Consultation Services', price: 0, unit: 'service', code: 'CONSULT' },
-        { service: 'Follow-up Consultation', category: 'Consultation Services', price: 0, unit: 'service', code: 'FUP' },
-        { service: 'Basic Lab Panel', category: 'Laboratory', price: 250.00, unit: 'package', code: 'LAB-BASIC' },
-        { service: 'Chest X-Ray', category: 'Radiology', price: 500.00, unit: 'service', code: 'CXR' }
+        { service: 'General Consultation', name: 'Consultation Services', price: 0, unit: 'service', code: 'CONSULT' },
+        { service: 'Follow-up Consultation', name: 'Consultation Services', price: 0, unit: 'service', code: 'FUP' },
+        { service: 'Basic Lab Panel', name: 'Laboratory', price: 250.00, unit: 'package', code: 'LAB-BASIC' },
+        { service: 'Chest X-Ray', name: 'Radiology', price: 500.00, unit: 'service', code: 'CXR' }
       ];
 
       return res.json({ success: true, data: fallbackServices, fallback: true, message: 'Using fallback services (billing DB unavailable)' });
@@ -179,7 +179,7 @@ router.get("/billing/services", async (req, res) => {
     if (search) {
       query.$or = [
         { service: { $regex: search, $options: "i" } },
-        { category: { $regex: search, $options: "i" } }
+        { name: { $regex: search, $options: "i" } }
       ];
       
       // Only search by code if it exists in documents
@@ -188,8 +188,8 @@ router.get("/billing/services", async (req, res) => {
     }
 
     const services = await BillingService.find(query)
-      .select("service category price unit")
-      .sort({ category: 1, service: 1 })
+      .select("service name price unit")
+      .sort({ name: 1, service: 1 })
       .limit(50)
       .lean(); // Use lean() for better performance
 
