@@ -4,9 +4,10 @@
 // ZIP: Comprehensive PhilPost lookup by PSGC code + name fallback
 // Search: startsWith-first → instant "QUE" = "Quezon City" on top
 // Highlight: matched characters are bolded in the dropdown
+// Barangay ZIP: auto-fills ZIP from barangay name, falls back to city ZIP
 // ============================================================
 
-const PSGC_BASE = "https://psgc.gitlab.io/api";
+const PSGC_BASE = "https://psgc.gitlab.io/api/";
 
 // ============================================================
 // ZIP CODE LOOKUP TABLE (PhilPost official)
@@ -107,6 +108,329 @@ const ZIP_BY_NAME = {
   "baguio": "2600", "tabuk": "3800", "marawi": "9700", "puerto princesa": "5300",
 };
 
+// ============================================================
+// BARANGAY ZIP LOOKUP TABLE (PhilPost — barangay-level ZIPs)
+// Key: lowercase barangay name  Value: ZIP code
+// These are barangays that have their own distinct ZIP from their city.
+// If a barangay is not listed here, the city ZIP is used as fallback.
+// ============================================================
+const BARANGAY_ZIP = {
+  // Manila barangays (1001–1096)
+  "tondo": "1012", "binondo": "1006", "quiapo": "1001", "sampaloc": "1008",
+  "santa cruz": "1003", "san nicolas": "1010", "port area": "1018",
+  "intramuros": "1002", "ermita": "1000", "malate": "1004",
+  "paco": "1007", "pandacan": "1011", "santa ana": "1009",
+  "san andres": "1015",
+
+  // Quezon City barangays (1100–1135)
+  "commonwealth": "1119", "fairview": "1118", "novaliches": "1117",
+  "batasan hills": "1126", "payatas": "1119", "bagong silangan": "1119",
+  "tandang sora": "1116", "east triangle": "1101", "west triangle": "1104",
+  "san bartolome": "1116", "apolonio samson": "1106",
+  "diliman": "1101", "central": "1100", "cubao": "1109",
+  "kamuning": "1103", "kristong hari": "1111", "loyola heights": "1108",
+  "new manila": "1112", "philam": "1104", "pinyahan": "1100",
+  "quirino 2-a": "1113", "quirino 3-a": "1114", "roxas": "1107",
+  "sacred heart": "1115", "san isidro labrador": "1114",
+  "santa teresita": "1115", "talipapa": "1116",
+  "teachers village east": "1101", "teachers village west": "1101",
+  "white plains": "1110", "bagong pag-asa": "1105",
+  "balingasa": "1115", "bungad": "1105", "damayang lagi": "1112",
+  "don manuel": "1113", "escopa": "1109",
+  "greater lagro": "1118", "gulod": "1117",
+  "holy spirit": "1127", "immaculate concepcion": "1111",
+  "la loma": "1114", "laging handa": "1103",
+  "manresa": "1115", "maharlika": "1111",
+  "old capitol site": "1101", "pag-ibig sa nayon": "1118",
+  "pasong putik": "1118", "pasong tamo": "1107",
+  "project 6": "1100", "project 7": "1105", "project 8": "1106",
+  "san agustin": "1117", "san antonio": "1105",
+  "sangandaan": "1116", "sauyo": "1116",
+  "sienna": "1119", "silangan": "1119",
+  "tagumpay": "1109", "ugong norte": "1110",
+  "villa maria clara": "1109", "pinagkaisahan": "1111",
+
+  // Makati barangays (1200–1235)
+  "ayala alabang": "1209", "bangkal": "1233",
+  "bel-air": "1209", "carmona": "1202",
+  "cembo": "1213", "comembo": "1213",
+  "dasmariñas": "1214", "dasmarinas village": "1214",
+  "east rembo": "1213", "forbes park": "1201",
+  "guadalupe nuevo": "1212", "guadalupe viejo": "1211",
+  "kasilawan": "1210", "la paz": "1204",
+  "magallanes": "1232", "olympia": "1207",
+  "palanan": "1235", "pembo": "1218",
+  "pinagkaisahan": "1215", "pio del pilar": "1230",
+  "pitogo": "1214", "post proper northside": "1213",
+  "post proper southside": "1213", "rizal": "1210",
+  "rockwell": "1210", "san antonio": "1203",
+  "san isidro": "1234", "san lorenzo": "1223",
+  "santa cruz": "1201", "singkamas": "1208",
+  "south cembo": "1213", "tejeros": "1233",
+  "urdaneta": "1222", "valenzuela": "1206",
+  "west rembo": "1216",
+
+  // Pasig barangays (1600–1612)
+  "bagong ilog": "1600", "bagong katipunan": "1609",
+  "bambang": "1607", "buting": "1602",
+  "caniogan": "1603", "dela paz": "1600",
+  "kalawaan": "1600", "kapasigan": "1600",
+  "kapitolyo": "1603", "malinao": "1600",
+  "manggahan": "1611", "maybunga": "1607",
+  "oranbo": "1600", "ortigas center": "1605",
+  "palatiw": "1606", "pinagbuhatan": "1600",
+  "pineda": "1600", "rosario": "1609",
+  "sagad": "1611", "san antonio": "1600",
+  "san joaquin": "1601", "san jose": "1600",
+  "san miguel": "1600", "san nicolas": "1600",
+  "santa lucia": "1608", "santa rosa": "1600",
+  "santo tomas": "1600", "santolan": "1610",
+  "sumilang": "1600", "ugong": "1604",
+
+  // Taguig barangays (1630–1637)
+  "bgc": "1634", "bonifacio global city": "1634",
+  "fort bonifacio": "1634", "ususan": "1637",
+  "tuktukan": "1637", "hagonoy": "1636",
+  "ligid-tipas": "1631", "napindan": "1632",
+  "palingon": "1637", "san miguel": "1636",
+  "santa ana": "1637", "tanyag": "1635",
+  "upper bicutan": "1634", "western bicutan": "1633",
+  "wawa": "1638",
+
+  // Mandaluyong barangays (1550)
+  "barangka": "1550", "buayang bato": "1550",
+  "addition hills": "1550", "bagong silang": "1550",
+  "hulo": "1550", "mauway": "1550",
+  "plainview": "1550", "poblacion": "1550",
+  "pag-asa": "1550",
+
+  // Marikina barangays (1800–1811)
+  "barangka": "1800", "calumpang": "1808",
+  "concepcion uno": "1810", "concepcion dos": "1811",
+  "fortune": "1812", "industrial valley": "1800",
+  "jesus dela peña": "1800", "malanday": "1800",
+  "nangka": "1800", "parang": "1809",
+  "san roque": "1800", "santa elena": "1800",
+  "tañong": "1800",
+
+  // Parañaque barangays (1700–1720)
+  "bf homes": "1720", "don bosco": "1707",
+  "don galo": "1713", "la huerta": "1700",
+  "marcelo green": "1700", "merville": "1709",
+  "moonshine": "1716", "san antonio": "1706",
+  "san dionisio": "1700", "san isidro": "1700",
+  "san martin de porres": "1700", "san pedro": "1700",
+  "tambo": "1701", "vitalez": "1700",
+  "baclaran": "1300", "sunville": "1714",
+
+  // Las Piñas barangays (1740–1750)
+  "almanza uno": "1750", "almanza dos": "1750",
+  "bf international": "1743", "daniel fajardo": "1740",
+  "elias aldana": "1741", "ilaya": "1740",
+  "manuyo uno": "1746", "pamplona uno": "1743",
+  "pamplona dos": "1744", "pamplona tres": "1744",
+  "pilar": "1745", "pulang lupa uno": "1747",
+  "pulang lupa dos": "1747", "talon uno": "1748",
+  "talon dos": "1748", "talon tres": "1748",
+  "talon kwatro": "1749", "talon singko": "1749",
+  "zapote": "1740",
+
+  // Muntinlupa barangays (1770–1781)
+  "alabang": "1770", "bayanan": "1773",
+  "buli": "1776", "cupang": "1771",
+  "poblacion": "1776", "putatan": "1772",
+  "sucat": "1770", "tunasan": "1774",
+  "ayala alabang": "1780",
+
+  // Caloocan barangays
+  "bagong silang": "1428", "camarin": "1422",
+  "deparo": "1424", "grace park east": "1403",
+  "grace park west": "1406", "maypajo": "1409",
+  "monumento": "1400", "novaliches": "1422",
+  "sangandaan": "1400",
+
+  // Valenzuela barangays (1440–1465)
+  "arkong bato": "1441", "bignay": "1442",
+  "bisig": "1443", "canumay east": "1444",
+  "canumay west": "1444", "coloong": "1445",
+  "dalandanan": "1446", "hen. t. de leon": "1442",
+  "isla": "1447", "karuhatan": "1441",
+  "lawang bato": "1447", "lingunan": "1453",
+  "mabolo": "1448", "malanday": "1445",
+  "malinta": "1449", "mapulang lupa": "1446",
+  "marulas": "1450", "maysan": "1451",
+  "palasan": "1452", "pariancillo villa": "1453",
+  "paso de blas": "1440", "pasolo": "1440",
+  "poblacion": "1460", "pulo": "1454",
+  "punturin": "1440", "rincon": "1455",
+  "tagalag": "1456", "ugong": "1457",
+  "veinte reales": "1440", "wawang pulo": "1440",
+
+  // Cebu City barangays (6000–6009)
+  "apas": "6000", "banilad": "6000",
+  "basak pardo": "6000", "basak san nicolas": "6000",
+  "busay": "6000", "calamba": "6001",
+  "capitol site": "6000", "carreta": "6000",
+  "cogon ramos": "6000", "duljo": "6000",
+  "ermita": "6000", "guadalupe": "6000",
+  "guba": "6000", "inayawan": "6000",
+  "kasambagan": "6000", "kinasang-an": "6000",
+  "labangon": "6000", "lahug": "6000",
+  "lorega": "6000", "lusaran": "6000",
+  "luz": "6000", "mabini": "6000",
+  "mabolo": "6000", "malubog": "6000",
+  "mambaling": "6000", "pahina central": "6000",
+  "pahina san nicolas": "6000", "pamutan": "6000",
+  "pardo": "6000", "pari-an": "6000",
+  "paril": "6000", "pasil": "6000",
+  "pit-os": "6000", "poblacion lahug": "6000",
+  "pung-ol-sibugay": "6000", "punta princesa": "6000",
+  "quiot pardo": "6000", "sambag i": "6000",
+  "sambag ii": "6000", "san antonio": "6000",
+  "san jose": "6000", "san nicolas central": "6000",
+  "san roque": "6000", "santa cruz": "6000",
+  "sinsin": "6000", "suba": "6000",
+  "sudlon i": "6000", "sudlon ii": "6000",
+  "talamban": "6000", "taptap": "6000",
+  "tejero": "6000", "tinago": "6000",
+  "to-ong pardo": "6000", "zapatera": "6000",
+
+  // Davao City barangays (8000)
+  "agdao": "8000", "buhangin": "8000",
+  "bunawan": "8000", "calinan": "8000",
+  "catalunan grande": "8000", "catalunan pequeño": "8000",
+  "centro": "8000", "communal": "8000",
+  "cugman": "8000", "daliaon plantation": "8000",
+  "indangan": "8000", "lacson": "8000",
+  "lanang": "8000", "lasang": "8000",
+  "leon garcia": "8000", "lizada": "8000",
+  "lubogan": "8000", "maa": "8000",
+  "mabuhay": "8000", "malagos": "8000",
+  "malamba": "8000", "mandug": "8000",
+  "mintal": "8000", "mudiang": "8000",
+  "mulig": "8000", "panacan": "8000",
+  "paquibato": "8000", "poblacion": "8000",
+  "riverside": "8000", "san antonio": "8000",
+  "santo niño": "8000", "sasa": "8000",
+  "sirawan": "8000", "suawan": "8000",
+  "talomo": "8000", "tibungco": "8000",
+  "tigatto": "8000", "toril": "8000",
+  "tugbok": "8000", "waan": "8000",
+
+  // Cagayan de Oro barangays (9000)
+  "agusan": "9000", "balubal": "9000",
+  "bayabas": "9000", "bonbon": "9000",
+  "bugo": "9000", "bulua": "9000",
+  "camaman-an": "9000", "carmen": "9000",
+  "canitoan": "9000", "consolacion": "9000",
+  "corporate": "9000", "cowboy": "9000",
+  "dansolihon": "9000", "de oro": "9000",
+  "diversion": "9000", "echavez": "9000",
+  "gusa": "9000", "iponan": "9000",
+  "kauswagan": "9000", "lalawigan": "9000",
+  "lapasan": "9000", "lumbia": "9000",
+  "macabalan": "9000", "macasandig": "9000",
+  "mambuaya": "9000", "nazareth": "9000",
+  "pagalungan": "9000", "pagatpat": "9000",
+  "patag": "9000", "san simon": "9000",
+  "tablon": "9000", "taglimao": "9000",
+  "tignapoloan": "9000", "tuburan": "9000",
+  "tumpagon": "9000", "upper carmen": "9000",
+  "west": "9000",
+
+  // General Santos barangays (9500)
+  "apopong": "9500", "baluan": "9500",
+  "batomelong": "9500", "buayan": "9500",
+  "bula": "9500", "calumpang": "9500",
+  "catitipan": "9500", "conel": "9500",
+  "dadiangas east": "9500", "dadiangas norte": "9500",
+  "dadiangas south": "9500", "dadiangas west": "9500",
+  "fatima": "9500", "katangawan": "9500",
+  "labangal": "9500", "lagao": "9500",
+  "ligaya": "9500", "mabuhay": "9500",
+  "olympog": "9500", "san isidro": "9500",
+  "san jose": "9500", "sinawal": "9500",
+  "tambler": "9500", "united muslim": "9500",
+
+  // Iloilo City barangays (5000)
+  "arevalo": "5000", "bonifacio": "5000",
+  "concepcion arroceros": "5000", "cuartero": "5000",
+  "dungon": "5000", "guzman": "5000",
+  "habog-habog": "5000", "hibao-an": "5000",
+  "iloilo city proper": "5000", "jalandoni estate": "5000",
+  "jibao-an": "5000", "lapaz": "5000",
+  "leganes": "5000", "libertad": "5000",
+  "luna": "5000", "maasin": "5000",
+  "mandurriao": "5000", "molo": "5000",
+  "nabitasan": "5000", "oñate de leon": "5000",
+  "pale": "5000", "poblacion": "5000",
+  "san isidro": "5000", "santa barbara": "5000",
+  "tigbauan": "5000", "zarraga": "5000",
+
+  // Bacolod barangays (6100)
+  "alangilan": "6100", "alijis": "6100",
+  "banago": "6100", "bata": "6100",
+  "cabug": "6100", "estefania": "6100",
+  "felisa": "6100", "granada": "6100",
+  "handumanan": "6100", "lag-asan": "6100",
+  "lupit": "6100", "mandalagan": "6100",
+  "mansilingan": "6100", "montevista": "6100",
+  "pahanocoy": "6100", "punta taytay": "6100",
+  "singcang-airport": "6100", "sum-ag": "6100",
+  "taculing": "6100", "tangub": "6100",
+  "villamonte": "6100", "vista alegre": "6100",
+  "zone i": "6100", "zone ii": "6100",
+
+  // Baguio barangays (2600)
+  "abanao-zandueta": "2600", "alfonso tabora": "2600",
+  "ambiong": "2600", "andres bonifacio": "2600",
+  "asin road": "2600", "atok trail": "2600",
+  "aurora hill": "2600", "bakakeng central": "2600",
+  "bakakeng norte": "2600", "bayan park village": "2600",
+  "cabinet hill": "2600", "camdas subdivision": "2600",
+  "camp 7": "2600", "camp 8": "2600",
+  "camp allen": "2600", "campo filipino": "2600",
+  "city camp central": "2600", "city camp lagoon": "2600",
+  "country club village": "2600", "dagsian lower": "2600",
+  "dagsian upper": "2600", "dizon subdivision": "2600",
+  "dominican hill": "2600", "dontogan": "2600",
+  "dry igorot village": "2600", "engineers hill": "2600",
+  "fairview village": "2600", "happy hollow": "2600",
+  "hillside": "2600", "holy ghost extension": "2600",
+  "holy ghost proper": "2600", "honeymoon": "2600",
+  "irisan": "2600", "imelda village": "2600",
+  "kabayanihan": "2600", "kagitingan": "2600",
+  "kennon road": "2600", "kias": "2600",
+  "la trinidad": "2600", "lourdes subdivision": "2600",
+  "lower rock quarry": "2600", "luneta hill": "2600",
+  "magsaysay private road": "2600", "malcolm square": "2600",
+  "military cut-off": "2600", "mines view park": "2600",
+  "modern site east": "2600", "modern site west": "2600",
+  "mount data": "2600", "mps building": "2600",
+  "new pahayas": "2600", "new central business district": "2600",
+  "p.u.p. village": "2600", "pacdal": "2600",
+  "palma-urbano": "2600", "phil-am": "2600",
+  "pinget": "2600", "pinsao pilot project": "2600",
+  "pinsao proper": "2600", "poliwes": "2600",
+  "pucsusan": "2600", "quezon hill proper": "2600",
+  "rizal monument area": "2600", "rock quarry lower": "2600",
+  "rock quarry middle": "2600", "rock quarry upper": "2600",
+  "san antonio village": "2600", "san luis village": "2600",
+  "san roque village": "2600", "session road area": "2600",
+  "sierra del norte": "2600", "sierra del sur": "2600",
+  "slaughterhouse area": "2600", "south drive": "2600",
+  "tadiangan": "2600", "tam-awan": "2600",
+  "teacher's camp": "2600", "tinongdan": "2600",
+  "tiptop": "2600", "trancoville": "2600",
+  "upper general luna road": "2600", "upper magsaysay": "2600",
+  "upper market subdivision": "2600", "upper rock quarry": "2600",
+};
+
+/**
+ * Resolves ZIP code from PSGC city/municipality code and/or name.
+ * Tries code lookup first (first 6 digits), then name fallback.
+ * Also strips " City" suffix for fallback matching.
+ */
 function getZipCode(cityName, cityCode) {
   const code6 = (cityCode || "").toString().replace(/\D/g, "").substring(0, 6);
   if (code6 && ZIP_TABLE[code6]) return ZIP_TABLE[code6];
@@ -116,12 +440,22 @@ function getZipCode(cityName, cityCode) {
   return ZIP_BY_NAME[stripped] || "";
 }
 
+/**
+ * Resolves ZIP code from barangay name.
+ * Falls back to the current city ZIP if barangay not found in the table.
+ */
+function getZipFromBarangay(barangayName, fallbackCityZip) {
+  const name = (barangayName || "").toLowerCase().trim();
+  return BARANGAY_ZIP[name] || fallbackCityZip || "";
+}
+
 // ============================================================
 // SHARED STATE
 // ============================================================
 let allCitiesCache   = null;
 let currentBarangays = [];
 let selectedCityCode = null;
+let currentCityZip   = "";   // ← tracks the ZIP of the currently selected city
 
 // ============================================================
 // STYLES
@@ -222,7 +556,6 @@ function smartFilter(items, query) {
 // COMBOBOX FACTORY
 // ============================================================
 function makeCombobox(inputEl, { placeholder, onSelect, onOpen }) {
-  // Avoid double-wrapping
   if (inputEl.parentElement.classList.contains("ph-combo-wrap")) {
     inputEl.parentElement.remove();
     inputEl.classList.remove("ph-combo-input");
@@ -398,9 +731,11 @@ function setupCityAutocomplete() {
     onSelect: async item => {
       selectedCityCode = item.value;
 
-      // ✅ Auto-fill ZIP from lookup table
+      // Auto-fill ZIP from city lookup, and remember it as fallback
+      const cityZip = getZipCode(item.label, item.value);
+      currentCityZip = cityZip;
       if (zipcodeInput && !zipcodeInput.disabled) {
-        zipcodeInput.value = getZipCode(item.label, item.value);
+        zipcodeInput.value = cityZip;
       }
 
       // Reset barangay
@@ -414,9 +749,15 @@ function setupCityAutocomplete() {
         barangayInput.placeholder = "Loading barangays…";
         currentBarangays = await loadBarangaysForCity(selectedCityCode);
         barangayInput.placeholder = orig || "Pumili ng barangay";
-        if (barangayCombo) barangayCombo.setItems(
-          currentBarangays.map(b => ({ label: b.name, value: b.code }))
-        );
+        if (barangayCombo) {
+          barangayCombo.setItems(
+            currentBarangays.map(b => ({
+              label: b.name,
+              value: b.code,
+              zip:   getZipFromBarangay(b.name, currentCityZip),
+            }))
+          );
+        }
       }
     },
     onOpen: async ({ showLoading, renderList, setItems }) => {
@@ -435,24 +776,40 @@ function setupCityAutocomplete() {
 
 function setupBarangayAutocomplete() {
   const barangayInput = document.getElementById("barangay");
+  const zipcodeInput  = document.getElementById("zipcode");
   if (!barangayInput) return;
 
   barangayCombo = makeCombobox(barangayInput, {
     placeholder: "Hanapin ang barangay…",
-    onSelect(_item) { /* zip already set from city */ },
+    onSelect(item) {
+      // Auto-fill ZIP from barangay lookup, fall back to city ZIP
+      if (zipcodeInput && !zipcodeInput.disabled) {
+        zipcodeInput.value = getZipFromBarangay(item.label, currentCityZip);
+      }
+    },
     onOpen: ({ showLoading, renderList, setItems }) => {
       if (currentBarangays.length === 0) {
         showLoading("Pumili muna ng city…");
         return;
       }
-      const items = currentBarangays.map(b => ({ label: b.name, value: b.code }));
+      const items = currentBarangays.map(b => ({
+        label: b.name,
+        value: b.code,
+        zip:   getZipFromBarangay(b.name, currentCityZip),
+      }));
       setItems(items);
       renderList(items);
     },
   });
 
   if (currentBarangays.length > 0) {
-    barangayCombo.setItems(currentBarangays.map(b => ({ label: b.name, value: b.code })));
+    barangayCombo.setItems(
+      currentBarangays.map(b => ({
+        label: b.name,
+        value: b.code,
+        zip:   getZipFromBarangay(b.name, currentCityZip),
+      }))
+    );
   }
 }
 
@@ -521,15 +878,22 @@ async function loadPatientInfo() {
       });
     }
 
-    // Pre-load barangays if city is already set
+    // Pre-load barangays and city ZIP if city is already set
     if (p.city) {
       const cities = await loadAllCities();
       const matched = cities.find(c => c.name.toLowerCase() === p.city.toLowerCase());
       if (matched) {
         selectedCityCode = matched.code;
+        currentCityZip   = getZipCode(matched.name, matched.code);
         loadBarangaysForCity(selectedCityCode).then(brgy => {
           currentBarangays = brgy;
-          if (barangayCombo) barangayCombo.setItems(brgy.map(b => ({ label: b.name, value: b.code })));
+          if (barangayCombo) {
+            barangayCombo.setItems(brgy.map(b => ({
+              label: b.name,
+              value: b.code,
+              zip:   getZipFromBarangay(b.name, currentCityZip),
+            })));
+          }
         });
       }
     }
