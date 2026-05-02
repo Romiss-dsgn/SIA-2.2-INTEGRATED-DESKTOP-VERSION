@@ -95,6 +95,57 @@ document.addEventListener("DOMContentLoaded", async () => {
     addVitalBtn.style.display = "none";
   }
 
+  // ── Status helper functions ─────────────────────────────────────────
+  function getHRStatus(val) {
+    const n = parseFloat(val);
+    if (isNaN(n)) return null;
+    if (n < 60)   return { text: "⚠️ Bradycardia – Below normal range",  color: "#f59e0b" };
+    if (n <= 100) return { text: "✅ Normal heart rate",                  color: "#059669" };
+    return              { text: "⚠️ Tachycardia – Above normal range",   color: "#ef4444" };
+  }
+  function getTempStatus(val) {
+    const n = parseFloat(val);
+    if (isNaN(n)) return null;
+    if (n < 36.0)  return { text: "🥶 Hypothermia – Critically low temperature",  color: "#3b82f6" };
+    if (n <= 37.2) return { text: "✅ Normal – No fever detected",                 color: "#059669" };
+    if (n <= 37.9) return { text: "🌡️ Low-grade Fever – Mild elevation",           color: "#f59e0b" };
+    if (n <= 38.9) return { text: "🔥 Fever – Patient has fever",                  color: "#f97316" };
+    return               { text: "🔥 High Fever – Requires immediate attention",  color: "#dc2626" };
+  }
+  function getBMIStatus(val) {
+    const n = parseFloat(val);
+    if (isNaN(n)) return null;
+    if (n < 18.5) return { text: `BMI ${n.toFixed(1)} — Underweight`,      color: "#3b82f6" };
+    if (n < 25.0) return { text: `BMI ${n.toFixed(1)} — ✅ Normal weight`, color: "#059669" };
+    if (n < 30.0) return { text: `BMI ${n.toFixed(1)} — ⚠️ Overweight`,   color: "#f59e0b" };
+    return              { text: `BMI ${n.toFixed(1)} — ⚠️ Obese`,         color: "#ef4444" };
+  }
+  function getBPStatus(val) {
+    if (!val) return null;
+    const match = String(val).match(/(\d+\.?\d*)\s*\/\s*(\d+\.?\d*)/);
+    if (!match) return null;
+    const s = parseFloat(match[1]), d = parseFloat(match[2]);
+    if (s > 180 || d > 120) return { text: "🚨 Hypertensive Crisis – Seek emergency care immediately", color: "#dc2626" };
+    if (s >= 140 || d >= 90) return { text: "🔴 High BP Stage 2 – Consult a doctor",                  color: "#ef4444" };
+    if ((s >= 130 && s <= 139) || (d >= 80 && d <= 89)) return { text: "🟠 High BP Stage 1 – Monitor closely", color: "#f97316" };
+    if (s >= 120 && s <= 129 && d < 80) return { text: "🟡 Elevated – Lifestyle changes recommended",  color: "#f59e0b" };
+    if (s < 90 || d < 60) return { text: "🔵 Hypotension – Blood pressure is low",                     color: "#3b82f6" };
+    return { text: "✅ Normal blood pressure", color: "#059669" };
+  }
+  function getHeightConvert(val) {
+    const cm = parseFloat(val);
+    if (isNaN(cm) || cm <= 0) return null;
+    const totalInches = cm / 2.54;
+    const feet  = Math.floor(totalInches / 12);
+    const inches = Math.round(totalInches % 12);
+    return { text: `≈ ${feet}ft ${inches}in  (${totalInches.toFixed(1)} inches)` };
+  }
+  function statusBadge(status, extraColor) {
+    if (!status) return "";
+    const color = extraColor || status.color || "#64748b";
+    return `<span class="text-xs font-semibold mt-1 block" style="color:${color}">${status.text}</span>`;
+  }
+
   // Load existing vital sign records
   async function loadVitals() {
     try {
@@ -129,10 +180,12 @@ document.addEventListener("DOMContentLoaded", async () => {
               <div class="flex flex-col gap-1">
                 <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Heart Rate</label>
                 <div class="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-white text-sm text-slate-800">${v.heartrate || "—"}</div>
+                ${statusBadge(getHRStatus(v.heartrate))}
               </div>
               <div class="flex flex-col gap-1">
                 <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Temperature</label>
                 <div class="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-white text-sm text-slate-800">${v.temp || "—"}</div>
+                ${statusBadge(getTempStatus(v.temp))}
               </div>
               <div class="flex flex-col gap-1">
                 <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Weight</label>
@@ -141,16 +194,19 @@ document.addEventListener("DOMContentLoaded", async () => {
               <div class="flex flex-col gap-1">
                 <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Blood Pressure</label>
                 <div class="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-white text-sm text-slate-800">${v.pressure || "—"}</div>
+                ${statusBadge(getBPStatus(v.pressure))}
               </div>
               <div class="flex flex-col gap-1">
                 <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Height</label>
                 <div class="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-white text-sm text-slate-800">${v.height || "—"}</div>
+                ${(() => { const h = getHeightConvert(v.height); return h ? `<span class="text-xs font-semibold mt-1 block" style="color:#64748b">${h.text}</span>` : ""; })()}
               </div>
             </div>
             <div class="grid grid-cols-1 gap-4">
               <div class="flex flex-col gap-1">
                 <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide">BMI</label>
                 <div class="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-white text-sm text-slate-800">${v.bmi || "—"}</div>
+                ${statusBadge(getBMIStatus(v.bmi))}
               </div>
             </div>
           `;
