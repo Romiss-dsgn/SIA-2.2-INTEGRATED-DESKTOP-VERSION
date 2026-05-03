@@ -61,7 +61,7 @@
     <script src="JS/Sidebar.js"></script>
     <script>loadSidebar("AddPatient.html");</script>
 
-    <!-- NEW HEADER -->
+    <!-- HEADER -->
     <header id="topHeader" class="fixed top-0 left-64 right-0 h-20 flex items-center justify-end px-10 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-100 dark:border-slate-700 z-40">
       <div class="flex items-center gap-6">
         <div class="flex items-center gap-4 bg-slate-50 dark:bg-slate-700 px-4 py-2 rounded-2xl border border-slate-100 dark:border-slate-600">
@@ -82,7 +82,6 @@
       </div>
     </header>
 
-    <!-- ORIGINAL STRUCTURE PRESERVED EXACTLY -->
     <main class="flex-1 ml-64 p-5 overflow-y-auto" style="margin-top: 80px;">
       <div class="mainContent bg-white rounded-xl shadow-sm border border-border-light p-6">
         <div class="titleCon mb-6">
@@ -90,51 +89,39 @@
         </div>
 
         <form id="addPatient" action="">
-          <section class="topSec grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
-            <div class="topLeft">
-              <div class="section-header flex items-center gap-2 text-primary font-semibold mb-4">
-                <i class="fas fa-id-card"></i> Personal Information
-              </div>
-              <div class="form-group mb-4">
+          <section class="topSec mb-6">
+            <div class="section-header flex items-center gap-2 text-primary font-semibold mb-4">
+              <i class="fas fa-id-card"></i> Personal Information
+            </div>
+
+            <!-- Row 1: Patient ID | Last Name -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-4">
+              <div class="form-group">
                 <label for="patientid" class="block text-sm font-medium text-gray-700 mb-1">Patient ID</label>
                 <div class="input-wrapper relative">
                   <input type="text" id="patientid" name="patientid" placeholder="Auto-generated" readonly class="has-icon w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-gray-50" />
                   <i class="fas fa-hashtag absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                 </div>
               </div>
-              <div class="form-group mb-4">
-                <label for="firstname" class="block text-sm font-medium text-gray-700 mb-1">First Name <span class="required text-red-500">*</span></label>
-                <div class="input-wrapper relative">
-                  <input type="text" id="firstname" name="firstname" placeholder="Enter first name" required class="has-icon w-full px-4 py-2.5 rounded-lg border border-gray-200" pattern="[A-Za-zÑñ\s\-']+" title="Only letters, spaces, hyphens, and apostrophes allowed" />
-                  <i class="fas fa-user absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                </div>
-              </div>
-              <!-- ✅ NEW: Middle Name Field -->
-              <div class="form-group mb-4">
-                <label for="middlename" class="block text-sm font-medium text-gray-700 mb-1">Middle Name <span class="text-gray-400 text-xs">(Optional)</span></label>
-                <div class="input-wrapper relative">
-                  <input type="text" id="middlename" name="middlename" placeholder="Leave blank if none" class="has-icon w-full px-4 py-2.5 rounded-lg border border-gray-200" pattern="[A-Za-zÑñ\s\-']+" title="Only letters, spaces, hyphens, and apostrophes allowed" />
-                  <i class="fas fa-user absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                </div>
-              </div>
-              <div class="form-group mb-4">
-                <label for="dob" class="block text-sm font-medium text-gray-700 mb-1">Date of Birth <span class="required text-red-500">*</span></label>
-                <div class="input-wrapper relative">
-                  <input type="date" id="dob" name="dob" max="" required class="has-icon w-full px-4 py-2.5 rounded-lg border border-gray-200" />
-                  <i class="fas fa-calendar-alt absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                </div>
-              </div>
-            </div>
-            <div class="topRight">
-              <div class="section-header flex items-center gap-2 text-primary font-semibold mb-4 opacity-0">Spacer</div>
-              <div class="form-group mb-4">
+              <div class="form-group">
                 <label for="lastname" class="block text-sm font-medium text-gray-700 mb-1">Last Name <span class="required text-red-500">*</span></label>
                 <div class="input-wrapper relative">
                   <input type="text" id="lastname" name="lastname" placeholder="Enter last name" required class="has-icon w-full px-4 py-2.5 rounded-lg border border-gray-200" pattern="[A-Za-zÑñ\s\-']+" title="Only letters, spaces, hyphens, and apostrophes allowed" />
                   <i class="fas fa-user absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                 </div>
               </div>
-              <div class="form-group mb-4">
+            </div>
+
+            <!-- Row 2: First Name | Gender -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-4">
+              <div class="form-group">
+                <label for="firstname" class="block text-sm font-medium text-gray-700 mb-1">First Name <span class="required text-red-500">*</span></label>
+                <div class="input-wrapper relative">
+                  <input type="text" id="firstname" name="firstname" placeholder="Enter first name" required class="has-icon w-full px-4 py-2.5 rounded-lg border border-gray-200" pattern="[A-Za-zÑñ\s\-']+" title="Only letters, spaces, hyphens, and apostrophes allowed" />
+                  <i class="fas fa-user absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                </div>
+              </div>
+              <div class="form-group">
                 <label for="gender" class="block text-sm font-medium text-gray-700 mb-1">Gender <span class="required text-red-500">*</span></label>
                 <div class="input-wrapper relative">
                   <select id="gender" name="gender" required class="has-icon w-full px-4 py-2.5 rounded-lg border border-gray-200">
@@ -148,12 +135,69 @@
                 </div>
               </div>
             </div>
+
+            <!-- Row 3: Middle Name | Date of Birth -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-4">
+              <div class="form-group">
+                <label for="middlename" class="block text-sm font-medium text-gray-700 mb-1">Middle Name <span class="text-gray-400 text-xs">(Optional)</span></label>
+                <div class="input-wrapper relative">
+                  <input type="text" id="middlename" name="middlename" placeholder="Leave blank if none" class="has-icon w-full px-4 py-2.5 rounded-lg border border-gray-200" pattern="[A-Za-zÑñ\s\-']+" title="Only letters, spaces, hyphens, and apostrophes allowed" />
+                  <i class="fas fa-user absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="dob" class="block text-sm font-medium text-gray-700 mb-1">Date of Birth <span class="required text-red-500">*</span></label>
+                <div class="input-wrapper relative">
+                  <input type="date" id="dob" name="dob" max="" required class="has-icon w-full px-4 py-2.5 rounded-lg border border-gray-200" />
+                  <i class="fas fa-calendar-alt absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                </div>
+              </div>
+            </div>
           </section>
 
           <section class="middleSec mb-6">
             <div class="section-header flex items-center gap-2 text-primary font-semibold mb-4">
               <i class="fas fa-map-marker-alt"></i> Address Information
             </div>
+
+            <!-- Row 1: Province (full width) -->
+            <div class="form-group mb-4">
+              <label for="province" class="block text-sm font-medium text-gray-700 mb-1">Province / Region <span class="required text-red-500">*</span></label>
+              <div class="input-wrapper relative">
+                <input type="text" id="province" name="province" placeholder="Select province or region" required class="has-icon w-full px-4 py-2.5 rounded-lg border border-gray-200" />
+                <i class="fas fa-map absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+              </div>
+            </div>
+
+            <!-- Row 2: City → Barangay → Zip Code -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <!-- 1. City -->
+              <div class="form-group">
+                <label for="city" class="block text-sm font-medium text-gray-700 mb-1">City / Municipality <span class="required text-red-500">*</span></label>
+                <div class="input-wrapper relative">
+                  <input type="text" id="city" name="city" placeholder="Select province first" required class="has-icon w-full px-4 py-2.5 rounded-lg border border-gray-200" />
+                  <i class="fas fa-city absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                </div>
+              </div>
+              <!-- 2. Barangay -->
+              <div class="form-group">
+                <label for="barangay" class="block text-sm font-medium text-gray-700 mb-1">Barangay <span class="required text-red-500">*</span></label>
+                <div class="input-wrapper relative">
+                  <input type="text" id="barangay" name="barangay" placeholder="Select city first" required class="has-icon w-full px-4 py-2.5 rounded-lg border border-gray-200" />
+                  <i class="fas fa-map-pin absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                </div>
+              </div>
+              <!-- 3. Zip Code auto-filled -->
+              <div class="form-group">
+                <label for="zipcode" class="block text-sm font-medium text-gray-700 mb-1">Zip Code <span class="text-gray-400 text-xs">(Auto-filled)</span></label>
+                <div class="input-wrapper relative">
+                  <input type="text" id="zipcode" name="zipcode" placeholder="Auto-filled" readonly class="has-icon w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-gray-50" maxlength="4" pattern="[0-9]{4}" title="Please enter exactly 4 digits" />
+                  <i class="fas fa-mail-bulk absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Street Address — full width, AFTER city/barangay/zip -->
             <div class="form-group mb-4">
               <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Street Address</label>
               <div class="input-wrapper relative">
@@ -163,46 +207,26 @@
             </div>
           </section>
 
-          <section class="bottomSec grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
-            <div class="bottomLeft">
-              <div class="form-group mb-4">
-                <label for="barangay" class="block text-sm font-medium text-gray-700 mb-1">Barangay</label>
-                <div class="input-wrapper relative">
-                  <input type="text" id="barangay" name="barangay" placeholder="Enter barangay" required class="has-icon w-full px-4 py-2.5 rounded-lg border border-gray-200" />
-                  <i class="fas fa-map-pin absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                </div>
-              </div>
-              <div class="form-group mb-4">
-                <label for="zipcode" class="block text-sm font-medium text-gray-700 mb-1">Zip Code</label>
-                <div class="input-wrapper relative">
-                  <input type="text" id="zipcode" name="zipcode" placeholder="Enter zip code (4 digits)" required class="has-icon w-full px-4 py-2.5 rounded-lg border border-gray-200" maxlength="4" pattern="[0-9]{4}" title="Please enter exactly 4 digits" />
-                  <i class="fas fa-mail-bulk absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                </div>
-              </div>
-              <div class="form-group mb-4">
-                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <div class="input-wrapper relative">
-                  <input type="email" id="email" name="email" placeholder="example@email.com" required class="has-icon w-full px-4 py-2.5 rounded-lg border border-gray-200" />
-                  <i class="fas fa-envelope absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                </div>
-              </div>
+          <!-- Contact Info -->
+          <section class="contactSec mb-6">
+            <div class="section-header flex items-center gap-2 text-primary font-semibold mb-4">
+              <i class="fas fa-phone"></i> Contact Information
             </div>
-            <div class="bottomRight">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div class="form-group mb-4">
-                <label for="city" class="block text-sm font-medium text-gray-700 mb-1">City</label>
-                <div class="input-wrapper relative">
-                  <input type="text" id="city" name="city" placeholder="Enter city" required class="has-icon w-full px-4 py-2.5 rounded-lg border border-gray-200" />
-                  <i class="fas fa-city absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                </div>
-              </div>
-              <div class="form-group mb-4">
-                <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number <span class="required text-red-500">*</span></label>
                 <div class="input-wrapper relative">
                   <input type="tel" id="phone" name="phone" placeholder="09XXXXXXXXX" required class="has-icon w-full px-4 py-2.5 rounded-lg border border-gray-200" maxlength="11" pattern="[0-9]{11}" title="Please enter exactly 11 digits" />
                   <i class="fas fa-phone absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                 </div>
               </div>
-              
+              <div class="form-group mb-4">
+                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <div class="input-wrapper relative">
+                  <input type="email" id="email" name="email" placeholder="example@gmail.com" required class="has-icon w-full px-4 py-2.5 rounded-lg border border-gray-200" />
+                  <i class="fas fa-envelope absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                </div>
+              </div>
             </div>
           </section>
 
@@ -238,7 +262,7 @@
                 <div class="form-group mb-4">
                   <label for="em_email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
                   <div class="input-wrapper relative">
-                    <input type="email" id="em_email" name="em_email" placeholder="example@email.com" class="has-icon w-full px-4 py-2.5 rounded-lg border border-gray-200" />
+                    <input type="email" id="em_email" name="em_email" placeholder="example@gmail.com" class="has-icon w-full px-4 py-2.5 rounded-lg border border-gray-200" />
                     <i class="fas fa-envelope absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                   </div>
                 </div>
