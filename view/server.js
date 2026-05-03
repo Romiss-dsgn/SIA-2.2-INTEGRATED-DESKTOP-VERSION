@@ -525,7 +525,7 @@ app.delete("/api/archive/:id", async (req, res) => {
 const patientSchema = new mongoose.Schema({
   patientId: { type: String, unique: true },
   firstname: String,
-  middlename: { type: String, default: null }, 
+  middlename: { type: String, default: null },
   lastname: String,
   dob: Date,
   gender: String,
@@ -542,7 +542,7 @@ const patientSchema = new mongoose.Schema({
   relationship: String,
   em_email: String,
 }, {
-  timestamps: true  // ✅ ADD THIS LINE - Creates createdAt and updatedAt automatically
+  timestamps: true
 });
 const Patient = mongoose.model("Patient", patientSchema);
 
@@ -554,8 +554,6 @@ async function generatePatientId() {
   const lastIdNum = parseInt(lastId.replace("P", ""));
   return "P" + (lastIdNum + 1).toString().padStart(3, "0");
 }
-
-
 
 app.get("/api/patients/fix-status", async (req, res) => {
   try {
@@ -592,35 +590,23 @@ app.get("/api/patients/check-all", async (req, res) => {
 app.post("/api/patients", async (req, res) => {
   try {
     const newId = await generatePatientId();
-    
-    // ✅ Create patient data with explicit createdAt
     const patientData = {
       ...req.body,
       patientId: newId,
-      createdAt: new Date(),  // ✅ IMPORTANT: Explicit timestamp
+      createdAt: new Date(),
       status: req.body.status || "Active"
     };
-    
     const patient = new Patient(patientData);
     await patient.save();
-    
-    // ✅ Log for debugging
     console.log('✅ New patient registered:', {
       id: patient.patientId,
       name: `${patient.firstname} ${patient.lastname}`,
       createdAt: patient.createdAt
     });
-    
-    res.status(201).json({ 
-      message: "Patient registered successfully", 
-      patient 
-    });
+    res.status(201).json({ message: "Patient registered successfully", patient });
   } catch (err) {
     console.error('❌ Error registering patient:', err);
-    res.status(500).json({ 
-      message: "Error registering patient",
-      error: err.message 
-    });
+    res.status(500).json({ message: "Error registering patient", error: err.message });
   }
 });
 
@@ -656,158 +642,52 @@ app.put("/api/patients/:patientId", async (req, res) => {
 app.post("/api/patients/auto-update-status", async (req, res) => {
   try {
     console.log("🔄 Starting auto-inactive patient status check...");
-    
     const now = new Date();
     const thirtyDaysAgo = new Date(now);
     thirtyDaysAgo.setDate(now.getDate() - 30);
     thirtyDaysAgo.setHours(0, 0, 0, 0);
-    
     const thirtyDaysFromNow = new Date(now);
     thirtyDaysFromNow.setDate(now.getDate() + 30);
     thirtyDaysFromNow.setHours(23, 59, 59, 999);
-    
-    console.log("📅 Date ranges:", {
-      past30Days: thirtyDaysAgo.toISOString(),
-      next30Days: thirtyDaysFromNow.toISOString(),
-      today: now.toISOString()
-    });
-    
-    // Get all currently ACTIVE patients
     const activePatients = await Patient.find({ status: "Active" });
-    console.log(`👥 Found ${activePatients.length} active patients to check`);
-    
     let updatedCount = 0;
     const updatedPatients = [];
-    
     for (const patient of activePatients) {
-      // Check for appointments in the LAST 30 days
-      const recentAppointments = await Appointment.find({
-        patientId: patient.patientId,
-        date: { 
-          $gte: thirtyDaysAgo,
-          $lte: now
-        }
-      });
-      
-      // Check for appointments in the NEXT 30 days
-      const upcomingAppointments = await Appointment.find({
-        patientId: patient.patientId,
-        date: { 
-          $gte: now,
-          $lte: thirtyDaysFromNow
-        }
-      });
-      
-      // Also check archived appointments for the last 30 days
-      const recentArchivedAppointments = await ArchiveAppointment.find({
-        patientId: patient.patientId,
-        date: { 
-          $gte: thirtyDaysAgo,
-          $lte: now
-        }
-      });
-      
+      const recentAppointments = await Appointment.find({ patientId: patient.patientId, date: { $gte: thirtyDaysAgo, $lte: now } });
+      const upcomingAppointments = await Appointment.find({ patientId: patient.patientId, date: { $gte: now, $lte: thirtyDaysFromNow } });
+      const recentArchivedAppointments = await ArchiveAppointment.find({ patientId: patient.patientId, date: { $gte: thirtyDaysAgo, $lte: now } });
       const totalRecentAppointments = recentAppointments.length + recentArchivedAppointments.length;
-      
-      // ✅ AND LOGIC: Mark as INACTIVE only if BOTH conditions are true
-      const hasNoRecentAppointment = totalRecentAppointments === 0;
-      const hasNoUpcomingAppointment = upcomingAppointments.length === 0;
-      
-      if (hasNoRecentAppointment && hasNoUpcomingAppointment) {
-        // Mark patient as inactive
+      if (totalRecentAppointments === 0 && upcomingAppointments.length === 0) {
         patient.status = "Inactive";
         await patient.save();
-        
         updatedCount++;
-        updatedPatients.push({
-          patientId: patient.patientId,
-          name: `${patient.firstname} ${patient.lastname}`,
-          recentAppointments: totalRecentAppointments,
-          upcomingAppointments: upcomingAppointments.length
-        });
-        
-        console.log(`📝 Marked as INACTIVE: ${patient.patientId} - ${patient.firstname} ${patient.lastname}`);
-      } else {
-        console.log(`✅ Kept ACTIVE: ${patient.patientId} - Recent: ${totalRecentAppointments}, Upcoming: ${upcomingAppointments.length}`);
+        updatedPatients.push({ patientId: patient.patientId, name: `${patient.firstname} ${patient.lastname}` });
       }
     }
-    
-    console.log(`✅ Auto-inactive check complete. Updated ${updatedCount} patients.`);
-    
-    res.json({
-      success: true,
-      message: `Auto-inactive check complete`,
-      updatedCount,
-      totalChecked: activePatients.length,
-      updatedPatients,
-      criteria: {
-        logic: "AND",
-        past30Days: "No appointments in last 30 days",
-        next30Days: "No appointments in next 30 days"
-      }
-    });
-    
+    res.json({ success: true, message: `Auto-inactive check complete`, updatedCount, totalChecked: activePatients.length, updatedPatients });
   } catch (err) {
     console.error("❌ Error in auto-inactive check:", err);
-    res.status(500).json({
-      success: false,
-      message: "Error updating patient statuses",
-      error: err.message
-    });
+    res.status(500).json({ success: false, message: "Error updating patient statuses", error: err.message });
   }
 });
- 
-// ====== GET PATIENT APPOINTMENT SUMMARY ======
-// Optional: Returns appointment summary for a specific patient
+
 app.get("/api/patients/:patientId/appointment-summary", async (req, res) => {
   try {
     const { patientId } = req.params;
     const now = new Date();
-    
-    const thirtyDaysAgo = new Date(now);
-    thirtyDaysAgo.setDate(now.getDate() - 30);
-    
-    const thirtyDaysFromNow = new Date(now);
-    thirtyDaysFromNow.setDate(now.getDate() + 30);
-    
-    // Get recent appointments (last 30 days)
-    const recentActive = await Appointment.find({
-      patientId,
-      date: { $gte: thirtyDaysAgo, $lte: now }
-    }).sort({ date: -1 }).limit(1);
-    
-    const recentArchived = await ArchiveAppointment.find({
-      patientId,
-      date: { $gte: thirtyDaysAgo, $lte: now }
-    }).sort({ date: -1 }).limit(1);
-    
-    const lastAppointment = [...recentActive, ...recentArchived]
-      .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-    
-    // Get upcoming appointments (next 30 days)
-    const upcoming = await Appointment.find({
-      patientId,
-      date: { $gte: now, $lte: thirtyDaysFromNow }
-    }).sort({ date: 1 }).limit(1);
-    
+    const thirtyDaysAgo = new Date(now); thirtyDaysAgo.setDate(now.getDate() - 30);
+    const thirtyDaysFromNow = new Date(now); thirtyDaysFromNow.setDate(now.getDate() + 30);
+    const recentActive = await Appointment.find({ patientId, date: { $gte: thirtyDaysAgo, $lte: now } }).sort({ date: -1 }).limit(1);
+    const recentArchived = await ArchiveAppointment.find({ patientId, date: { $gte: thirtyDaysAgo, $lte: now } }).sort({ date: -1 }).limit(1);
+    const lastAppointment = [...recentActive, ...recentArchived].sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+    const upcoming = await Appointment.find({ patientId, date: { $gte: now, $lte: thirtyDaysFromNow } }).sort({ date: 1 }).limit(1);
     res.json({
       patientId,
-      lastAppointment: lastAppointment ? {
-        date: lastAppointment.date,
-        doctor: lastAppointment.doctorName,
-        type: lastAppointment.type,
-        daysAgo: Math.floor((now - new Date(lastAppointment.date)) / (1000 * 60 * 60 * 24))
-      } : null,
-      nextAppointment: upcoming[0] ? {
-        date: upcoming[0].date,
-        doctor: upcoming[0].doctorName,
-        type: upcoming[0].type,
-        daysFromNow: Math.floor((new Date(upcoming[0].date) - now) / (1000 * 60 * 60 * 24))
-      } : null,
+      lastAppointment: lastAppointment ? { date: lastAppointment.date, doctor: lastAppointment.doctorName, type: lastAppointment.type, daysAgo: Math.floor((now - new Date(lastAppointment.date)) / (1000 * 60 * 60 * 24)) } : null,
+      nextAppointment: upcoming[0] ? { date: upcoming[0].date, doctor: upcoming[0].doctorName, type: upcoming[0].type, daysFromNow: Math.floor((new Date(upcoming[0].date) - now) / (1000 * 60 * 60 * 24)) } : null,
       totalRecentAppointments: recentActive.length + recentArchived.length,
       totalUpcomingAppointments: upcoming.length
     });
-    
   } catch (err) {
     res.status(500).json({ message: "Error fetching appointment summary" });
   }
@@ -999,71 +879,115 @@ app.delete("/api/vitalsigns/:vitalId", async (req, res) => {
   }
 });
 
+// ══════════════════════════════════════════════════════════════════════
+// ✅ AI VITAL STATUS ROUTE — Claude API proxy (safe, server-side)
+// Requires ANTHROPIC_API_KEY in your .env file
+// Called by vital_signs.js as: POST /api/ai/vital-status
+// ══════════════════════════════════════════════════════════════════════
+const AI_VITAL_PROMPTS = {
+  heartrate: (v) =>
+    `You are a clinical assistant. A patient's resting heart rate is ${v} bpm.
+Normal adult range is 60–100 bpm. Bradycardia is below 60 bpm. Tachycardia is above 100 bpm.
+Give ONE short clinical interpretation (max 12 words). Start with the correct emoji:
+✅ normal  |  ⚠️ mild concern  |  🔴 moderate concern  |  🚨 urgent
+Only output the single line. No extra text, no punctuation after.`,
+
+  temperature: (v) =>
+    `You are a clinical assistant. A patient's oral body temperature is ${v}°C.
+Normal: 36.0–37.2°C | Low-grade fever: 37.3–37.9°C | Fever: 38.0–38.9°C | High fever: ≥39°C | Hypothermia: <36°C.
+Give ONE short clinical interpretation (max 12 words). Start with the correct emoji:
+✅ normal  |  🥶 hypothermia  |  🌡️ low-grade fever  |  🔥 fever  |  🚨 high fever
+Only output the single line. No extra text.`,
+
+  bloodpressure: (v) =>
+    `You are a clinical assistant. A patient's blood pressure is ${v} mmHg.
+AHA 2017: Normal <120/80 | Elevated 120-129/<80 | Stage 1 HTN 130-139/80-89 | Stage 2 HTN ≥140/≥90 | Crisis >180/>120 | Hypotension <90/60.
+Give ONE short clinical interpretation (max 12 words). Start with the correct emoji:
+✅ normal  |  🟡 elevated  |  🟠 Stage 1 HTN  |  🔴 Stage 2 HTN  |  🚨 crisis  |  🔵 hypotension
+Only output the single line. No extra text.`,
+};
+
+app.post("/api/ai/vital-status", async (req, res) => {
+  const { type, value } = req.body;
+
+  if (!type || !value) {
+    return res.status(400).json({ error: "Missing type or value" });
+  }
+
+  const promptFn = AI_VITAL_PROMPTS[type];
+  if (!promptFn) {
+    return res.status(400).json({ error: "Unknown vital type. Use: heartrate, temperature, bloodpressure" });
+  }
+
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    console.warn("⚠️ ANTHROPIC_API_KEY not set — AI vital status skipped");
+    return res.status(500).json({ error: "ANTHROPIC_API_KEY not configured on server" });
+  }
+
+  try {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type":      "application/json",
+        "x-api-key":         apiKey,
+        "anthropic-version": "2023-06-01",
+      },
+      body: JSON.stringify({
+        model:      "claude-haiku-4-5-20251001",  // fast + cheap for short labels
+        max_tokens: 60,
+        messages:   [{ role: "user", content: promptFn(value) }],
+      }),
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error("❌ Anthropic API error:", errText);
+      return res.status(502).json({ error: "AI upstream error" });
+    }
+
+    const data   = await response.json();
+    const result = data?.content?.[0]?.text?.trim() ?? "";
+    console.log(`🤖 AI vital [${type}=${value}] → ${result}`);
+    return res.json({ result });
+
+  } catch (err) {
+    console.error("❌ AI vital-status route error:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+console.log("✅ AI vital-status route registered → POST /api/ai/vital-status");
+// ══════════════════════════════════════════════════════════════════════
+
 // ====== LAB RESULT SCHEMA ======
-// ✅ Updated: fileData is now optional to support both
-//    (1) file-upload results  and  (2) structured-form results
 const labResultSchema = new mongoose.Schema(
   {
-    patientId:    { type: String,                          default: null },
-    patientName:  { type: String,                          required: true },
-    testName:     { type: String,                          required: true },
-    testDate:     { type: Date,                            default: Date.now },
-    notes:        { type: String,                          default: "" },
-    // --- file upload fields (optional) ---
-    fileName:     { type: String,                          default: "" },
-    fileData:     { type: String,                          default: "" },
-    fileType:     { type: String,                          default: "" },
-    // --- structured form fields (optional) ---
-    testType:     { type: String,                          default: "" },
-    testData:     { type: mongoose.Schema.Types.Mixed,     default: null },
-    physician:    { type: String,                          default: "" },
-    remarks:      { type: String,                          default: "" },
-    uploadedBy:   { type: String,                          default: "Medical Technologist" },
-    uploadedById: { type: String,                          default: null },
+    patientId:    { type: String, default: null },
+    patientName:  { type: String, required: true },
+    testName:     { type: String, required: true },
+    testDate:     { type: Date,   default: Date.now },
+    notes:        { type: String, default: "" },
+    fileName:     { type: String, default: "" },
+    fileData:     { type: String, default: "" },
+    fileType:     { type: String, default: "" },
+    testType:     { type: String, default: "" },
+    testData:     { type: mongoose.Schema.Types.Mixed, default: null },
+    physician:    { type: String, default: "" },
+    remarks:      { type: String, default: "" },
+    uploadedBy:   { type: String, default: "Medical Technologist" },
+    uploadedById: { type: String, default: null },
   },
   { timestamps: true, collection: "lab_results" }
 );
 const LabResult = mongoose.model("LabResult", labResultSchema);
 
-// ====== LAB RESULT ROUTES ======
-
-// POST /api/lab-results/upload
-// ✅ Supports BOTH file-upload payloads and structured-form payloads.
-//    fileData is NO LONGER required.
 app.post("/api/lab-results/upload", async (req, res) => {
   try {
-    const {
-      testName, patientName, patientId, testDate, notes,
-      uploadedBy, uploadedById,
-      // file upload fields (optional)
-      fileName, fileData, fileType,
-      // structured form fields (optional)
-      testType, testData, physician, remarks,
-    } = req.body;
-
+    const { testName, patientName, patientId, testDate, notes, uploadedBy, uploadedById, fileName, fileData, fileType, testType, testData, physician, remarks } = req.body;
     if (!testName)    return res.status(400).json({ message: "Test name is required." });
     if (!patientName) return res.status(400).json({ message: "Patient name is required." });
-    // ✅ REMOVED: if (!fileData) check — file is now optional
-
-    const labResult = new LabResult({
-      patientId:    patientId    || null,
-      patientName,
-      testName,
-      testDate:     testDate     || new Date(),
-      notes:        notes        || "",
-      // file upload (optional)
-      fileName:     fileName     || "",
-      fileData:     fileData     || "",
-      fileType:     fileType     || "",
-      // structured form (optional)
-      testType:     testType     || "",
-      testData:     testData     || null,
-      physician:    physician    || "",
-      remarks:      remarks      || "",
-      uploadedBy:   uploadedBy   || "Medical Technologist",
-      uploadedById: uploadedById || null,
-    });
-
+    const labResult = new LabResult({ patientId: patientId || null, patientName, testName, testDate: testDate || new Date(), notes: notes || "", fileName: fileName || "", fileData: fileData || "", fileType: fileType || "", testType: testType || "", testData: testData || null, physician: physician || "", remarks: remarks || "", uploadedBy: uploadedBy || "Medical Technologist", uploadedById: uploadedById || null });
     await labResult.save();
     res.status(201).json({ message: "Lab result saved successfully.", labResult });
   } catch (err) {
@@ -1075,21 +999,7 @@ app.post("/api/lab-results/upload", async (req, res) => {
 app.get("/api/lab-results", async (req, res) => {
   try {
     const results = await LabResult.find({}, "-fileData").sort({ createdAt: -1 }).lean();
-    res.json(results.map((r) => ({
-      id: r._id,
-      testName: r.testName,
-      testType: r.testType,
-      patientName: r.patientName,
-      patientId: r.patientId,
-      testDate: r.testDate,
-      notes: r.notes,
-      remarks: r.remarks,
-      physician: r.physician,
-      uploadedBy: r.uploadedBy,
-      uploadDate: r.createdAt,
-      fileType: r.fileType,
-      fileName: r.fileName,
-    })));
+    res.json(results.map((r) => ({ id: r._id, testName: r.testName, testType: r.testType, patientName: r.patientName, patientId: r.patientId, testDate: r.testDate, notes: r.notes, remarks: r.remarks, physician: r.physician, uploadedBy: r.uploadedBy, uploadDate: r.createdAt, fileType: r.fileType, fileName: r.fileName })));
   } catch (err) {
     res.status(500).json({ message: "Failed to fetch lab results." });
   }
@@ -1098,21 +1008,7 @@ app.get("/api/lab-results", async (req, res) => {
 app.get("/api/lab-results/patient/:patientId", async (req, res) => {
   try {
     const results = await LabResult.find({ patientId: req.params.patientId }, "-fileData").sort({ createdAt: -1 }).lean();
-    res.json(results.map((r) => ({
-      id: r._id,
-      testName: r.testName,
-      testType: r.testType,
-      patientName: r.patientName,
-      patientId: r.patientId,
-      testDate: r.testDate,
-      notes: r.notes,
-      remarks: r.remarks,
-      physician: r.physician,
-      uploadedBy: r.uploadedBy,
-      uploadDate: r.createdAt,
-      fileType: r.fileType,
-      fileName: r.fileName,
-    })));
+    res.json(results.map((r) => ({ id: r._id, testName: r.testName, testType: r.testType, patientName: r.patientName, patientId: r.patientId, testDate: r.testDate, notes: r.notes, remarks: r.remarks, physician: r.physician, uploadedBy: r.uploadedBy, uploadDate: r.createdAt, fileType: r.fileType, fileName: r.fileName })));
   } catch (err) {
     res.status(500).json({ message: "Failed to fetch lab results." });
   }
@@ -1128,7 +1024,7 @@ app.get("/api/lab-results/:id", async (req, res) => {
   }
 });
 
-app.delete("/api/lab-results/:id", async (req, res) => {
+app.delete("/api-results/:id", async (req, res) => {
   try {
     const result = await LabResult.findById(req.params.id);
     if (!result) return res.status(404).json({ message: "Lab result not found." });
@@ -1193,44 +1089,28 @@ app.post("/api/appointments", async (req, res) => {
     const doctor = await User.findOne({ userId: doctorId });
     if (!doctor) return res.status(404).json({ message: "Doctor not found" });
     if (doctor.status === "Inactive") return res.status(400).json({ message: "Cannot schedule appointment. Doctor account is inactive." });
-
     const appointmentDate = new Date(date);
     const appointmentDuration = duration || 30;
     const [hours, minutes] = time.split(":").map(Number);
     const startMinutes = hours * 60 + minutes;
     const endMinutes = startMinutes + appointmentDuration;
-
-    const existingAppointments = await Appointment.find({
-      patientId,
-      date: { $gte: new Date(appointmentDate.setHours(0, 0, 0, 0)), $lt: new Date(appointmentDate.setHours(23, 59, 59, 999)) },
-      status: { $in: ["Upcoming", "Ongoing"] },
-    });
-
+    const existingAppointments = await Appointment.find({ patientId, date: { $gte: new Date(appointmentDate.setHours(0, 0, 0, 0)), $lt: new Date(appointmentDate.setHours(23, 59, 59, 999)) }, status: { $in: ["Upcoming", "Ongoing"] } });
     for (const existing of existingAppointments) {
       const [eH, eM] = existing.time.split(":").map(Number);
       const existingStart = eH * 60 + eM;
       const existingEnd = existingStart + (existing.duration || 30);
       if (startMinutes < existingEnd && endMinutes > existingStart) {
         const fmt = (m) => { const h = Math.floor(m / 60); const mn = m % 60; return `${h % 12 || 12}:${String(mn).padStart(2, "0")} ${h >= 12 ? "PM" : "AM"}`; };
-        return res.status(409).json({
-          message: "Patient already has an appointment at this time",
-          conflict: { patientName, requestedDoctor: doctorName, existingDoctor: existing.doctorName, date: appointmentDate.toLocaleDateString(), requestedTime: fmt(startMinutes), requestedEnd: fmt(endMinutes), existingTime: fmt(existingStart), existingEnd: fmt(existingEnd), existingAppointmentId: existing.appointmentId },
-          suggestion: "Please choose a different time slot.",
-        });
+        return res.status(409).json({ message: "Patient already has an appointment at this time", conflict: { patientName, requestedDoctor: doctorName, existingDoctor: existing.doctorName, date: appointmentDate.toLocaleDateString(), requestedTime: fmt(startMinutes), requestedEnd: fmt(endMinutes), existingTime: fmt(existingStart), existingEnd: fmt(existingEnd), existingAppointmentId: existing.appointmentId }, suggestion: "Please choose a different time slot." });
       }
     }
-
     const newId = await generateAppointmentId();
     const appointment = new Appointment({ appointmentId: newId, patientId, patientName, doctorId, doctorName, date: new Date(date), time: time || "09:00", duration: duration || 30, type, reason, notes, status: "Upcoming" });
     await appointment.save();
-
-    // Reactivate patient once they have a valid scheduled appointment.
     if ((patient.status || "").toLowerCase() !== "active") {
       patient.status = "Active";
       await patient.save();
-      console.log(`✅ Reactivated patient ${patient.patientId} after appointment scheduling`);
     }
-
     res.status(201).json({ message: "✅ Appointment scheduled successfully", appointment });
   } catch (err) {
     console.error("Error scheduling appointment:", err);
@@ -1272,11 +1152,7 @@ app.get("/api/appointments/:appointmentId", async (req, res) => {
 app.put("/api/appointments/:appointmentId", async (req, res) => {
   try {
     const { patientName, doctorId, doctorName, date, time, type, duration, reason, notes, impression } = req.body;
-    const updated = await Appointment.findOneAndUpdate(
-      { appointmentId: req.params.appointmentId },
-      { patientName, doctorId, doctorName, date: new Date(date), time, type, duration, reason, notes, impression },
-      { new: true }
-    );
+    const updated = await Appointment.findOneAndUpdate({ appointmentId: req.params.appointmentId }, { patientName, doctorId, doctorName, date: new Date(date), time, type, duration, reason, notes, impression }, { new: true });
     if (!updated) return res.status(404).json({ message: "Appointment not found" });
     res.json({ message: "✅ Appointment updated successfully", appointment: updated });
   } catch (err) {
@@ -1550,59 +1426,27 @@ const requestFormSchema = new mongoose.Schema({
   priority:          { type: String,   enum: ["Routine", "Urgent", "Emergency"], default: "Routine" },
   tests:             { type: [String], default: [] },
   notes:             { type: String,   default: "" },
-  // ✅ Updated: added "Completed" to enum
-  status: {
-    type: String,
-    enum: ["Pending", "Approved", "Rejected", "In Progress", "Completed"],
-    default: "Pending"
-  },
-  // ✅ NEW: completion tracking fields
+  status: { type: String, enum: ["Pending", "Approved", "Rejected", "In Progress", "Completed"], default: "Pending" },
   completedAt:  { type: Date },
   completedBy:  { type: String },
   updatedAt:    { type: Date },
 });
- 
 const RequestForm = mongoose.model("RequestForm", requestFormSchema);
- 
+
 async function generateRequestFormId() {
   const today = new Date();
-  const dateStr = today.getFullYear().toString() +
-    String(today.getMonth() + 1).padStart(2, "0") +
-    String(today.getDate()).padStart(2, "0");
+  const dateStr = today.getFullYear().toString() + String(today.getMonth() + 1).padStart(2, "0") + String(today.getDate()).padStart(2, "0");
   const count = await RequestForm.countDocuments();
   const seq = String(count + 1).padStart(4, "0");
   return `RF-${dateStr}-${seq}`;
 }
- 
-// ── POST /api/request-forms ──────────────────────────────────
+
 app.post("/api/request-forms", async (req, res) => {
   try {
-    const {
-      patientID, patientName, patientFirstName, patientMiddleName, patientLastName,
-      patientAge, patientSex, patientDOB,
-      referringDoctor, submittedBy, priority, tests, notes
-    } = req.body;
- 
-    if (!patientID || !patientName) {
-      return res.status(400).json({ message: "Missing required fields." });
-    }
-    if (!Array.isArray(tests) || tests.length === 0) {
-      return res.status(400).json({ message: "Please select at least one laboratory test." });
-    }
- 
-    const newRequest = new RequestForm({
-      requestId:         await generateRequestFormId(),
-      patientID, patientName,
-      patientFirstName, patientMiddleName, patientLastName,
-      patientAge, patientSex, patientDOB,
-      referringDoctor, submittedBy,
-      priority:          priority || "Routine",
-      tests,
-      notes:             notes || "",
-      status:            "Pending",
-      submittedAt:       new Date(),
-    });
- 
+    const { patientID, patientName, patientFirstName, patientMiddleName, patientLastName, patientAge, patientSex, patientDOB, referringDoctor, submittedBy, priority, tests, notes } = req.body;
+    if (!patientID || !patientName) return res.status(400).json({ message: "Missing required fields." });
+    if (!Array.isArray(tests) || tests.length === 0) return res.status(400).json({ message: "Please select at least one laboratory test." });
+    const newRequest = new RequestForm({ requestId: await generateRequestFormId(), patientID, patientName, patientFirstName, patientMiddleName, patientLastName, patientAge, patientSex, patientDOB, referringDoctor, submittedBy, priority: priority || "Routine", tests, notes: notes || "", status: "Pending", submittedAt: new Date() });
     await newRequest.save();
     res.status(201).json({ message: "Request submitted successfully.", requestId: newRequest.requestId });
   } catch (err) {
@@ -1610,14 +1454,11 @@ app.post("/api/request-forms", async (req, res) => {
     res.status(500).json({ message: "Failed to submit request." });
   }
 });
- 
-// ── GET /api/request-forms ───────────────────────────────────
+
 app.get("/api/request-forms", async (req, res) => {
   try {
     const query = {};
-    if (req.query.status && req.query.status !== "all") {
-      query.status = req.query.status;
-    }
+    if (req.query.status && req.query.status !== "all") query.status = req.query.status;
     const requests = await RequestForm.find(query).sort({ submittedAt: -1 }).lean();
     res.json(requests);
   } catch (err) {
@@ -1625,32 +1466,23 @@ app.get("/api/request-forms", async (req, res) => {
     res.status(500).json({ message: "Failed to fetch request forms." });
   }
 });
- 
-// ── GET /api/request-forms/:requestId ───────────────────────
+
 app.get("/api/request-forms/:requestId", async (req, res) => {
   try {
     const request = await RequestForm.findOne({ requestId: req.params.requestId }).lean();
     if (!request) return res.status(404).json({ message: "Request not found." });
     res.json(request);
   } catch (err) {
-    console.error("Error fetching request form:", err);
     res.status(500).json({ message: "Failed to fetch request." });
   }
 });
- 
-// ── PUT /api/request-forms/:requestId/status ────────────────
-// Generic status update (keep for backward compat)
+
 app.put("/api/request-forms/:requestId/status", async (req, res) => {
   try {
-    const updated = await RequestForm.findOneAndUpdate(
-      { requestId: req.params.requestId },
-      { $set: { status: req.body.status, updatedAt: new Date() } },
-      { new: true }
-    );
+    const updated = await RequestForm.findOneAndUpdate({ requestId: req.params.requestId }, { $set: { status: req.body.status, updatedAt: new Date() } }, { new: true });
     if (!updated) return res.status(404).json({ message: "Request not found." });
     res.json({ message: "Status updated.", request: updated });
   } catch (err) {
-    console.error("Error updating status:", err);
     res.status(500).json({ message: "Failed to update status." });
   }
 });
@@ -1658,54 +1490,23 @@ app.put("/api/request-forms/:requestId/status", async (req, res) => {
 app.put("/api/request-forms/:requestId/complete", async (req, res) => {
   try {
     const { completedBy } = req.body;
-    console.log(`🔄 Marking request ${req.params.requestId} as Completed by ${completedBy}`);
- 
-    const updated = await RequestForm.findOneAndUpdate(
-      { requestId: req.params.requestId },          // ← must match exactly
-      {
-        $set: {
-          status:      "Completed",
-          completedAt: new Date(),
-          completedBy: completedBy || "Medical Technologist",
-          updatedAt:   new Date(),
-        },
-      },
-      { new: true }
-    );
- 
-    if (!updated) {
-      console.warn(`⚠️ Request not found: ${req.params.requestId}`);
-      return res.status(404).json({ success: false, message: "Request not found." });
-    }
- 
-    console.log(`✅ Request ${req.params.requestId} marked as Completed`);
+    const updated = await RequestForm.findOneAndUpdate({ requestId: req.params.requestId }, { $set: { status: "Completed", completedAt: new Date(), completedBy: completedBy || "Medical Technologist", updatedAt: new Date() } }, { new: true });
+    if (!updated) return res.status(404).json({ success: false, message: "Request not found." });
     res.json({ success: true, message: "Request marked as completed.", request: updated });
- 
   } catch (err) {
-    console.error("❌ Error marking request complete:", err);
     res.status(500).json({ success: false, message: "Failed to mark request as completed." });
   }
 });
- 
 
- 
-// ── PATCH /api/request-forms/:requestId ─────────────────────
-// Generic patch (for any field updates)
 app.patch("/api/request-forms/:requestId", async (req, res) => {
   try {
-    const updated = await RequestForm.findOneAndUpdate(
-      { requestId: req.params.requestId },
-      { $set: { ...req.body, updatedAt: new Date() } },
-      { new: true }
-    );
+    const updated = await RequestForm.findOneAndUpdate({ requestId: req.params.requestId }, { $set: { ...req.body, updatedAt: new Date() } }, { new: true });
     if (!updated) return res.status(404).json({ message: "Request not found." });
     res.json({ message: "Request updated.", request: updated });
   } catch (err) {
-    console.error("Error patching request form:", err);
     res.status(500).json({ message: "Failed to update request." });
   }
 });
-
 
 // ====== SYSTEM STATUS ======
 app.get("/api/emr/status", (req, res) => res.json({ connected: true }));
@@ -1717,7 +1518,6 @@ let backupIntervals = { appointment: null, account: null, activity: null };
 
 async function scheduleBackups(settings) {
   Object.values(backupIntervals).forEach((interval) => { if (interval) clearInterval(interval); });
-
   if (settings.appointment) {
     backupIntervals.appointment = setInterval(async () => {
       try {
@@ -1728,7 +1528,6 @@ async function scheduleBackups(settings) {
       } catch (err) { console.error("❌ Automatic appointment backup failed:", err); }
     }, convertToMilliseconds(settings.appointment.frequency, settings.appointment.unit));
   }
-
   if (settings.account) {
     setTimeout(() => {
       backupIntervals.account = setInterval(async () => {
@@ -1741,7 +1540,6 @@ async function scheduleBackups(settings) {
       }, convertToMilliseconds(settings.account.frequency, settings.account.unit));
     }, 1000);
   }
-
   if (settings.activity) {
     setTimeout(() => {
       backupIntervals.activity = setInterval(async () => {
@@ -1761,373 +1559,175 @@ function convertToMilliseconds(frequency, unit) {
 }
 
 // ====== NOTIFICATION ROUTES ======
- 
-// Create a new notification (generic endpoint)
 app.post("/api/notifications", async (req, res) => {
   try {
     const normalizedRole = normalizeRole(req.body.recipientRole);
     const normalizedRecipientId = await resolveRecipientUserId(req.body.recipientId);
-    const payload = {
-      ...req.body,
-      recipientRole: normalizedRole,
-      recipientId: normalizedRecipientId,
-    };
+    const payload = { ...req.body, recipientRole: normalizedRole, recipientId: normalizedRecipientId };
     const notification = await Notification.createNotification(payload);
-    
-    // Emit real-time notification
-    if (notification.recipientId) {
-      // Specific user
-      emitToUser(notification.recipientId, "new_notification", notification);
-    } else {
-      // All users with that role
-      emitToRole(notification.recipientRole, "new_notification", notification);
-    }
-    
-    res.status(201).json({ 
-      success: true, 
-      message: "Notification created", 
-      notification 
-    });
+    if (notification.recipientId) { emitToUser(notification.recipientId, "new_notification", notification); }
+    else { emitToRole(notification.recipientRole, "new_notification", notification); }
+    res.status(201).json({ success: true, message: "Notification created", notification });
   } catch (err) {
     console.error("Error creating notification:", err);
     res.status(500).json({ success: false, message: "Failed to create notification" });
   }
 });
- 
-// Get notifications for current user
+
 app.get("/api/notifications/my", async (req, res) => {
   try {
     const { userId, role } = req.query;
     const normalizedRole = normalizeRole(role);
-    
-    if (!userId || !normalizedRole) {
-      return res.status(400).json({ message: "userId and role required" });
-    }
-    
-    // Get unread/unhandled notifications for this user
-    const notifications = await Notification.find({
-      $or: [
-        { recipientId: userId },           // Specific to this user
-        { recipientRole: normalizedRole, recipientId: null } // For all users of this role
-      ],
-      status: { $in: ["unread", "read"] } // Not handled yet
-    }).sort({ createdAt: -1 }).lean();
-    
+    if (!userId || !normalizedRole) return res.status(400).json({ message: "userId and role required" });
+    const notifications = await Notification.find({ $or: [{ recipientId: userId }, { recipientRole: normalizedRole, recipientId: null }], status: { $in: ["unread", "read"] } }).sort({ createdAt: -1 }).lean();
     res.json({ success: true, notifications });
   } catch (err) {
-    console.error("Error fetching notifications:", err);
     res.status(500).json({ success: false, message: "Failed to fetch notifications" });
   }
 });
- 
-// Get notification count
+
 app.get("/api/notifications/count", async (req, res) => {
   try {
     const { userId, role } = req.query;
     const normalizedRole = normalizeRole(role);
-    
-    if (!userId || !normalizedRole) {
-      return res.status(400).json({ message: "userId and role required" });
-    }
-    
-    const count = await Notification.countDocuments({
-      $or: [
-        { recipientId: userId },
-        { recipientRole: normalizedRole, recipientId: null }
-      ],
-      status: "unread"
-    });
-    
+    if (!userId || !normalizedRole) return res.status(400).json({ message: "userId and role required" });
+    const count = await Notification.countDocuments({ $or: [{ recipientId: userId }, { recipientRole: normalizedRole, recipientId: null }], status: "unread" });
     res.json({ success: true, count });
   } catch (err) {
     res.status(500).json({ success: false, count: 0 });
   }
 });
- 
-// Mark notification as read
+
 app.put("/api/notifications/:id/read", async (req, res) => {
   try {
     const notification = await Notification.findById(req.params.id);
-    if (!notification) {
-      return res.status(404).json({ message: "Notification not found" });
-    }
-    
+    if (!notification) return res.status(404).json({ message: "Notification not found" });
     await notification.markAsRead();
     res.json({ success: true, notification });
   } catch (err) {
     res.status(500).json({ success: false, message: "Failed to mark as read" });
   }
 });
- 
-// Mark notification as handled
+
 app.put("/api/notifications/:id/handle", async (req, res) => {
   try {
     const notification = await Notification.findById(req.params.id);
-    if (!notification) {
-      return res.status(404).json({ message: "Notification not found" });
-    }
-    
+    if (!notification) return res.status(404).json({ message: "Notification not found" });
     await notification.markAsHandled();
-    
-    // Emit update to all clients
-    emitToRole(notification.recipientRole, "notification_handled", { 
-      notificationId: notification._id 
-    });
-    
+    emitToRole(notification.recipientRole, "notification_handled", { notificationId: notification._id });
     res.json({ success: true, notification });
   } catch (err) {
     res.status(500).json({ success: false, message: "Failed to mark as handled" });
   }
 });
- 
-// Clear all notifications for a user
+
 app.delete("/api/notifications/clear", async (req, res) => {
   try {
     const { userId, role } = req.body;
     const normalizedRole = normalizeRole(role);
-    
-    if (!userId || !normalizedRole) {
-      return res.status(400).json({ message: "userId and role required" });
-    }
-    
-    await Notification.updateMany(
-      {
-        $or: [
-          { recipientId: userId },
-          { recipientRole: normalizedRole, recipientId: null }
-        ],
-        status: { $in: ["unread", "read"] }
-      },
-      { 
-        $set: { status: "handled", handledAt: new Date() } 
-      }
-    );
-    
+    if (!userId || !normalizedRole) return res.status(400).json({ message: "userId and role required" });
+    await Notification.updateMany({ $or: [{ recipientId: userId }, { recipientRole: normalizedRole, recipientId: null }], status: { $in: ["unread", "read"] } }, { $set: { status: "handled", handledAt: new Date() } });
     res.json({ success: true, message: "All notifications cleared" });
   } catch (err) {
     res.status(500).json({ success: false, message: "Failed to clear notifications" });
   }
 });
- 
-// ====== SPECIFIC NOTIFICATION CREATORS ======
- 
-// Lab request notification (called when doctor submits request)
+
 app.post("/api/notifications/lab-request", async (req, res) => {
   try {
     const { requestId, patientName, doctorName, doctorId, tests, priority } = req.body;
-    
-    const notification = await Notification.createNotification({
-      type: "lab_request",
-      recipientRole: "Medtech",
-      recipientId: null, // All medtechs
-      senderId: doctorId || "system",
-      senderName: doctorName || "Doctor",
-      senderRole: "Doctor",
-      title: "🧪 New Lab Request",
-      message: `New lab request for ${patientName} (${tests?.slice(0, 2)?.join(", ") || "Lab Test"})`,
-      patientName,
-      doctorName,
-      requestId,
-      data: { tests, priority },
-      priority: priority === "Urgent" || priority === "Emergency" ? "high" : "normal"
-    });
-    
-    // Emit real-time notification to all Medtechs
+    const notification = await Notification.createNotification({ type: "lab_request", recipientRole: "Medtech", recipientId: null, senderId: doctorId || "system", senderName: doctorName || "Doctor", senderRole: "Doctor", title: "🧪 New Lab Request", message: `New lab request for ${patientName} (${tests?.slice(0, 2)?.join(", ") || "Lab Test"})`, patientName, doctorName, requestId, data: { tests, priority }, priority: priority === "Urgent" || priority === "Emergency" ? "high" : "normal" });
     emitToRole("Medtech", "new_notification", notification);
-    
     res.status(201).json({ success: true, notification });
   } catch (err) {
-    console.error("Error creating lab request notification:", err);
     res.status(500).json({ success: false, message: err.message });
   }
 });
- 
-// Doctor enter notification (called when doctor clicks Enter button)
+
 app.post("/api/notifications/doctor-enter", async (req, res) => {
   try {
     const { appointmentId, patientName, doctorName, doctorId } = req.body;
-    
-    const notification = await Notification.createNotification({
-      type: "doctor_enter",
-      recipientRole: "Nurse",
-      recipientId: null,
-      senderId: doctorId || "system",
-      senderName: doctorName,
-      senderRole: "Doctor",
-      title: "Doctor Consultation Request",
-      message: `Dr. ${doctorName} is ready to consult with ${patientName}`,
-      appointmentId,
-      patientName,
-      doctorId,
-      doctorName,
-      data: { appointmentId, patientName, doctorId, doctorName }
-    });
-    
+    const notification = await Notification.createNotification({ type: "doctor_enter", recipientRole: "Nurse", recipientId: null, senderId: doctorId || "system", senderName: doctorName, senderRole: "Doctor", title: "Doctor Consultation Request", message: `Dr. ${doctorName} is ready to consult with ${patientName}`, appointmentId, patientName, doctorId, doctorName, data: { appointmentId, patientName, doctorId, doctorName } });
     emitToRole("Nurse", "new_notification", notification);
-    
     res.status(201).json({ success: true, notification });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
 });
- 
-// Appointment time arrived (called by appointment monitor)
+
 app.post("/api/notifications/appointment-time", async (req, res) => {
   try {
     const { appointmentId, patientName, doctorName, doctorId, time } = req.body;
-
-    // Prevent duplicate "appointment time arrived" notifications per appointment
-    const existingNotification = await Notification.findOne({
-      type: "appointment_time_arrived",
-      appointmentId,
-      status: { $in: ["unread", "read"] },
-    }).lean();
-
-    if (existingNotification) {
-      return res.status(200).json({
-        success: true,
-        notification: existingNotification,
-        deduped: true,
-      });
-    }
-    
-    const notification = await Notification.createNotification({
-      type: "appointment_time_arrived",
-      recipientRole: "Nurse",
-      recipientId: null,
-      senderId: "system",
-      senderName: "System",
-      senderRole: "System",
-      title: "Appointment Time Arrived",
-      message: `Appointment for ${patientName} with ${doctorName} is due now`,
-      appointmentId,
-      patientName,
-      doctorId,
-      doctorName,
-      data: { appointmentId, patientName, doctorId, doctorName, time }
-    });
-    
+    const existingNotification = await Notification.findOne({ type: "appointment_time_arrived", appointmentId, status: { $in: ["unread", "read"] } }).lean();
+    if (existingNotification) return res.status(200).json({ success: true, notification: existingNotification, deduped: true });
+    const notification = await Notification.createNotification({ type: "appointment_time_arrived", recipientRole: "Nurse", recipientId: null, senderId: "system", senderName: "System", senderRole: "System", title: "Appointment Time Arrived", message: `Appointment for ${patientName} with ${doctorName} is due now`, appointmentId, patientName, doctorId, doctorName, data: { appointmentId, patientName, doctorId, doctorName, time } });
     emitToRole("Nurse", "new_notification", notification);
-    
     res.status(201).json({ success: true, notification });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
 });
- 
-// Nurse response notification (patient present/absent)
+
 app.post("/api/notifications/nurse-response", async (req, res) => {
   try {
     const { appointmentId, patientName, status, doctorId } = req.body;
     const resolvedDoctorRecipientId = await resolveRecipientUserId(doctorId);
-    
-    const notification = await Notification.createNotification({
-      type: "nurse_response",
-      recipientRole: "Doctor",
-      recipientId: resolvedDoctorRecipientId, // Specific doctor only
-      senderId: req.body.nurseId || "system",
-      senderName: req.body.nurseName || "Nurse",
-      senderRole: "Nurse",
-      title: status === "ongoing" ? "Patient Present" : "Appointment Canceled",
-      message: status === "ongoing"
-        ? `Patient ${patientName} is present. Appointment is now Ongoing.`
-        : `Patient ${patientName} is not present. Appointment has been canceled.`,
-      appointmentId,
-      patientName,
-      doctorId: resolvedDoctorRecipientId || doctorId,
-      data: { appointmentId, patientName, status }
-    });
-    
-    if (resolvedDoctorRecipientId) {
-      emitToUser(resolvedDoctorRecipientId, "new_notification", notification);
-    } else {
-      emitToRole("Doctor", "new_notification", notification);
-    }
-    
+    const notification = await Notification.createNotification({ type: "nurse_response", recipientRole: "Doctor", recipientId: resolvedDoctorRecipientId, senderId: req.body.nurseId || "system", senderName: req.body.nurseName || "Nurse", senderRole: "Nurse", title: status === "ongoing" ? "Patient Present" : "Appointment Canceled", message: status === "ongoing" ? `Patient ${patientName} is present. Appointment is now Ongoing.` : `Patient ${patientName} is not present. Appointment has been canceled.`, appointmentId, patientName, doctorId: resolvedDoctorRecipientId || doctorId, data: { appointmentId, patientName, status } });
+    if (resolvedDoctorRecipientId) { emitToUser(resolvedDoctorRecipientId, "new_notification", notification); }
+    else { emitToRole("Doctor", "new_notification", notification); }
     res.status(201).json({ success: true, notification });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
 });
- 
+
 console.log("✅ Notification routes registered");
 
 // ====== START SERVER ======
 const PORT = process.env.PORT || 5000;
 const httpServer = createServer(app);
- 
-// Initialize Socket.io
+
 const io = new SocketIOServer(httpServer, {
-  cors: {
-    origin: "*", // Allow all origins (Electron app)
-    methods: ["GET", "POST"]
-  }
+  cors: { origin: "*", methods: ["GET", "POST"] }
 });
 
-const connectedUsers = new Map(); // Track connected users: userId -> socketId
- 
+const connectedUsers = new Map();
+
 io.on("connection", (socket) => {
   console.log(`🔌 Socket connected: ${socket.id}`);
-  
-  // User registers their ID when they connect
   socket.on("register", (userId) => {
     connectedUsers.set(userId, socket.id);
     console.log(`✅ User ${userId} registered with socket ${socket.id}`);
-    console.log(`📊 Total connected users: ${connectedUsers.size}`);
   });
-  
-  // Handle disconnection
   socket.on("disconnect", () => {
-    // Remove user from connected users
     for (const [userId, socketId] of connectedUsers.entries()) {
-      if (socketId === socket.id) {
-        connectedUsers.delete(userId);
-        console.log(`❌ User ${userId} disconnected`);
-        break;
-      }
+      if (socketId === socket.id) { connectedUsers.delete(userId); break; }
     }
-    console.log(`📊 Total connected users: ${connectedUsers.size}`);
   });
 });
- 
-// Helper function to emit notification to specific role
+
 function emitToRole(role, event, data) {
   io.emit(`notification:${role}`, { event, data });
   console.log(`📢 Emitted ${event} to all ${role}s`);
 }
- 
-// Helper function to emit notification to specific user
+
 function emitToUser(userId, event, data) {
   const socketId = connectedUsers.get(userId);
-  if (socketId) {
-    io.to(socketId).emit("notification", { event, data });
-    console.log(`📢 Emitted ${event} to user ${userId}`);
-    return true;
-  }
-  console.log(`⚠️ User ${userId} not connected`);
+  if (socketId) { io.to(socketId).emit("notification", { event, data }); return true; }
   return false;
 }
- 
-// Make io and emit functions available globally
+
 global.io = io;
 global.emitToRole = emitToRole;
 global.emitToUser = emitToUser;
 
-// Server-side monitor for appointment-time notifications.
-// This makes notifications reliable across different devices/sessions.
 function parseAppointmentTime(timeValue) {
   const raw = String(timeValue || "").trim();
   if (!raw) return null;
-
-  // 24-hour format: HH:mm
   if (/^\d{1,2}:\d{2}$/.test(raw)) {
     const [h, m] = raw.split(":").map(Number);
-    if (!Number.isNaN(h) && !Number.isNaN(m)) {
-      return { hours: h, minutes: m };
-    }
+    if (!Number.isNaN(h) && !Number.isNaN(m)) return { hours: h, minutes: m };
   }
-
-  // 12-hour format: h:mm AM/PM
   const match12 = raw.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
   if (match12) {
     let hours = Number(match12[1]);
@@ -2137,110 +1737,44 @@ function parseAppointmentTime(timeValue) {
     if (meridiem === "PM") hours += 12;
     return { hours, minutes };
   }
-
   return null;
 }
 
 async function scanUpcomingAppointmentTimes() {
   try {
     const now = new Date();
-    const upcomingAppointments = await Appointment.find({
-      status: { $in: ["Upcoming", "Ongoing"] },
-    }).lean();
-
-    if (!upcomingAppointments.length) {
-      console.log("⏰ Scanner: no Upcoming/Ongoing appointments found");
-      return;
-    }
-
+    const upcomingAppointments = await Appointment.find({ status: { $in: ["Upcoming", "Ongoing"] } }).lean();
+    if (!upcomingAppointments.length) return;
     const dueAppointments = upcomingAppointments.filter((appointment) => {
       if (!appointment?.date || !appointment?.time) return false;
-
       const parsedTime = parseAppointmentTime(appointment.time);
       if (!parsedTime) return false;
-
       const schedule = new Date(appointment.date);
       if (Number.isNaN(schedule.getTime())) return false;
       schedule.setHours(parsedTime.hours, parsedTime.minutes, 0, 0);
-
       const nowAtMinute = new Date(now);
       nowAtMinute.setSeconds(0, 0);
-
       return now.getSeconds() === 0 && schedule.getTime() === nowAtMinute.getTime();
     });
-
-    console.log(
-      `⏰ Scanner: now=${now.toISOString()} checked=${upcomingAppointments.length} due=${dueAppointments.length}`
-    );
-
     if (!dueAppointments.length) return;
-
-    const appointmentIds = dueAppointments
-      .map((a) => a.appointmentId)
-      .filter(Boolean);
-
+    const appointmentIds = dueAppointments.map((a) => a.appointmentId).filter(Boolean);
     if (!appointmentIds.length) return;
-
-    const existing = await Notification.find(
-      {
-        type: "appointment_time_arrived",
-        appointmentId: { $in: appointmentIds },
-        status: { $in: ["unread", "read"] },
-      },
-      { appointmentId: 1 }
-    ).lean();
-
+    const existing = await Notification.find({ type: "appointment_time_arrived", appointmentId: { $in: appointmentIds }, status: { $in: ["unread", "read"] } }, { appointmentId: 1 }).lean();
     const existingIds = new Set(existing.map((n) => n.appointmentId));
-
-    let createdCount = 0;
-
     for (const appointment of dueAppointments) {
-      if (!appointment.appointmentId || existingIds.has(appointment.appointmentId)) {
-        continue;
-      }
-
-      const notification = await Notification.createNotification({
-        type: "appointment_time_arrived",
-        recipientRole: "Nurse",
-        recipientId: null,
-        senderId: "system",
-        senderName: "System",
-        senderRole: "System",
-        title: "Appointment Time Arrived",
-        message: `Appointment for ${appointment.patientName} with ${appointment.doctorName} is due now`,
-        appointmentId: appointment.appointmentId,
-        patientName: appointment.patientName,
-        doctorId: appointment.doctorId,
-        doctorName: appointment.doctorName,
-        data: {
-          appointmentId: appointment.appointmentId,
-          patientName: appointment.patientName,
-          doctorId: appointment.doctorId,
-          doctorName: appointment.doctorName,
-          time: appointment.time,
-        },
-      });
-
+      if (!appointment.appointmentId || existingIds.has(appointment.appointmentId)) continue;
+      const notification = await Notification.createNotification({ type: "appointment_time_arrived", recipientRole: "Nurse", recipientId: null, senderId: "system", senderName: "System", senderRole: "System", title: "Appointment Time Arrived", message: `Appointment for ${appointment.patientName} with ${appointment.doctorName} is due now`, appointmentId: appointment.appointmentId, patientName: appointment.patientName, doctorId: appointment.doctorId, doctorName: appointment.doctorName, data: { appointmentId: appointment.appointmentId, patientName: appointment.patientName, doctorId: appointment.doctorId, doctorName: appointment.doctorName, time: appointment.time } });
       emitToRole("Nurse", "new_notification", notification);
       existingIds.add(appointment.appointmentId);
-      createdCount += 1;
-    }
-
-    if (createdCount > 0) {
-      console.log(`🔔 Created ${createdCount} appointment-time notification(s)`);
-    } else {
-      console.log("⏰ Scanner: due appointments found but already deduped");
     }
   } catch (err) {
     console.error("Error scanning appointment-time notifications:", err);
   }
 }
 
-// Start periodic server-side scan (every second for exact :00 minute matching)
 setInterval(scanUpcomingAppointmentTimes, 1000);
 setTimeout(scanUpcomingAppointmentTimes, 5000);
- 
-// Start server
+
 httpServer.listen(PORT, () => {
   console.log(`🚀 EMR Server running on port ${PORT}`);
   console.log(`🔌 Socket.io server ready`);
