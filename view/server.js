@@ -529,6 +529,7 @@ const patientSchema = new mongoose.Schema({
   lastname: String,
   dob: Date,
   gender: String,
+  province: String,   // ADD THIS
   address: String,
   city: String,
   barangay: String,

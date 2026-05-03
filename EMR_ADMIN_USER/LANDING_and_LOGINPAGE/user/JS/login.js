@@ -163,6 +163,12 @@ document.getElementById('loginForm').addEventListener('submit', async function (
     showLoginError("⚠️ Please fill in all fields.");
     return;
   }
+ 
+  const loginEmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
+  if (!loginEmailRegex.test(email)) {
+    showLoginError("⚠️ Please enter a valid email address.");
+    return;
+  }
 
   loginBtn.innerHTML = `<span class="loading-spinner"></span>Signing In...`;
   loginBtn.disabled  = true;

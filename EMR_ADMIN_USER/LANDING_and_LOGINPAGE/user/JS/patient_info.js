@@ -2674,6 +2674,7 @@ async function loadPatientInfo() {
     document.getElementById("status").value       = p.status?.toLowerCase() || "";
     document.getElementById("phone").value        = p.phone        || "";
     document.getElementById("email").value        = p.email        || "";
+    document.getElementById("province").value     = p.province     || "";
     document.getElementById("address").value      = p.address      || "";
     document.getElementById("barangay").value     = p.barangay     || "";
     document.getElementById("city").value         = p.city         || "";
@@ -2719,9 +2720,7 @@ async function loadPatientInfo() {
     }
 
     // Populate province + city + barangay state from saved data
-    if (p.province) {
-      document.getElementById("province") && (document.getElementById("province").value = p.province);
-    }
+    
 
     if (p.city) {
       const provinces = await loadAllProvinces();
@@ -2827,12 +2826,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const emailVal   = document.getElementById("email").value.trim();
       const emEmailVal = document.getElementById("em_email").value.trim();
 
-      const gmailRegex = /^[^\s@]+@gmail\.com$/i;
-      if (emailVal && !gmailRegex.test(emailVal)) {
-        alert("The primary email address must be a valid @gmail.com account."); return;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
+      if (emailVal && !emailRegex.test(emailVal)) {
+        alert("Please enter a valid email address (e.g. example@gmail.com, example@yahoo.com)."); return;
       }
-      if (emEmailVal && !gmailRegex.test(emEmailVal)) {
-        alert("The emergency contact email must be a valid @gmail.com account if provided."); return;
+      if (emEmailVal && !emailRegex.test(emEmailVal)) {
+        alert("Please enter a valid emergency contact email address."); return;
       }
 
       const updatedData = {

@@ -208,8 +208,9 @@ async function addUser() {
   }
   
   // 2. ✅ Email domain validation
-  if (!email.toLowerCase().endsWith("@gmail.com")) {
-    const message = "Email must be a valid @gmail.com address.";
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
+  if (!emailRegex.test(email)) {
+    const message = "Please enter a valid email address (e.g. user@gmail.com, user@yahoo.com).";
     if (errorMessageEl) {
       errorMessageEl.textContent = message;
       errorMessageEl.classList.remove("hidden");
@@ -471,6 +472,12 @@ async function saveUserUpdate() {
   
   if (!updatedName || !updatedEmail) {
     alert("Name and Email are required fields.");
+    return;
+  }
+ 
+  const updateEmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
+  if (!updateEmailRegex.test(updatedEmail)) {
+    alert("Please enter a valid email address (e.g. user@gmail.com, user@yahoo.com).");
     return;
   }
   

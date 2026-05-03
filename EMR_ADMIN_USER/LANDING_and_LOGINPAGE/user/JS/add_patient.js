@@ -2660,9 +2660,9 @@ document.getElementById("addPatient").addEventListener("submit", async function 
   if (!/^\d{4}$/.test(zipcode))          { alert("Zip code must be exactly 4 digits"); return; }
   if (new Date(dob) > new Date())        { alert("Date of birth cannot be in the future"); return; }
 
-  const gmailRegex = /^[^\s@]+@gmail\.com$/i;
-  if (email && !gmailRegex.test(email))     { alert("The primary email address must be a valid @gmail.com account."); return; }
-  if (emEmail && !gmailRegex.test(emEmail)) { alert("The emergency contact email must be a valid @gmail.com account if provided."); return; }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
+  if (email && !emailRegex.test(email))     { alert("Please enter a valid email address (e.g. example@gmail.com, example@yahoo.com)."); return; }
+  if (emEmail && !emailRegex.test(emEmail)) { alert("Please enter a valid emergency contact email address."); return; }
 
   if (email) {
     try {
