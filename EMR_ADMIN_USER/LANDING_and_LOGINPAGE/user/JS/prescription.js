@@ -1811,7 +1811,7 @@ function setupPrintFunctionality(patientId, appointmentId) {
               patient.lastname
             );
             
-            patientAddress = [patient.address, patient.barangay, patient.city]
+            patientAddress = [patient.address, patient.barangay, patient.city, patient.province]
             .filter(Boolean)
             .join(", ");
             if (patient.dob) {
