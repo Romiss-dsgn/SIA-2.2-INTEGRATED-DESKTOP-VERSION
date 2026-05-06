@@ -851,7 +851,9 @@
       const res = await fetch("http://localhost:5000/api/patients/" + _patientId);
       if (!res.ok) return;
       const p = await res.json();
-      _patientName = ((p.firstname || "") + " " + (p.lastname || "")).trim();
+      const middle = (p.middlename || "").trim();
+const middleInitial = middle ? " " + middle.charAt(0).toUpperCase() + "." : "";
+_patientName = ((p.firstname || "") + middleInitial + " " + (p.lastname || "")).trim();
       _patientAge  = p.age || "";
       _patientSex  = p.sex || p.gender || "";
 

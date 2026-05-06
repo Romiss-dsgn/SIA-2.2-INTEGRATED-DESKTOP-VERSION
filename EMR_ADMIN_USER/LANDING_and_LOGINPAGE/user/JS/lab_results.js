@@ -75,8 +75,10 @@ async function updatePatientHeader() {
 
     // Expose globally so inline script can use it
     window._currentPatientId   = patientId;
-    window._currentPatientName =
-      `${patient.firstname || ""} ${patient.lastname || ""}`.trim();
+    const middle = (patient.middlename || "").trim();
+const middleInitial = middle ? " " + middle.charAt(0).toUpperCase() + "." : "";
+window._currentPatientName =
+  `${patient.firstname || ""}${middleInitial} ${patient.lastname || ""}`.trim();
 
     // Header h1
     const h1 = document.querySelector("header h1");
