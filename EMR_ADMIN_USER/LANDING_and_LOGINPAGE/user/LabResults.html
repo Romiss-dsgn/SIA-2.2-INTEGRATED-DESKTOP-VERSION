@@ -135,6 +135,10 @@
 
     </div>
   </div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- CHOICE MODAL                                            -->
+<!-- ═══════════════════════════════════════════════════════ -->
 <div id="choiceModal" class="fixed inset-0 z-[1001] bg-black/60 hidden items-center justify-center p-4">
   <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-lg shadow-2xl">
     
@@ -202,7 +206,7 @@
 </div>
  
 <!-- ═══════════════════════════════════════════════════════ -->
-<!-- ✅ NEW: FILE UPLOAD MODAL -->
+<!-- FILE UPLOAD MODAL                                       -->
 <!-- ═══════════════════════════════════════════════════════ -->
 <div id="uploadFileModal" class="fixed inset-0 z-[1000] bg-black/60 hidden items-center justify-center p-4">
   <div class="bg-[#F3F4F6] dark:bg-slate-900 rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
@@ -334,12 +338,8 @@
  
   </div>
 </div>
- 
-<!-- ═══════════════════════════════════════════════════════ -->
-<!-- ✅ UPDATED STYLES - Add to your <style> section if needed -->
-<!-- ═══════════════════════════════════════════════════════ -->
+
 <style type="text/tailwindcss">
-  /* Ensure scrollbar styling */
   .custom-scrollbar::-webkit-scrollbar { width: 5px; }
   .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
   .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
@@ -493,9 +493,9 @@
             <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-slate-500">Mucus Threads</label>
               <select id="ua_mucus" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm"><option value="">—</option><option>None</option><option>Rare</option><option>Few</option><option>Moderate</option><option>Many</option></select></div>
             <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-slate-500">Amorphous Type</label>
-  <select id="ua_amorphous_type" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm"><option value="">—</option><option>Amorphous Urates</option><option>Amorphous Phosphates</option></select></div>
-<div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-slate-500">Amorphous Result</label>
-  <select id="ua_amorphous_result" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm"><option value="">—</option><option>None</option><option>Rare</option><option>Few</option><option>Moderate</option><option>Many</option></select></div>
+              <select id="ua_amorphous_type" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm"><option value="">—</option><option>Amorphous Urates</option><option>Amorphous Phosphates</option></select></div>
+            <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-slate-500">Amorphous Result</label>
+              <select id="ua_amorphous_result" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm"><option value="">—</option><option>None</option><option>Rare</option><option>Few</option><option>Moderate</option><option>Many</option></select></div>
             <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-slate-500">Others</label><input type="text" id="ua_others" placeholder="Optional" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm" /></div>
           </div>
         </div>
@@ -693,7 +693,6 @@
     <div id="notificationList" class="max-h-[440px] overflow-y-auto p-3"><p class="text-center text-slate-400 py-5">No notifications</p></div>
   </div>
 
-  
   <script src="JS/header.js"></script>
   <script src="JS/auto_refresh.js"></script>
   <script>
@@ -757,6 +756,39 @@
     document.getElementById("closeViewModal")?.addEventListener("click",   closeViewModal);
     document.getElementById("printResultBtn")?.addEventListener("click",   printCurrentResult);
 
+    // Choice modal buttons
+    document.getElementById("chooseUploadFile")?.addEventListener("click", openUploadFileModal);
+    document.getElementById("chooseCreateForm")?.addEventListener("click", openFormModal);
+    document.getElementById("closeChoiceModal")?.addEventListener("click", closeChoiceModal);
+
+    // Upload modal buttons
+    document.getElementById("closeUploadModal")?.addEventListener("click",  closeUploadFileModal);
+    document.getElementById("cancelUploadModal")?.addEventListener("click", closeUploadFileModal);
+    document.getElementById("uploadFileBtn")?.addEventListener("click",     uploadLabResultFile);
+    document.getElementById("removeFile")?.addEventListener("click", () => {
+      document.getElementById("fileInput").value = "";
+      _uploadedFile = null;
+      document.getElementById("dropZoneContent").classList.remove("hidden");
+      document.getElementById("filePreview").classList.add("hidden");
+      document.getElementById("uploadFileBtn").disabled = true;
+    });
+
+    // File input change & drag-drop
+    const fileInput = document.getElementById("fileInput");
+    const dropZone  = document.getElementById("dropZone");
+    fileInput?.addEventListener("change", handleFileSelect);
+    dropZone?.addEventListener("dragover",  e => { e.preventDefault(); dropZone.classList.add("border-primary","bg-brand-light/50"); });
+    dropZone?.addEventListener("dragleave", ()  => dropZone.classList.remove("border-primary","bg-brand-light/50"));
+    dropZone?.addEventListener("drop", e => {
+      e.preventDefault();
+      dropZone.classList.remove("border-primary","bg-brand-light/50");
+      if (e.dataTransfer.files.length) { fileInput.files = e.dataTransfer.files; handleFileSelect(); }
+    });
+
+    // Upload form live validation
+    document.getElementById("uploadTestName")?.addEventListener("input",  validateUploadForm);
+    document.getElementById("uploadTestDate")?.addEventListener("change", validateUploadForm);
+
     // Notification bell
     (function() {
       const bell = document.getElementById("notificationBell");
@@ -774,7 +806,7 @@
     })();
 
     document.addEventListener("keydown", e => {
-      if (e.key === "Escape") { closeAddModal(); closeViewModal(); }
+      if (e.key === "Escape") { closeAddModal(); closeViewModal(); closeChoiceModal(); closeUploadFileModal(); }
     });
   });
 
@@ -836,12 +868,34 @@
   }
 
   // ════════════════════════════════════════════════════════════
-  // ✅ FIX: AUTOFILL — Medtech name/license + Physician field
-  //
-  //   Priority order for Requesting Physician:
-  //   1. If role is Doctor  → use logged-in doctor's own name
-  //   2. If role is Medtech → patient record → notification data (pendingPhysician)
-  //   3. Fallback           → leave blank
+  // SHARED PHYSICIAN AUTOFILL HELPER
+  // Returns the resolved doctor name string, or "" if none found.
+  // ════════════════════════════════════════════════════════════
+  function resolvePhysicianName() {
+    const role = sessionStorage.getItem("role");
+    const name = sessionStorage.getItem("name")
+               || sessionStorage.getItem("fullName")
+               || sessionStorage.getItem("rf_physicianName")
+               || "";
+
+    if (role === "Doctor" && name) {
+      return name.toLowerCase().startsWith("dr.") ? name : "Dr. " + name;
+    }
+
+    if (role === "Medtech") {
+      const source = _patientPhysician
+        || sessionStorage.getItem("pendingPhysician")
+        || "";
+      if (source) {
+        return source.toLowerCase().startsWith("dr.") ? source : "Dr. " + source;
+      }
+    }
+
+    return "";
+  }
+
+  // ════════════════════════════════════════════════════════════
+  // AUTOFILL — Medtech name/license + Physician field (form modal)
   // ════════════════════════════════════════════════════════════
   function autofillMedtech() {
     const name = sessionStorage.getItem("name")
@@ -852,7 +906,6 @@
                || sessionStorage.getItem("prcLicense")
                || sessionStorage.getItem("licNo")
                || "";
-    const role = sessionStorage.getItem("role");
 
     // Autofill Medtech name & license
     const el1 = document.getElementById("formMedtech");
@@ -860,29 +913,12 @@
     if (el1) el1.value = name;
     if (el2) el2.value = lic ? "PRC Lic.#" + lic : "";
 
-    // Autofill Requesting Physician
+    // Autofill Requesting Physician (form modal)
     const physicianEl    = document.getElementById("commonPhysician");
     const physicianBadge = document.getElementById("physicianAutofillBadge");
-
     if (!physicianEl) return;
 
-    let drName = "";
-
-    if (role === "Doctor" && name) {
-      // Logged-in user IS the doctor — use their own name
-      drName = name.toLowerCase().startsWith("dr.") ? name : "Dr. " + name;
-
-    } else if (role === "Medtech") {
-      // ✅ FIX: Priority → patient record first, then notification data (pendingPhysician)
-      const source = _patientPhysician
-        || sessionStorage.getItem("pendingPhysician")
-        || "";
-      if (source) {
-        drName = source.toLowerCase().startsWith("dr.")
-          ? source
-          : "Dr. " + source;
-      }
-    }
+    const drName = resolvePhysicianName();
 
     if (drName) {
       physicianEl.value = drName;
@@ -892,7 +928,6 @@
         physicianBadge.classList.add("inline-flex");
       }
     } else {
-      // No physician found — clear any stale autofill state
       physicianEl.classList.remove("autofilled");
       if (physicianBadge) {
         physicianBadge.classList.add("hidden");
@@ -950,134 +985,204 @@
   // LOAD LAB RESULTS
   // ════════════════════════════════════════════════════════════
   async function loadLabResults() {
-  if (!_patientId) {
-    _patientId = new URLSearchParams(window.location.search).get("patientId") || "";
-    if (!_patientId) return;
-  }
- 
-  const loading = document.getElementById("loadingState");
-  const empty   = document.getElementById("emptyState");
-  const grid    = document.getElementById("labResultsGrid");
- 
-  // ✅ Use style.display exclusively — no classList toggling
-  loading.style.display = "flex";
-  empty.style.display   = "none";   // ← was: empty.classList.add("hidden")
-  grid.style.display    = "none";   // ← was: grid.classList.add("hidden")
-  grid.innerHTML = "";
- 
-  try {
-    const res  = await fetch("http://localhost:5000/api/lab-results/patient/" + _patientId);
-    if (!res.ok) throw new Error(res.status);
-    const raw  = await res.json();
-    const list = Array.isArray(raw) ? raw : (raw.results || raw.data || []);
- 
-    loading.style.display = "none";
- 
-    if (!list.length) {
-      empty.style.display = "flex";  // ← was: empty.classList.remove("hidden") + style.display="flex"
-      return;
+    if (!_patientId) {
+      _patientId = new URLSearchParams(window.location.search).get("patientId") || "";
+      if (!_patientId) return;
     }
- 
-    // ✅ Show grid using style.display — overrides any previous state cleanly
-    grid.style.display = "grid";    // ← was: grid.classList.remove("hidden")
- 
-    list.forEach(r => {
-      const d = document.createElement("div");
-      d.innerHTML = buildCard(r);
-      d.firstElementChild.querySelector(".view-btn")
-        ?.addEventListener("click", () => openViewModal(r));
-      grid.appendChild(d.firstElementChild);
-    });
- 
-  } catch (err) {
-    loading.style.display = "none";
-    grid.style.display    = "grid";
-    grid.innerHTML = `
-      <div class="col-span-full bg-white rounded-3xl border border-red-100 p-10 flex flex-col items-center gap-3">
-        <div class="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center">
-          <i class="fa-solid fa-exclamation-triangle text-3xl text-red-400"></i>
-        </div>
-        <p class="font-extrabold text-slate-700">Error Loading Results</p>
-        <button onclick="loadLabResults()" class="px-5 py-2 bg-primary text-white font-bold rounded-2xl text-sm hover:bg-[#054a37]">
-          <span class="material-symbols-outlined text-sm">refresh</span> Retry
-        </button>
-      </div>`;
+
+    const loading = document.getElementById("loadingState");
+    const empty   = document.getElementById("emptyState");
+    const grid    = document.getElementById("labResultsGrid");
+
+    loading.style.display = "flex";
+    empty.style.display   = "none";
+    grid.style.display    = "none";
+    grid.innerHTML = "";
+
+    try {
+      const res  = await fetch("http://localhost:5000/api/lab-results/patient/" + _patientId);
+      if (!res.ok) throw new Error(res.status);
+      const raw  = await res.json();
+      const list = Array.isArray(raw) ? raw : (raw.results || raw.data || []);
+
+      loading.style.display = "none";
+
+      if (!list.length) {
+        empty.style.display = "flex";
+        return;
+      }
+
+      grid.style.display = "grid";
+
+      list.forEach(r => {
+        const d = document.createElement("div");
+        d.innerHTML = buildCard(r);
+        d.firstElementChild.querySelector(".view-btn")
+          ?.addEventListener("click", () => openViewModal(r));
+        grid.appendChild(d.firstElementChild);
+      });
+
+    } catch (err) {
+      loading.style.display = "none";
+      grid.style.display    = "grid";
+      grid.innerHTML = `
+        <div class="col-span-full bg-white rounded-3xl border border-red-100 p-10 flex flex-col items-center gap-3">
+          <div class="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center">
+            <i class="fa-solid fa-exclamation-triangle text-3xl text-red-400"></i>
+          </div>
+          <p class="font-extrabold text-slate-700">Error Loading Results</p>
+          <button onclick="loadLabResults()" class="px-5 py-2 bg-primary text-white font-bold rounded-2xl text-sm hover:bg-[#054a37]">
+            <span class="material-symbols-outlined text-sm">refresh</span> Retry
+          </button>
+        </div>`;
+    }
   }
-}
 
   function buildCard(r) {
-  // ✅ Detect uploaded file by fileName only (fileData absent in list API)
-  const isUploadedFile = !!r.fileName;
- 
-  // ✅ Always prefer testName; fall back to TEST_LABELS for structured tests
-  const label = r.testName
-    || TEST_LABELS[r.testType]
-    || r.testType
-    || "Lab Result";
- 
-  const type = r.testType || "UA";
-  const icon = TEST_ICONS[type] || "science";
- 
-  // ✅ For uploaded files, use a document icon
-  const displayIcon = isUploadedFile ? "description" : icon;
-  
-  const date = r.uploadDate || r.createdAt || r.testDate;
-  const fd = date ? new Date(date).toLocaleDateString("en-US", {
-    year: "numeric", 
-    month: "short", 
-    day: "numeric", 
-    hour: "2-digit", 
-    minute: "2-digit"
-  }) : "—";
-  
-  return `
-    <div class="result-card bg-white dark:bg-slate-800 rounded-3xl border-2 border-slate-100 dark:border-slate-700 p-5 transition-all duration-200">
-      <div class="flex items-start gap-3 mb-4">
-        <div class="w-12 h-12 rounded-2xl ${isUploadedFile ? 'bg-blue-50' : 'bg-brand-light'} flex items-center justify-center shrink-0">
-          <span class="material-symbols-outlined ${isUploadedFile ? 'text-blue-600' : 'text-primary'} text-2xl">${displayIcon}</span>
-        </div>
-        <div class="flex-1 min-w-0">
-          <h3 class="font-extrabold text-slate-800 dark:text-slate-100 text-sm">${escapeHtml(label)}</h3>
-          <p class="text-xs text-slate-400 mt-1 font-medium">
-            <i class="fa-solid fa-calendar-alt mr-1 text-primary/60"></i>${fd}
-          </p>
-          ${isUploadedFile ? `
-          <div class="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 border border-blue-100">
-            <span class="material-symbols-outlined text-blue-600 text-xs">attach_file</span>
-            <span class="text-[10px] font-bold text-blue-600">Uploaded File</span>
+    const isUploadedFile = !!r.fileName;
+    const label = r.testName || TEST_LABELS[r.testType] || r.testType || "Lab Result";
+    const type  = r.testType || "UA";
+    const icon  = TEST_ICONS[type] || "science";
+    const displayIcon = isUploadedFile ? "description" : icon;
+    const date = r.uploadDate || r.createdAt || r.testDate;
+    const fd = date ? new Date(date).toLocaleDateString("en-US", {
+      year:"numeric", month:"short", day:"numeric", hour:"2-digit", minute:"2-digit"
+    }) : "—";
+
+    return `
+      <div class="result-card bg-white dark:bg-slate-800 rounded-3xl border-2 border-slate-100 dark:border-slate-700 p-5 transition-all duration-200">
+        <div class="flex items-start gap-3 mb-4">
+          <div class="w-12 h-12 rounded-2xl ${isUploadedFile ? 'bg-blue-50' : 'bg-brand-light'} flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined ${isUploadedFile ? 'text-blue-600' : 'text-primary'} text-2xl">${displayIcon}</span>
           </div>
-          ` : ''}
+          <div class="flex-1 min-w-0">
+            <h3 class="font-extrabold text-slate-800 dark:text-slate-100 text-sm">${escapeHtml(label)}</h3>
+            <p class="text-xs text-slate-400 mt-1 font-medium">
+              <i class="fa-solid fa-calendar-alt mr-1 text-primary/60"></i>${fd}
+            </p>
+            ${isUploadedFile ? `
+            <div class="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 border border-blue-100">
+              <span class="material-symbols-outlined text-blue-600 text-xs">attach_file</span>
+              <span class="text-[10px] font-bold text-blue-600">Uploaded File</span>
+            </div>
+            ` : ''}
+          </div>
         </div>
-      </div>
-      <div class="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-700">
-        <div class="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
-          <i class="fa-solid fa-user-nurse text-primary/60"></i>
-          <span class="truncate max-w-[120px]">${escapeHtml(r.uploadedBy || "Medical Technologist")}</span>
+        <div class="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-700">
+          <div class="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
+            <i class="fa-solid fa-user-nurse text-primary/60"></i>
+            <span class="truncate max-w-[120px]">${escapeHtml(r.uploadedBy || "Medical Technologist")}</span>
+          </div>
+          <button class="view-btn inline-flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-primary text-white text-xs font-extrabold hover:bg-[#054a37] transition-all shadow-md shadow-primary/10">
+            <span class="material-symbols-outlined text-[14px]">visibility</span>View
+          </button>
         </div>
-        <button class="view-btn inline-flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-primary text-white text-xs font-extrabold hover:bg-[#054a37] transition-all shadow-md shadow-primary/10">
-          <span class="material-symbols-outlined text-[14px]">visibility</span>View
-        </button>
-      </div>
-    </div>`;
-}
+      </div>`;
+  }
 
   // ════════════════════════════════════════════════════════════
-  // ✅ FIX: OPEN / CLOSE MODALS
+  // MODAL: openAddModal — shows choice modal for Medtech
   // ════════════════════════════════════════════════════════════
   function openAddModal() {
+    if (sessionStorage.getItem("role") === "Medtech") {
+      openChoiceModal();
+    } else {
+      openFormModal();
+    }
+  }
+
+  function openChoiceModal() {
+    const m = document.getElementById("choiceModal");
+    m.classList.remove("hidden");
+    m.classList.add("flex");
+  }
+
+  function closeChoiceModal() {
+    const m = document.getElementById("choiceModal");
+    m.classList.add("hidden");
+    m.classList.remove("flex");
+  }
+
+  // ════════════════════════════════════════════════════════════
+  // MODAL: openUploadFileModal — ✅ FIX: autofills physician
+  // ════════════════════════════════════════════════════════════
+  function openUploadFileModal() {
+    closeChoiceModal();
+
+    const modal = document.getElementById("uploadFileModal");
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+
+    // Autofill patient info
+    document.getElementById("uploadPatientName").value = _patientName;
+    document.getElementById("uploadPatientId").value   = _patientId;
+    document.getElementById("uploadTestDate").value    = new Date().toISOString().split("T")[0];
+
+    // ✅ FIX: Autofill Requesting Physician for the upload modal
+    const physicianEl    = document.getElementById("uploadPhysician");
+    const physicianBadge = document.getElementById("uploadPhysicianBadge");
+
+    const drName = resolvePhysicianName();
+
+    if (drName && physicianEl) {
+      physicianEl.value = drName;
+      physicianEl.classList.add("autofilled");
+      if (physicianBadge) {
+        physicianBadge.classList.remove("hidden");
+        physicianBadge.classList.add("inline-flex");
+      }
+    } else if (physicianEl) {
+      physicianEl.value = "";
+      physicianEl.classList.remove("autofilled");
+      if (physicianBadge) {
+        physicianBadge.classList.add("hidden");
+        physicianBadge.classList.remove("inline-flex");
+      }
+    }
+
+    // Clear pendingPhysician after use so it doesn't carry over
+    sessionStorage.removeItem("pendingPhysician");
+  }
+
+  function closeUploadFileModal() {
+    const modal = document.getElementById("uploadFileModal");
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+
+    // Reset form
+    document.getElementById("uploadTestName").value = "";
+    document.getElementById("uploadTestDate").value = new Date().toISOString().split("T")[0];
+    document.getElementById("uploadNotes").value    = "";
+    document.getElementById("uploadPhysician").value = "";
+    document.getElementById("fileInput").value      = "";
+    _uploadedFile = null;
+
+    const badge = document.getElementById("uploadPhysicianBadge");
+    badge?.classList.add("hidden");
+    badge?.classList.remove("inline-flex");
+    document.getElementById("uploadPhysician")?.classList.remove("autofilled");
+
+    // Reset drop zone
+    document.getElementById("dropZoneContent").classList.remove("hidden");
+    document.getElementById("filePreview").classList.add("hidden");
+    document.getElementById("uploadFileBtn").disabled = true;
+  }
+
+  // ════════════════════════════════════════════════════════════
+  // MODAL: openFormModal — create lab result (structured form)
+  // ════════════════════════════════════════════════════════════
+  function openFormModal() {
+    closeChoiceModal();
+
     const m = document.getElementById("addLabModal");
     m.classList.remove("hidden");
     m.classList.add("flex");
 
-    // Set static fields first
     document.getElementById("formPatientName").value   = _patientName;
     document.getElementById("formPatientAgeSex").value = _patientAge + (_patientAge && _patientSex ? " / " : "") + _patientSex;
     document.getElementById("commonDate").value        = new Date().toISOString().split("T")[0];
 
-    // ✅ FIX: autofillMedtech() runs AFTER fields are set so pendingPhysician is read correctly
     autofillMedtech();
-
-    // ✅ FIX: Clear pendingPhysician after use so it doesn't carry over to other patients
     sessionStorage.removeItem("pendingPhysician");
   }
 
@@ -1093,73 +1198,67 @@
     document.getElementById("formActions").classList.add("hidden");
     _currentTest = null;
 
-    // Reset all inputs
     m.querySelectorAll("input:not([readonly]), select, textarea").forEach(el => {
       if (el.type === "checkbox") el.checked = (el.id === "fa_noParasite");
       else if (el.id !== "commonDate") el.value = "";
     });
     document.getElementById("commonDate").value = new Date().toISOString().split("T")[0];
 
-    // Reset physician autofill badge
     const badge = document.getElementById("physicianAutofillBadge");
     badge?.classList.add("hidden");
     badge?.classList.remove("inline-flex");
     document.getElementById("commonPhysician")?.classList.remove("autofilled");
 
-    // Reset chem computed cells
     document.querySelectorAll("[id^='conv_'],[id^='si_']").forEach(el => {
       if (el.tagName === "SPAN") el.textContent = el.id.startsWith("si_") ? "auto" : "—";
     });
   }
 
   function openViewModal(result) {
-  const modal   = document.getElementById("viewLabModal");
-  const content = document.getElementById("viewModalContent");
-  document.getElementById("viewModalTitle").textContent =
-    TEST_LABELS[result.testType] || result.testName || "Lab Result";
-  modal.classList.remove("hidden");
-  modal.classList.add("flex");
-  content.innerHTML = '<div class="flex items-center justify-center py-12"><div class="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div></div>';
+    const modal   = document.getElementById("viewLabModal");
+    const content = document.getElementById("viewModalContent");
+    document.getElementById("viewModalTitle").textContent =
+      TEST_LABELS[result.testType] || result.testName || "Lab Result";
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+    content.innerHTML = '<div class="flex items-center justify-center py-12"><div class="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div></div>';
 
     const isUploadedFile = !!result.fileName;
-  const hasTestData    = result.testData && Object.keys(result.testData).length > 0;
- 
-  if (isUploadedFile || hasTestData) {
-    // Render immediately — no fetch needed
-    _viewResult = result;
-    content.innerHTML = buildViewHTML(result);
-    _applyPrintBtnState(result);
-    return;
-  }
- 
-  // Structured test without testData yet — fetch full record
-  fetch("http://localhost:5000/api/lab-results/" + (result.id || result._id))
-    .then(r => r.ok ? r.json() : Promise.reject())
-    .then(full => { result = full; })
-    .catch(() => {})
-    .finally(() => {
+    const hasTestData    = result.testData && Object.keys(result.testData).length > 0;
+
+    if (isUploadedFile || hasTestData) {
       _viewResult = result;
       content.innerHTML = buildViewHTML(result);
       _applyPrintBtnState(result);
-    });
-}
- 
-// ✅ Helper — centralise print button state logic
-function _applyPrintBtnState(result) {
-  const printBtn = document.getElementById("printResultBtn");
-  if (!printBtn) return;
-  if (!!result.fileName) {
-    printBtn.disabled = true;
-    printBtn.classList.add("opacity-40", "cursor-not-allowed");
-    printBtn.classList.remove("hover:bg-[#054a37]");
-    printBtn.title = "Print is not available for uploaded files";
-  } else {
-    printBtn.disabled = false;
-    printBtn.classList.remove("opacity-40", "cursor-not-allowed");
-    printBtn.classList.add("hover:bg-[#054a37]");
-    printBtn.title = "";
+      return;
+    }
+
+    fetch("http://localhost:5000/api/lab-results/" + (result.id || result._id))
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(full => { result = full; })
+      .catch(() => {})
+      .finally(() => {
+        _viewResult = result;
+        content.innerHTML = buildViewHTML(result);
+        _applyPrintBtnState(result);
+      });
   }
-}
+
+  function _applyPrintBtnState(result) {
+    const printBtn = document.getElementById("printResultBtn");
+    if (!printBtn) return;
+    if (!!result.fileName) {
+      printBtn.disabled = true;
+      printBtn.classList.add("opacity-40", "cursor-not-allowed");
+      printBtn.classList.remove("hover:bg-[#054a37]");
+      printBtn.title = "Print is not available for uploaded files";
+    } else {
+      printBtn.disabled = false;
+      printBtn.classList.remove("opacity-40", "cursor-not-allowed");
+      printBtn.classList.add("hover:bg-[#054a37]");
+      printBtn.title = "";
+    }
+  }
 
   function closeViewModal() {
     const m = document.getElementById("viewLabModal");
@@ -1167,7 +1266,6 @@ function _applyPrintBtnState(result) {
     m.classList.remove("flex");
     document.getElementById("viewModalContent").innerHTML = "";
     _viewResult = null;
-    // ✅ Reset print button state
     const printBtn = document.getElementById("printResultBtn");
     if (printBtn) {
       printBtn.disabled = false;
@@ -1175,6 +1273,123 @@ function _applyPrintBtnState(result) {
       printBtn.classList.add("hover:bg-[#054a37]");
       printBtn.title = "";
     }
+  }
+
+  // ════════════════════════════════════════════════════════════
+  // FILE UPLOAD HELPERS
+  // ════════════════════════════════════════════════════════════
+  let _uploadedFile = null;
+
+  function handleFileSelect() {
+    const fileInput = document.getElementById("fileInput");
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    const allowedTypes = [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "image/png","image/jpeg","image/jpg"
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      alert("❌ Invalid file type. Please upload a PDF, Word document, or Excel file.");
+      fileInput.value = "";
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      alert("❌ File too large. Maximum size is 10MB.");
+      fileInput.value = "";
+      return;
+    }
+
+    _uploadedFile = file;
+    document.getElementById("dropZoneContent").classList.add("hidden");
+    document.getElementById("filePreview").classList.remove("hidden");
+    document.getElementById("fileName").textContent = file.name;
+    document.getElementById("fileSize").textContent = formatFileSize(file.size);
+    validateUploadForm();
+  }
+
+  function validateUploadForm() {
+    const testName  = document.getElementById("uploadTestName").value.trim();
+    const testDate  = document.getElementById("uploadTestDate").value;
+    const uploadBtn = document.getElementById("uploadFileBtn");
+    uploadBtn.disabled = !(testName && testDate && _uploadedFile);
+  }
+
+  async function uploadLabResultFile() {
+    if (!_uploadedFile) { alert("Please select a file to upload."); return; }
+
+    const testName = document.getElementById("uploadTestName").value.trim();
+    const testDate = document.getElementById("uploadTestDate").value;
+    const notes    = document.getElementById("uploadNotes").value.trim();
+
+    if (!testName || !testDate) { alert("Please fill in all required fields."); return; }
+
+    const btn = document.getElementById("uploadFileBtn");
+    btn.disabled = true;
+    btn.innerHTML = '<span class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span><span>Uploading...</span>';
+
+    try {
+      const base64File = await fileToBase64(_uploadedFile);
+      const payload = {
+        patientId:    _patientId,
+        patientName:  _patientName,
+        testName,
+        testDate,
+        physician:    document.getElementById("uploadPhysician")?.value?.trim() || "",
+        notes,
+        fileName:     _uploadedFile.name,
+        fileData:     base64File,
+        fileType:     _uploadedFile.type,
+        uploadedBy:   sessionStorage.getItem("name") || "Medical Technologist",
+        uploadedById: sessionStorage.getItem("userId") || "",
+      };
+
+      const res = await fetch("http://localhost:5000/api/lab-results/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({}));
+        throw new Error(error.message || "Upload failed");
+      }
+
+      alert("✅ Lab result uploaded successfully!");
+      await _markRequestComplete();
+      closeUploadFileModal();
+      await loadLabResults();
+
+    } catch (err) {
+      console.error("Upload error:", err);
+      alert("❌ Failed to upload: " + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">cloud_upload</span><span>Upload Result</span>';
+    }
+  }
+
+  function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload  = () => resolve(reader.result.split(",")[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function formatFileSize(bytes) {
+    if (!bytes || bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes","KB","MB","GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
   }
 
   // ════════════════════════════════════════════════════════════
@@ -1209,7 +1424,7 @@ function _applyPrintBtnState(result) {
   }
 
   // ════════════════════════════════════════════════════════════
-  // SAVE LAB RESULT
+  // SAVE LAB RESULT (structured form)
   // ════════════════════════════════════════════════════════════
   async function saveLabResult() {
     if (!_currentTest) { alert("Please select a test type first."); return; }
@@ -1241,38 +1456,7 @@ function _applyPrintBtnState(result) {
       });
       if (!res.ok) throw new Error((await res.json().catch(() => ({}))).message || "Save failed.");
       alert("Lab result saved successfully!");
-      const pendingRequestId = sessionStorage.getItem('pendingRequestId');
-    
-    if (pendingRequestId) {
-      try {
-        console.log('🔄 Marking request as completed:', pendingRequestId);
-        
-        const completeRes = await fetch(
-          `http://localhost:5000/api/request-forms/${pendingRequestId}/complete`,
-          {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              completedBy: sessionStorage.getItem('name') || 'Medical Technologist'
-            })
-          }
-        );
-        
-        if (completeRes.ok) {
-          const result = await completeRes.json();
-          console.log('✅ Request marked as completed:', result);
-        } else {
-          console.warn('⚠️ Failed to mark request as completed:', completeRes.status);
-        }
-      } catch (completeErr) {
-        console.error('❌ Error marking request complete:', completeErr);
-        // Don't show error to user - lab result was still saved successfully
-      }
-      
-      // Clean up session storage
-      sessionStorage.removeItem('pendingRequestId');
-      sessionStorage.removeItem('pendingPhysician');
-    }
+      await _markRequestComplete();
       closeAddModal();
       await loadLabResults();
     } catch (err) {
@@ -1284,179 +1468,171 @@ function _applyPrintBtnState(result) {
   }
 
   // ════════════════════════════════════════════════════════════
+  // SHARED: mark pending lab request as completed
+  // ════════════════════════════════════════════════════════════
+  async function _markRequestComplete() {
+    const pendingRequestId = sessionStorage.getItem("pendingRequestId");
+    if (!pendingRequestId) return;
+
+    try {
+      const res = await fetch(
+        `http://localhost:5000/api/request-forms/${pendingRequestId}/complete`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ completedBy: sessionStorage.getItem("name") || "Medical Technologist" }),
+        }
+      );
+      if (res.ok) {
+        console.log("✅ Request marked as completed:", pendingRequestId);
+      } else {
+        console.warn("⚠️ Failed to mark request as completed:", res.status);
+      }
+    } catch (err) {
+      console.error("❌ Error marking request complete:", err);
+    } finally {
+      sessionStorage.removeItem("pendingRequestId");
+      sessionStorage.removeItem("pendingPhysician");
+    }
+  }
+
+  // ════════════════════════════════════════════════════════════
   // BUILD VIEW HTML
   // ════════════════════════════════════════════════════════════
   function buildViewHTML(r) {
-  const H = s => escapeHtml(s || "");
-  const date = r.testDate ? new Date(r.testDate).toLocaleDateString("en-PH", {year:"numeric", month:"long", day:"numeric"}) : "—";
-  
-  // ✅ Check if this is an uploaded file (has fileName field)
-  const isUploadedFile = !!r.fileName;
-  
-  let html = `
-    <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 p-5 grid grid-cols-2 gap-3">
-      <div><p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-0.5">Patient</p><p class="font-extrabold text-slate-800 text-sm">${H(r.patientName || _patientName)}</p></div>
-      <div><p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-0.5">Test</p><p class="font-extrabold text-slate-800 text-sm">${H(r.testName)}</p></div>
-      <div><p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-0.5">Date</p><p class="font-extrabold text-slate-800 text-sm">${H(date)}</p></div>
-      <div><p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-0.5">Requesting Physician</p><p class="font-extrabold text-slate-800 text-sm">${H(r.physician) || "—"}</p></div>
-    </div>`;
-  
-  // ✅ IF UPLOADED FILE: Show file info instead of test data
-  if (isUploadedFile) {
-    html += `
-      <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 p-6">
-        <div class="flex items-center gap-4 mb-6">
-          <div class="w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center shrink-0">
-            <span class="material-symbols-outlined text-4xl text-blue-600">description</span>
+    const H    = s => escapeHtml(s || "");
+    const date = r.testDate ? new Date(r.testDate).toLocaleDateString("en-PH", {year:"numeric",month:"long",day:"numeric"}) : "—";
+    const isUploadedFile = !!r.fileName;
+
+    let html = `
+      <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 p-5 grid grid-cols-2 gap-3">
+        <div><p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-0.5">Patient</p><p class="font-extrabold text-slate-800 text-sm">${H(r.patientName || _patientName)}</p></div>
+        <div><p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-0.5">Test</p><p class="font-extrabold text-slate-800 text-sm">${H(r.testName)}</p></div>
+        <div><p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-0.5">Date</p><p class="font-extrabold text-slate-800 text-sm">${H(date)}</p></div>
+        <div><p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-0.5">Requesting Physician</p><p class="font-extrabold text-slate-800 text-sm">${H(r.physician) || "—"}</p></div>
+      </div>`;
+
+    if (isUploadedFile) {
+      html += `
+        <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 p-6">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-4xl text-blue-600">description</span>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-1">Uploaded Document</h3>
+              <p class="text-sm text-slate-500">This lab result was uploaded as a file</p>
+            </div>
           </div>
-          <div class="flex-1">
-            <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-1">Uploaded Document</h3>
-            <p class="text-sm text-slate-500">This lab result was uploaded as a file</p>
+          <div class="bg-slate-50 dark:bg-slate-700 rounded-2xl p-5 space-y-3">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-600">
+              <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-2xl text-primary">attach_file</span>
+                <div>
+                  <p class="font-bold text-slate-800 dark:text-white text-sm">${H(r.fileName)}</p>
+                  <p class="text-xs text-slate-400 mt-0.5">File Type: ${H(getFileTypeName(r.fileType))}</p>
+                </div>
+              </div>
+              <button onclick="viewUploadedFile('${r._id || r.id}', '${r.fileType || ''}')" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white font-bold text-xs hover:bg-[#054a37] transition-all shadow-md">
+                <span class="material-symbols-outlined text-lg">open_in_new</span>
+                View
+              </button>
+            </div>
+            ${r.notes ? `
+            <div class="pt-2">
+              <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Notes</p>
+              <p class="text-sm text-slate-700 dark:text-slate-300">${H(r.notes)}</p>
+            </div>
+            ` : ''}
           </div>
-        </div>
-        
-        <div class="bg-slate-50 dark:bg-slate-700 rounded-2xl p-5 space-y-3">
-          <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-600">
-            <div class="flex items-center gap-3">
-              <span class="material-symbols-outlined text-2xl text-primary">attach_file</span>
-              <div>
-                <p class="font-bold text-slate-800 dark:text-white text-sm">${H(r.fileName)}</p>
-                <p class="text-xs text-slate-400 mt-0.5">File Type: ${H(getFileTypeName(r.fileType))}</p>
+          <div class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800">
+            <div class="flex items-start gap-3">
+              <span class="material-symbols-outlined text-blue-600 text-xl">info</span>
+              <div class="flex-1">
+                <p class="text-xs font-bold text-blue-800 dark:text-blue-300 mb-1">About Uploaded Files</p>
+                <p class="text-xs text-blue-600 dark:text-blue-400">This document was uploaded from an external source. Click the view button above to view the full file.</p>
               </div>
             </div>
-            <button onclick="viewUploadedFile('${r._id || r.id}', '${r.fileType || ''}')" ...>
-  <span class="material-symbols-outlined text-lg">open_in_new</span>
-  View
-</button>
           </div>
-          
-          ${r.notes ? `
-          <div class="pt-2">
-            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Notes</p>
-            <p class="text-sm text-slate-700 dark:text-slate-300">${H(r.notes)}</p>
-          </div>
-          ` : ''}
-        </div>
-        
-        <div class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800">
-          <div class="flex items-start gap-3">
-            <span class="material-symbols-outlined text-blue-600 text-xl">info</span>
-            <div class="flex-1">
-              <p class="text-xs font-bold text-blue-800 dark:text-blue-300 mb-1">About Uploaded Files</p>
-              <p class="text-xs text-blue-600 dark:text-blue-400">This document was uploaded from an external source. Click the view button above to view the full file.</p>
-            </div>
-          </div>
-        </div>
-      </div>`;
-  } else {
-    // ✅ IF STRUCTURED TEST: Show test data as before
-    html += `
-      <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 overflow-hidden">
-        ${buildTestView(r.testType, r.testData || {})}
-      </div>`;
-  }
-  
-  if (r.remarks) {
-    html += `<div class="bg-amber-50 rounded-3xl border border-amber-200 p-5"><p class="text-[10px] font-extrabold text-amber-600 uppercase tracking-widest mb-1">Remarks</p><p class="text-sm font-semibold text-slate-700">${H(r.remarks)}</p></div>`;
-  }
-  
-  html += `
-    <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 p-5 flex justify-between">
-      <div class="text-center min-w-[160px]"><div class="h-8"></div><div class="border-t border-slate-400 pt-2"><p class="font-extrabold text-slate-800 text-xs">${H(r.uploadedBy || "Medical Technologist")}</p><p class="text-[10px] text-slate-400">Medical Technologist, PRC Lic.#0130020</p></div></div>
-      <div class="text-center min-w-[180px]"><div class="h-8"></div><div class="border-t border-slate-400 pt-2"><p class="font-extrabold text-slate-800 text-xs">HORACIO A. SAGUIL, JR. MD, FPSP</p><p class="text-[10px] text-slate-400">Pathologist, Lic.#: 0103226</p></div></div>
-    </div>`;
-  
-  return html;
-}
- 
-// ✅ NEW: Helper function to get file type display name
-function getFileTypeName(fileType) {
-  if (!fileType) return "Document";
-  
-  const typeMap = {
-    "application/pdf": "PDF Document",
-    "application/msword": "Word Document (.doc)",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "Word Document (.docx)",
-    "application/vnd.ms-excel": "Excel Spreadsheet (.xls)",
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "Excel Spreadsheet (.xlsx)",
-    "image/png":  "PNG Image",
-    "image/jpeg": "JPEG Image",
-    "image/jpg":  "JPEG Image"
-  };
-  
-  return typeMap[fileType] || "Document";
-}
- 
-async function viewUploadedFile(resultId, fileType) {
-  if (!resultId) {
-    alert("Cannot open file: Invalid result ID");
-    return;
-  }
- 
-  try {
-    const res = await fetch(`http://localhost:5000/api/lab-results/${resultId}`);
-    if (!res.ok) throw new Error("Failed to fetch result");
- 
-    const result = await res.json();
- 
-    if (!result.fileData || !result.fileName) {
-      alert("This result does not have an attached file.");
-      return;
-    }
- 
-    // Convert base64 → Blob
-    const byteCharacters = atob(result.fileData);
-    const byteArray = new Uint8Array(byteCharacters.length);
-    for (let i = 0; i < byteCharacters.length; i++) {
-      byteArray[i] = byteCharacters.charCodeAt(i);
-    }
-    const mimeType = result.fileType || fileType || "application/octet-stream";
-    const blob = new Blob([byteArray], { type: mimeType });
-    const url  = window.URL.createObjectURL(blob);
- 
-    // ✅ FIX: Check if it's a PDF
-    const isPdf = mimeType === "application/pdf" || result.fileName.toLowerCase().endsWith(".pdf");
-    
-    // ✅ FIX: Check if it's an image (PNG, JPG, JPEG, GIF, WEBP)
-    const isImage = mimeType.startsWith("image/") || 
-                    result.fileName.toLowerCase().match(/\.(png|jpg|jpeg|gif|webp)$/);
- 
-    if (isPdf || isImage) {
-      // ✅ FIX: Open PDF or IMAGE in a new tab for inline viewing
-      const win = window.open(url, "_blank");
-      if (!win) {
-        alert("Pop-up blocked. Please allow pop-ups and try again.");
-      }
-      // Revoke after a short delay so the tab has time to load
-      setTimeout(() => window.URL.revokeObjectURL(url), 10000);
+        </div>`;
     } else {
-      // DOCX / XLSX cannot render in-browser — download instead and inform user
-      alert("ℹ️ This file type (" + result.fileName.split(".").pop().toUpperCase() + ") cannot be previewed in the browser and will be downloaded instead.");
-      const a = document.createElement("a");
-      a.style.display = "none";
-      a.href = url;
-      a.download = result.fileName;
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => {
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-      }, 1000);
+      html += `
+        <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 overflow-hidden">
+          ${buildTestView(r.testType, r.testData || {})}
+        </div>`;
     }
- 
-  } catch (err) {
-    console.error("View file error:", err);
-    alert("Failed to open file: " + err.message);
+
+    if (r.remarks) {
+      html += `<div class="bg-amber-50 rounded-3xl border border-amber-200 p-5"><p class="text-[10px] font-extrabold text-amber-600 uppercase tracking-widest mb-1">Remarks</p><p class="text-sm font-semibold text-slate-700">${H(r.remarks)}</p></div>`;
+    }
+
+    html += `
+      <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 p-5 flex justify-between">
+        <div class="text-center min-w-[160px]"><div class="h-8"></div><div class="border-t border-slate-400 pt-2"><p class="font-extrabold text-slate-800 text-xs">${H(r.uploadedBy || "Medical Technologist")}</p><p class="text-[10px] text-slate-400">Medical Technologist, PRC Lic.#0130020</p></div></div>
+        <div class="text-center min-w-[180px]"><div class="h-8"></div><div class="border-t border-slate-400 pt-2"><p class="font-extrabold text-slate-800 text-xs">HORACIO A. SAGUIL, JR. MD, FPSP</p><p class="text-[10px] text-slate-400">Pathologist, Lic.#: 0103226</p></div></div>
+      </div>`;
+
+    return html;
   }
-}
+
+  function getFileTypeName(fileType) {
+    if (!fileType) return "Document";
+    const typeMap = {
+      "application/pdf": "PDF Document",
+      "application/msword": "Word Document (.doc)",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "Word Document (.docx)",
+      "application/vnd.ms-excel": "Excel Spreadsheet (.xls)",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "Excel Spreadsheet (.xlsx)",
+      "image/png":  "PNG Image",
+      "image/jpeg": "JPEG Image",
+      "image/jpg":  "JPEG Image"
+    };
+    return typeMap[fileType] || "Document";
+  }
+
+  async function viewUploadedFile(resultId, fileType) {
+    if (!resultId) { alert("Cannot open file: Invalid result ID"); return; }
+    try {
+      const res = await fetch(`http://localhost:5000/api/lab-results/${resultId}`);
+      if (!res.ok) throw new Error("Failed to fetch result");
+      const result = await res.json();
+      if (!result.fileData || !result.fileName) { alert("This result does not have an attached file."); return; }
+
+      const byteCharacters = atob(result.fileData);
+      const byteArray = new Uint8Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) byteArray[i] = byteCharacters.charCodeAt(i);
+      const mimeType = result.fileType || fileType || "application/octet-stream";
+      const blob = new Blob([byteArray], { type: mimeType });
+      const url  = window.URL.createObjectURL(blob);
+
+      const isPdf    = mimeType === "application/pdf" || result.fileName.toLowerCase().endsWith(".pdf");
+      const isImage  = mimeType.startsWith("image/") || result.fileName.toLowerCase().match(/\.(png|jpg|jpeg|gif|webp)$/);
+
+      if (isPdf || isImage) {
+        const win = window.open(url, "_blank");
+        if (!win) alert("Pop-up blocked. Please allow pop-ups and try again.");
+        setTimeout(() => window.URL.revokeObjectURL(url), 10000);
+      } else {
+        alert("ℹ️ This file type (" + result.fileName.split(".").pop().toUpperCase() + ") cannot be previewed in the browser and will be downloaded instead.");
+        const a = document.createElement("a");
+        a.style.display = "none"; a.href = url; a.download = result.fileName;
+        document.body.appendChild(a); a.click();
+        setTimeout(() => { window.URL.revokeObjectURL(url); document.body.removeChild(a); }, 1000);
+      }
+    } catch (err) {
+      console.error("View file error:", err);
+      alert("Failed to open file: " + err.message);
+    }
+  }
+
   // ════════════════════════════════════════════════════════════
   // PRINT
   // ════════════════════════════════════════════════════════════
   function printCurrentResult() {
     if (!_viewResult) return;
-    const r    = _viewResult;
-    const H    = s => escapeHtml(s || "");
-    const win  = window.open("", "_blank", "width=900,height=1200");
+    const r   = _viewResult;
+    const H   = s => escapeHtml(s || "");
+    const win = window.open("", "_blank", "width=900,height=1200");
     if (!win) { alert("Pop-up blocked. Please allow pop-ups and try again."); return; }
     const date = r.testDate ? new Date(r.testDate).toLocaleDateString("en-PH",{year:"numeric",month:"long",day:"numeric"}) : "—";
 
@@ -1535,7 +1711,7 @@ ${r.remarks?`<div class="remarks-box"><strong>Remarks:</strong> ${H(r.remarks)}<
     const row = (l, v) => `<tr><td class="rl">${H(l)}</td><td class="rv">${H(v)||"—"}</td></tr>`;
     const sec = l => `<tr><th colspan="2" class="sec">${l}</th></tr>`;
     switch (type) {
-      case "UA": return `<table>${sec("Macroscopic Examination")}${row("Color",d.color)}${row("Transparency",d.transparency)}${row("Specific Gravity",d.specificGravity)}${sec("Chemical Analysis")}${row("pH",d.ph)}${row("Glucose",d.glucose)}${row("Protein",d.protein)}${row("Blood",d.blood)}${row("Ketone",d.ketone)}${row("Nitrite",d.nitrite)}${row("Urobilinogen",d.urobilinogen)}${sec("Microscopic Examination")}${row("WBC",d.wbc)}${row("RBC",d.rbc)}${row("Epithelial Cells",d.epithelialCells)}${row("Bacteria",d.bacteria)}${row("Renal Cells",d.renalCells)}${row("Crystals",d.crystals)}${row("Mucus Threads",d.mucusThreads)}${d.amorphousType||d.amorphousResult ? row("Amorphous",d.amorphousType&&d.amorphousResult ? d.amorphousType+" – "+d.amorphousResult : d.amorphousType||d.amorphousResult) : ""}${d.others?row("Others",d.others):""}</table>`;
+      case "UA": return `<table>${sec("Macroscopic Examination")}${row("Color",d.color)}${row("Transparency",d.transparency)}${row("Specific Gravity",d.specificGravity)}${sec("Chemical Analysis")}${row("pH",d.ph)}${row("Glucose",d.glucose)}${row("Protein",d.protein)}${row("Blood",d.blood)}${row("Ketone",d.ketone)}${row("Nitrite",d.nitrite)}${row("Urobilinogen",d.urobilinogen)}${sec("Microscopic Examination")}${row("WBC",d.wbc)}${row("RBC",d.rbc)}${row("Epithelial Cells",d.epithelialCells)}${row("Bacteria",d.bacteria)}${row("Renal Cells",d.renalCells)}${row("Crystals",d.crystals)}${row("Mucus Threads",d.mucusThreads)}${d.amorphousType||d.amorphousResult?row("Amorphous",d.amorphousType&&d.amorphousResult?d.amorphousType+" – "+d.amorphousResult:d.amorphousType||d.amorphousResult):""}${d.others?row("Others",d.others):""}</table>`;
       case "BT": return `<table>${row("Blood Type",d.bloodType)}${row("Rh Factor",d.rhFactor)}${row("Method",d.method)}</table>`;
       case "PT": return `<table>${row("Pregnancy Test (Urine)",d.result)}</table>`;
       case "DVT": return `<table>${row("Dengue NS1",d.ns1)}${row("Dengue Duo IgG",d.igg)}${row("Dengue Duo IgM",d.igm)}</table>`;
@@ -1557,115 +1733,38 @@ ${r.remarks?`<div class="remarks-box"><strong>Remarks:</strong> ${H(r.remarks)}<
   }
 
   function buildTestView(type, d) {
-  const H   = s => escapeHtml(s || "");
-  const row = (l, v) => `<tr class="border-b border-slate-100 last:border-0"><td class="py-2.5 px-5 text-sm text-slate-500 w-1/2">${H(l)}</td><td class="py-2.5 px-5 text-sm font-bold text-slate-800">${H(v) || "—"}</td></tr>`;
-  const sec = l  => `<tr><th colspan="2" class="px-5 py-3 bg-slate-50 text-left text-[10px] font-extrabold uppercase tracking-widest text-slate-400">${l}</th></tr>`;
- 
-  switch (type) {
-    case "UA":
-      return `<table class="w-full">
-        ${sec("Macroscopic Examination")}
-        ${row("Color", d.color)}
-        ${row("Transparency", d.transparency)}
-        ${row("Specific Gravity", d.specificGravity)}
-        ${sec("Chemical Analysis")}
-        ${row("pH", d.ph)}
-        ${row("Glucose", d.glucose)}
-        ${row("Protein", d.protein)}
-        ${row("Blood", d.blood)}
-        ${row("Ketone", d.ketone)}
-        ${row("Nitrite", d.nitrite)}
-        ${row("Urobilinogen", d.urobilinogen)}
-        ${sec("Microscopic Examination")}
-        ${row("WBC", d.wbc)}
-        ${row("RBC", d.rbc)}
-        ${row("Epithelial Cells", d.epithelialCells)}
-        ${row("Bacteria", d.bacteria)}
-        ${row("Renal Cells", d.renalCells)}
-        ${row("Crystals", d.crystals)}
-        ${row("Mucus Threads", d.mucusThreads)}
-        ${d.amorphousType || d.amorphousResult
-          ? row("Amorphous", d.amorphousType && d.amorphousResult
-              ? d.amorphousType + " – " + d.amorphousResult
-              : d.amorphousType || d.amorphousResult)
-          : ""}
-        ${d.others ? row("Others", d.others) : ""}
-      </table>`;
- 
-    case "BT":
-      return `<table class="w-full"><tbody>
-        ${row("Blood Type", d.bloodType)}
-        ${row("Rh Factor", d.rhFactor)}
-        ${row("Method", d.method)}
-      </tbody></table>`;
- 
-    case "PT":
-      return `<table class="w-full"><tbody>
-        ${row("Pregnancy Test (Urine)", d.result)}
-      </tbody></table>`;
- 
-    case "DVT":
-      return `<table class="w-full"><tbody>
-        ${row("Dengue NS1", d.ns1)}
-        ${row("Dengue Duo IgG", d.igg)}
-        ${row("Dengue Duo IgM", d.igm)}
-      </tbody></table>`;
- 
-    case "FA":
-      return `<table class="w-full">
-        ${sec("A. Gross")}
-        ${row("Consistency", d.consistency)}
-        ${row("Color", d.color)}
-        ${row("Occult Blood", d.occultBlood)}
-        ${row("Ova / Parasite", d.ovaParasite)}
-        ${row("Fat Globules", d.fatGlobules)}
-        ${d.others ? row("Others", d.others) : ""}
-        ${sec("B. Microscopic")}
-        ${row("Pus Cells", d.pusCells)}
-        ${row("Red Blood Cells", d.rbc)}
-        ${d.noIntestinalParasite ? row("", "NO INTESTINAL PARASITE SEEN.") : ""}
-      </table>`;
- 
-    case "SEROLOGY":
-      return `<table class="w-full"><tbody>
-        ${row("HBsAg Screening (Qualitative)", d.hbsag)}
-        ${row("VDRL Screening (Qualitative)", d.vdrl)}
-      </tbody></table>`;
- 
-    case "CHEM": {
-      const tests = d.tests || {};
-      let t = `<div class="overflow-x-auto"><table class="w-full text-sm">
-        <thead><tr class="bg-slate-50 border-b-2 border-slate-200">
-          <th class="text-left py-3 px-4 text-[10px] font-extrabold uppercase tracking-widest text-slate-500">Test</th>
-          <th class="text-center py-3 px-3 text-[10px] font-extrabold uppercase text-secondary">Conv.</th>
-          <th class="text-center py-3 px-3 text-[10px] font-bold uppercase text-slate-400">Unit</th>
-          <th class="text-center py-3 px-3 text-[10px] font-bold uppercase text-slate-400">Ref</th>
-          <th class="text-center py-3 px-3 text-[10px] font-extrabold uppercase text-primary">SI</th>
-          <th class="text-center py-3 px-3 text-[10px] font-bold uppercase text-slate-400">Unit</th>
-          <th class="text-center py-3 px-3 text-[10px] font-bold uppercase text-slate-400">Ref</th>
-        </tr></thead>
-        <tbody class="divide-y divide-slate-100">`;
-      CHEM_TESTS.forEach(ct => {
-        const rr = tests[ct.key] || {};
-        t += `<tr class="hover:bg-slate-50">
-          <td class="py-2.5 px-4 font-semibold text-slate-700 text-sm">${H(ct.label)}</td>
-          <td class="py-2.5 px-3 text-center font-extrabold text-secondary text-sm">${H(rr.convResult || "—")}</td>
-          <td class="py-2.5 px-3 text-center text-xs text-slate-400">${H(ct.convUnit)}</td>
-          <td class="py-2.5 px-3 text-center text-xs text-slate-400">${H(ct.convRef)}</td>
-          <td class="py-2.5 px-3 text-center font-extrabold text-primary text-sm">${H(rr.siResult || "—")}</td>
-          <td class="py-2.5 px-3 text-center text-xs text-slate-400">${H(ct.siUnit)}</td>
-          <td class="py-2.5 px-3 text-center text-xs text-slate-400">${H(ct.siRef)}</td>
-        </tr>`;
-      });
-      t += `</tbody></table></div>`;
-      if (d.remarks) t += `<div class="px-5 py-3 bg-slate-50 border-t border-slate-100 text-sm text-slate-600"><strong>Remarks:</strong> ${H(d.remarks)}</div>`;
-      return t;
+    const H   = s => escapeHtml(s || "");
+    const row = (l, v) => `<tr class="border-b border-slate-100 last:border-0"><td class="py-2.5 px-5 text-sm text-slate-500 w-1/2">${H(l)}</td><td class="py-2.5 px-5 text-sm font-bold text-slate-800">${H(v) || "—"}</td></tr>`;
+    const sec = l  => `<tr><th colspan="2" class="px-5 py-3 bg-slate-50 text-left text-[10px] font-extrabold uppercase tracking-widest text-slate-400">${l}</th></tr>`;
+
+    switch (type) {
+      case "UA":
+        return `<table class="w-full">${sec("Macroscopic Examination")}${row("Color",d.color)}${row("Transparency",d.transparency)}${row("Specific Gravity",d.specificGravity)}${sec("Chemical Analysis")}${row("pH",d.ph)}${row("Glucose",d.glucose)}${row("Protein",d.protein)}${row("Blood",d.blood)}${row("Ketone",d.ketone)}${row("Nitrite",d.nitrite)}${row("Urobilinogen",d.urobilinogen)}${sec("Microscopic Examination")}${row("WBC",d.wbc)}${row("RBC",d.rbc)}${row("Epithelial Cells",d.epithelialCells)}${row("Bacteria",d.bacteria)}${row("Renal Cells",d.renalCells)}${row("Crystals",d.crystals)}${row("Mucus Threads",d.mucusThreads)}${d.amorphousType||d.amorphousResult?row("Amorphous",d.amorphousType&&d.amorphousResult?d.amorphousType+" – "+d.amorphousResult:d.amorphousType||d.amorphousResult):""}${d.others?row("Others",d.others):""}</table>`;
+      case "BT":
+        return `<table class="w-full"><tbody>${row("Blood Type",d.bloodType)}${row("Rh Factor",d.rhFactor)}${row("Method",d.method)}</tbody></table>`;
+      case "PT":
+        return `<table class="w-full"><tbody>${row("Pregnancy Test (Urine)",d.result)}</tbody></table>`;
+      case "DVT":
+        return `<table class="w-full"><tbody>${row("Dengue NS1",d.ns1)}${row("Dengue Duo IgG",d.igg)}${row("Dengue Duo IgM",d.igm)}</tbody></table>`;
+      case "FA":
+        return `<table class="w-full">${sec("A. Gross")}${row("Consistency",d.consistency)}${row("Color",d.color)}${row("Occult Blood",d.occultBlood)}${row("Ova / Parasite",d.ovaParasite)}${row("Fat Globules",d.fatGlobules)}${d.others?row("Others",d.others):""}${sec("B. Microscopic")}${row("Pus Cells",d.pusCells)}${row("Red Blood Cells",d.rbc)}${d.noIntestinalParasite?row("","NO INTESTINAL PARASITE SEEN."):""}</table>`;
+      case "SEROLOGY":
+        return `<table class="w-full"><tbody>${row("HBsAg Screening (Qualitative)",d.hbsag)}${row("VDRL Screening (Qualitative)",d.vdrl)}</tbody></table>`;
+      case "CHEM": {
+        const tests = d.tests || {};
+        let t = `<div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="bg-slate-50 border-b-2 border-slate-200"><th class="text-left py-3 px-4 text-[10px] font-extrabold uppercase tracking-widest text-slate-500">Test</th><th class="text-center py-3 px-3 text-[10px] font-extrabold uppercase text-secondary">Conv.</th><th class="text-center py-3 px-3 text-[10px] font-bold uppercase text-slate-400">Unit</th><th class="text-center py-3 px-3 text-[10px] font-bold uppercase text-slate-400">Ref</th><th class="text-center py-3 px-3 text-[10px] font-extrabold uppercase text-primary">SI</th><th class="text-center py-3 px-3 text-[10px] font-bold uppercase text-slate-400">Unit</th><th class="text-center py-3 px-3 text-[10px] font-bold uppercase text-slate-400">Ref</th></tr></thead><tbody class="divide-y divide-slate-100">`;
+        CHEM_TESTS.forEach(ct => {
+          const rr = tests[ct.key] || {};
+          t += `<tr class="hover:bg-slate-50"><td class="py-2.5 px-4 font-semibold text-slate-700 text-sm">${H(ct.label)}</td><td class="py-2.5 px-3 text-center font-extrabold text-secondary text-sm">${H(rr.convResult||"—")}</td><td class="py-2.5 px-3 text-center text-xs text-slate-400">${H(ct.convUnit)}</td><td class="py-2.5 px-3 text-center text-xs text-slate-400">${H(ct.convRef)}</td><td class="py-2.5 px-3 text-center font-extrabold text-primary text-sm">${H(rr.siResult||"—")}</td><td class="py-2.5 px-3 text-center text-xs text-slate-400">${H(ct.siUnit)}</td><td class="py-2.5 px-3 text-center text-xs text-slate-400">${H(ct.siRef)}</td></tr>`;
+        });
+        t += `</tbody></table></div>`;
+        if (d.remarks) t += `<div class="px-5 py-3 bg-slate-50 border-t border-slate-100 text-sm text-slate-600"><strong>Remarks:</strong> ${H(d.remarks)}</div>`;
+        return t;
+      }
+      default:
+        return `<p class="p-5 text-slate-400 text-sm">No data available.</p>`;
     }
- 
-    default:
-      return `<p class="p-5 text-slate-400 text-sm">No data available.</p>`;
   }
-}
 
   // ════════════════════════════════════════════════════════════
   // UTILITY
@@ -1674,344 +1773,6 @@ ${r.remarks?`<div class="remarks-box"><strong>Remarks:</strong> ${H(r.remarks)}<
     if (!str && str !== 0) return "";
     return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
   }
-
-  // Auto-refresh every 10s (only when modals are closed)
-
-  let _uploadedFile = null;
- 
-// ✅ MODIFY: Update openAddModal to show choice modal instead
-function openAddModal() {
-  const role = sessionStorage.getItem("role");
-  
-  // ✅ Only show choice modal for Medtech
-  if (role === "Medtech") {
-    openChoiceModal();
-  } else {
-    // For doctors, open form directly (shouldn't happen as button is hidden)
-    openFormModal();
-  }
-}
- 
-// ✅ NEW: Open choice modal
-function openChoiceModal() {
-  const modal = document.getElementById("choiceModal");
-  modal.classList.remove("hidden");
-  modal.classList.add("flex");
-}
- 
-// ✅ NEW: Close choice modal
-function closeChoiceModal() {
-  const modal = document.getElementById("choiceModal");
-  modal.classList.add("hidden");
-  modal.classList.remove("flex");
-}
- 
-// ✅ NEW: Open upload file modal
-function openUploadFileModal() {
-  closeChoiceModal();
-  
-  const modal = document.getElementById("uploadFileModal");
-  modal.classList.remove("hidden");
-  modal.classList.add("flex");
-  
-  // Autofill patient info
-  document.getElementById("uploadPatientName").value = _patientName;
-  document.getElementById("uploadPatientId").value = _patientId;
-  document.getElementById("uploadTestDate").value = new Date().toISOString().split("T")[0];
-}
- 
-// ✅ NEW: Close upload file modal
-function closeUploadFileModal() {
-  const modal = document.getElementById("uploadFileModal");
-  modal.classList.add("hidden");
-  modal.classList.remove("flex");
-  
-  // Reset form
-  document.getElementById("uploadTestName").value = "";
-  document.getElementById("uploadTestDate").value = new Date().toISOString().split("T")[0];
-  document.getElementById("uploadNotes").value = "";
-  document.getElementById("uploadPhysician").value = "";
-  document.getElementById("fileInput").value = "";
-  _uploadedFile = null;
-  const badge = document.getElementById("uploadPhysicianBadge");
-  badge?.classList.add("hidden");
-  badge?.classList.remove("inline-flex");
-  document.getElementById("uploadPhysician")?.classList.remove("autofilled");
-  
-  // Reset drop zone
-  document.getElementById("dropZoneContent").classList.remove("hidden");
-  document.getElementById("filePreview").classList.add("hidden");
-  document.getElementById("uploadFileBtn").disabled = true;
-}
- 
-// ✅ NEW: Open form modal (existing functionality)
-function openFormModal() {
-  closeChoiceModal();
-  
-  const m = document.getElementById("addLabModal");
-  m.classList.remove("hidden");
-  m.classList.add("flex");
- 
-  // Set static fields first
-  document.getElementById("formPatientName").value   = _patientName;
-  document.getElementById("formPatientAgeSex").value = _patientAge + (_patientAge && _patientSex ? " / " : "") + _patientSex;
-  document.getElementById("commonDate").value        = new Date().toISOString().split("T")[0];
- 
-  autofillMedtech();
-  sessionStorage.removeItem("pendingPhysician");
-}
- 
-// ✅ NEW: File input handling
-document.addEventListener("DOMContentLoaded", () => {
-  const fileInput = document.getElementById("fileInput");
-  const dropZone = document.getElementById("dropZone");
-  const uploadBtn = document.getElementById("uploadFileBtn");
-  
-  // Choice modal buttons
-  document.getElementById("chooseUploadFile")?.addEventListener("click", openUploadFileModal);
-  document.getElementById("chooseCreateForm")?.addEventListener("click", openFormModal);
-  document.getElementById("closeChoiceModal")?.addEventListener("click", closeChoiceModal);
-  
-  // Upload modal buttons
-  document.getElementById("closeUploadModal")?.addEventListener("click", closeUploadFileModal);
-  document.getElementById("cancelUploadModal")?.addEventListener("click", closeUploadFileModal);
-  document.getElementById("uploadFileBtn")?.addEventListener("click", uploadLabResultFile);
-  document.getElementById("removeFile")?.addEventListener("click", () => {
-    fileInput.value = "";
-    _uploadedFile = null;
-    document.getElementById("dropZoneContent").classList.remove("hidden");
-    document.getElementById("filePreview").classList.add("hidden");
-    uploadBtn.disabled = true;
-  });
-  
-  // File input change
-  fileInput?.addEventListener("change", handleFileSelect);
-  
-  // Drag and drop
-  dropZone?.addEventListener("dragover", (e) => {
-    e.preventDefault();
-    dropZone.classList.add("border-primary", "bg-brand-light/50");
-  });
-  
-  dropZone?.addEventListener("dragleave", () => {
-    dropZone.classList.remove("border-primary", "bg-brand-light/50");
-  });
-  
-  dropZone?.addEventListener("drop", (e) => {
-    e.preventDefault();
-    dropZone.classList.remove("border-primary", "bg-brand-light/50");
-    
-    const files = e.dataTransfer.files;
-    if (files.length > 0) {
-      fileInput.files = files;
-      handleFileSelect();
-    }
-  });
-});
- 
-// ✅ NEW: Handle file selection
-function handleFileSelect() {
-  const fileInput = document.getElementById("fileInput");
-  const file = fileInput.files[0];
-  
-  if (!file) return;
-  
-  // Validate file type
-  const allowedTypes = [
-    "application/pdf",
-    "application/msword",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    "application/vnd.ms-excel",
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    "image/png",
-    "image/jpeg",
-    "image/jpg"
-  ];
-  
-  if (!allowedTypes.includes(file.type)) {
-    alert("❌ Invalid file type. Please upload a PDF, Word document, or Excel file.");
-    fileInput.value = "";
-    return;
-  }
-  
-  // Validate file size (10MB max)
-  const maxSize = 10 * 1024 * 1024; // 10MB
-  if (file.size > maxSize) {
-    alert("❌ File too large. Maximum size is 10MB.");
-    fileInput.value = "";
-    return;
-  }
-  
-  _uploadedFile = file;
-  
-  // Show file preview
-  document.getElementById("dropZoneContent").classList.add("hidden");
-  document.getElementById("filePreview").classList.remove("hidden");
-  document.getElementById("fileName").textContent = file.name;
-  document.getElementById("fileSize").textContent = formatFileSize(file.size);
-  
-  // Enable upload button if test name is filled
-  validateUploadForm();
-}
- 
-// ✅ NEW: Validate upload form
-function validateUploadForm() {
-  const testName = document.getElementById("uploadTestName").value.trim();
-  const testDate = document.getElementById("uploadTestDate").value;
-  const uploadBtn = document.getElementById("uploadFileBtn");
-  
-  uploadBtn.disabled = !(testName && testDate && _uploadedFile);
-}
- 
-// Listen to test name changes
-document.getElementById("uploadTestName")?.addEventListener("input", validateUploadForm);
-document.getElementById("uploadTestDate")?.addEventListener("change", validateUploadForm);
- 
-// ✅ NEW: Upload lab result file
-async function uploadLabResultFile() {
-  if (!_uploadedFile) {
-    alert("Please select a file to upload.");
-    return;
-  }
-  
-  const testName = document.getElementById("uploadTestName").value.trim();
-  const testDate = document.getElementById("uploadTestDate").value;
-  const notes = document.getElementById("uploadNotes").value.trim();
-  
-  if (!testName || !testDate) {
-    alert("Please fill in all required fields.");
-    return;
-  }
-  
-  const btn = document.getElementById("uploadFileBtn");
-  btn.disabled = true;
-  btn.innerHTML = '<span class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span><span>Uploading...</span>';
-  
-  try {
-    // Convert file to base64
-    const base64File = await fileToBase64(_uploadedFile);
-    
-    const payload = {
-      patientId:    _patientId,
-      patientName:  _patientName,
-      testName:     testName,
-      testDate:     testDate,
-      physician:    document.getElementById("uploadPhysician")?.value?.trim() || "",
-      notes:        notes,
-      fileName:     _uploadedFile.name,
-      fileData:     base64File,
-      fileType:     _uploadedFile.type,
-      uploadedBy:   sessionStorage.getItem("name") || "Medical Technologist",
-      uploadedById: sessionStorage.getItem("userId") || "",
-    };
-    
-    const res = await fetch("http://localhost:5000/api/lab-results/upload", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    
-    if (!res.ok) {
-      const error = await res.json().catch(() => ({}));
-      throw new Error(error.message || "Upload failed");
-    }
-    
-    alert("✅ Lab result uploaded successfully!");
-    
-    // ✅ NEW: Mark the corresponding lab request as completed
-    const pendingRequestId = sessionStorage.getItem('pendingRequestId');
-    
-    if (pendingRequestId) {
-      try {
-        console.log('🔄 Marking request as completed:', pendingRequestId);
-        
-        const completeRes = await fetch(
-          `http://localhost:5000/api/request-forms/${pendingRequestId}/complete`,
-          {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              completedBy: sessionStorage.getItem('name') || 'Medical Technologist'
-            })
-          }
-        );
-        
-        if (completeRes.ok) {
-          const result = await completeRes.json();
-          console.log('✅ Request marked as completed:', result);
-        } else {
-          console.warn('⚠️ Failed to mark request as completed:', completeRes.status);
-        }
-      } catch (completeErr) {
-        console.error('❌ Error marking request complete:', completeErr);
-        // Don't show error to user - lab result was still saved successfully
-      }
-      
-      // Clean up session storage
-      sessionStorage.removeItem('pendingRequestId');
-      sessionStorage.removeItem('pendingPhysician');
-    }
-    
-    closeUploadFileModal();
-    await loadLabResults();
-    
-  } catch (err) {
-    console.error("Upload error:", err);
-    alert("❌ Failed to upload: " + err.message);
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">cloud_upload</span><span>Upload Result</span>';
-  }
-}
- 
-// ✅ NEW: Convert file to base64
-function fileToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result.split(",")[1]);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
- 
-// ✅ NEW: Format file size (if not already in lab_results.js)
-function formatFileSize(bytes) {
-  if (!bytes || bytes === 0) return "0 Bytes";
-  const k = 1024;
-  const sizes = ["Bytes", "KB", "MB", "GB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
-}
-
-async function markRequestComplete() {
-  const requestId = sessionStorage.getItem("pendingRequestId");
-  if (!requestId) return; // No pending request — result was added manually
- 
-  try {
-    const res = await fetch(
-      "http://localhost:5000/api/request-forms/" + requestId,
-      {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          status:      "Completed",
-          completedAt: new Date().toISOString(),
-          completedBy: sessionStorage.getItem("name") || "Medical Technologist",
-        }),
-      }
-    );
-    if (!res.ok) {
-      console.warn("Could not mark request complete:", res.status);
-    } else {
-      console.log("✅ Request", requestId, "marked as Completed");
-    }
-  } catch (err) {
-    console.warn("markRequestComplete error:", err);
-  } finally {
-    // Always clear so it doesn't carry over to the next patient
-    sessionStorage.removeItem("pendingRequestId");
-  }
-}
   </script>
 </body>
 </html>
