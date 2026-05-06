@@ -121,13 +121,18 @@ async function loadRecentPatients() {
     const loggedInUserId = sessionStorage.getItem('userId');
     const loggedInName = sessionStorage.getItem('name');
 
-    const appointmentRes = await fetch("http://localhost:5000/api/appointments");
-    if (!appointmentRes.ok) throw new Error("Failed to fetch appointments");
-    const allAppointments = await appointmentRes.json();
+    const res = await fetch("http://localhost:5000/api/appointments/archive/list");
+    if (!res.ok) throw new Error("Failed to fetch archived appointments");
+    let archivedAppointments = await res.json();
 
-    let relevantAppointments = allAppointments;
+    // Only completed appointments
+    let completed = archivedAppointments.filter(app =>
+      (app.status || "").toLowerCase() === "completed"
+    );
+
+    // Filter by doctor if logged in as doctor
     if (loggedInRole === "Doctor" && loggedInUserId) {
-      relevantAppointments = allAppointments.filter(app => {
+      completed = completed.filter(app => {
         const matchesDoctorId = app.doctorId === loggedInUserId;
         const matchesDoctorName = app.doctorName === `Dr. ${loggedInName}` ||
                                    app.doctorName === loggedInName;
@@ -135,41 +140,30 @@ async function loadRecentPatients() {
       });
     }
 
-    const patientLastSeen = {};
-    relevantAppointments.forEach(app => {
-      if (!app.patientId || !app.patientName) return;
-
-      let appDate;
-      try {
-        const dateStr = app.date ? String(app.date).split('T')[0] : null;
-        const timeStr = app.time ? String(app.time).substring(0, 5) : '00:00';
-        appDate = dateStr ? new Date(`${dateStr}T${timeStr}:00`) : new Date(0);
-        if (isNaN(appDate.getTime())) appDate = new Date(0);
-      } catch {
-        appDate = new Date(0);
-      }
-
-      if (!patientLastSeen[app.patientId] || appDate > patientLastSeen[app.patientId].date) {
-        patientLastSeen[app.patientId] = { date: appDate, name: app.patientName, id: app.patientId };
-      }
+    // Sort by date descending, get latest 5 unique patients
+    completed.sort((a, b) => {
+      const dateA = new Date(`${String(a.date).split('T')[0]}T${a.time || '00:00'}`);
+      const dateB = new Date(`${String(b.date).split('T')[0]}T${b.time || '00:00'}`);
+      return dateB - dateA;
     });
 
-    const sortedPatients = Object.values(patientLastSeen)
-      .sort((a, b) => b.date - a.date)
-      .slice(0, 10);
+    // Deduplicate by patientId, keep only the most recent per patient, max 5
+    const seen = new Set();
+    const recentPatients = [];
+    for (const app of completed) {
+      if (!app.patientId || seen.has(app.patientId)) continue;
+      seen.add(app.patientId);
+      recentPatients.push({ id: app.patientId, name: app.patientName, date: app.date });
+      if (recentPatients.length >= 5) break;
+    }
 
-    const currentIds = Array.from(recentCon.querySelectorAll('[data-patient-id]'))
-      .map(el => el.getAttribute('data-patient-id')).join(',');
-    const newIds = sortedPatients.map(p => p.id).join(',');
-    if (currentIds === newIds) return;
-
-    if (sortedPatients.length === 0) {
+    if (recentPatients.length === 0) {
       recentCon.innerHTML = `<p style="text-align:center; color:gray; margin-top:20px;">No recent patients</p>`;
       return;
     }
 
-    recentCon.innerHTML = sortedPatients.map(p => {
-      const cleanName = p.name.replace(/\s*\(.*?\)\s*/g, "").trim();
+    recentCon.innerHTML = recentPatients.map(p => {
+      const cleanName = (p.name || "").replace(/\s*\(.*?\)\s*/g, "").trim();
       const initials = cleanName.split(" ")
         .filter(part => part.length > 0)
         .map(n => n[0]?.toUpperCase() || "")
