@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="CSS/Global.css" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script>
       tailwind.config = {
         darkMode: "class",
@@ -1331,279 +1332,161 @@
       }
 
       function saveReceiptAsPDF() {
-        if (!_lastFormData) return;
- 
-        const fd           = _lastFormData;
-        const refNum       = fd.requestId    || "—";
-        const testTags     = fd.tests        || [];
-        const patientName  = fd.patientName  || "—";
-        const ageSex       = `${fd.patientAge || "—"} / ${fd.patientSex || "—"}`;
-        const patientId    = fd.patientID    || "—";
-        const priority     = fd.priority     || "—";
-        const reqDate      = fmtDate(fd.requestedDate);
-        const referringDr  = fd.referringDoctor || "—";
-        const remarks      = fd.notes        || "—";
-        const dateSubmitted = fd.dateSubmitted || "—";
- 
-        const ALL_TESTS = {
-          "HEMATOLOGY": ["CBC", "CBC w/ Platelet", "ABO w/ RH Typing", "ESR"],
-          "BLOOD CHEMISTRY": ["HGT/FBS", "Lipid Profile", "BUN", "CREA", "BUA", "HgbA1c", "SGPT", "SGOT", "Sodium", "Potassium", "Calcium", "Chloride"],
-          "ULTRASOUND": ["Whole Abdomen US", "Upper Abdomen US", "KUB US", "Pelvic US", "Transvaginal US", "Transrectal US", "Scrotal US"],
-          "CLINICAL MICROSCOPY": ["Urinalysis", "Fecalysis", "Pregnancy Test"],
-          "SEROLOGY": ["HBsAG/VDRL/HIV", "Dengue Rapid Test", "ASO"],
-          "THYROID FUNCTION TEST": ["TSH", "FT3", "FT4"],
-          "OTHERS": ["12-L ECG"],
-          "X-RAY": ["Chest X-Ray", "Chest PA/ALV", "Chest PA/LAT", "Chest AP/LAT", "Skull X-Ray AP/LAT", "PNS X-Ray", "Extremities X-Ray", "Lumbosacral X-Ray", "Thoracic X-Ray"],
-        };
- 
-        function buildCategory(title, items) {
-          const rows = items.map(item => {
-            const isChecked = testTags.some(t => t === item || t.startsWith(item + ":") || item.startsWith(t));
-            const box = isChecked
-              ? `<span style="display:inline-block;width:13px;height:13px;border:1.5px solid #065f46;background:#065f46;border-radius:3px;margin-right:6px;vertical-align:middle;position:relative;"><span style="position:absolute;left:1px;top:-1px;color:white;font-size:10px;font-weight:900;line-height:13px;">✓</span></span>`
-              : `<span style="display:inline-block;width:13px;height:13px;border:1.5px solid #94a3b8;border-radius:3px;margin-right:6px;vertical-align:middle;"></span>`;
-            return `<div style="display:flex;align-items:center;padding:2px 0;font-size:11.5px;">
-                      ${box}<span style="color:${isChecked ? '#065f46' : '#374151'};font-weight:${isChecked ? '700' : '500'};">${item}</span>
-                    </div>`;
-          }).join("");
- 
-          const othersTag = testTags.find(t =>
-            (title === "ULTRASOUND" && t.startsWith("US Others")) ||
-            (title === "X-RAY" && t.startsWith("X-Ray Others"))
-          );
-          const othersRow = othersTag
-            ? `<div style="display:flex;align-items:center;padding:2px 0;font-size:11.5px;">
-                <span style="display:inline-block;width:13px;height:13px;border:1.5px solid #065f46;background:#065f46;border-radius:3px;margin-right:6px;vertical-align:middle;position:relative;"><span style="position:absolute;left:1px;top:-1px;color:white;font-size:10px;font-weight:900;line-height:13px;">✓</span></span>
-                <span style="color:#065f46;font-weight:700;">OTHERS: <u>${othersTag.split(":")[1]?.trim() || ""}</u></span>
-              </div>`
-            : (title === "ULTRASOUND" || title === "X-RAY")
-              ? `<div style="display:flex;align-items:center;padding:2px 0;font-size:11.5px;">
-                  <span style="display:inline-block;width:13px;height:13px;border:1.5px solid #94a3b8;border-radius:3px;margin-right:6px;vertical-align:middle;"></span>
-                  <span style="color:#374151;font-weight:500;">OTHERS: <span style="display:inline-block;width:80px;border-bottom:1px solid #94a3b8;">&nbsp;</span></span>
-                </div>`
-              : "";
- 
-          return `<div style="margin-bottom:10px;">
-            <div style="font-weight:800;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:#111;border-bottom:2px solid #065f46;padding-bottom:3px;margin-bottom:5px;">${title}</div>
-            ${rows}${othersRow}
-          </div>`;
-        }
- 
-        function cb(checked) {
-          return checked
-            ? `<span style="display:inline-block;width:13px;height:13px;border:1.5px solid #065f46;background:#065f46;border-radius:3px;margin-right:6px;vertical-align:middle;position:relative;"><span style="position:absolute;left:1px;top:-1px;color:white;font-size:10px;font-weight:900;line-height:13px;">✓</span></span>`
-            : `<span style="display:inline-block;width:13px;height:13px;border:1.5px solid #94a3b8;border-radius:3px;margin-right:6px;vertical-align:middle;"></span>`;
-        }
- 
-        const chestChecked = testTags.some(t => t === "Chest X-Ray");
-        const paAlvChecked = testTags.some(t => t === "Chest PA/ALV");
-        const paLatChecked = testTags.some(t => t === "Chest PA/LAT");
-        const apLatChecked = testTags.some(t => t === "Chest AP/LAT");
-        const skullChecked = testTags.some(t => t === "Skull X-Ray AP/LAT");
-        const pnsChecked   = testTags.some(t => t === "PNS X-Ray");
-        const extChecked   = testTags.some(t => t === "Extremities X-Ray");
-        const lumboChecked = testTags.some(t => t === "Lumbosacral X-Ray");
-        const thorChecked  = testTags.some(t => t === "Thoracic X-Ray");
-        const xrayOtherTag = testTags.find(t => t.startsWith("X-Ray Others"));
- 
-        const xraySection = `<div style="margin-bottom:10px;">
-          <div style="font-weight:800;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:#111;border-bottom:2px solid #065f46;padding-bottom:3px;margin-bottom:5px;">X-RAY</div>
-          <div style="display:flex;align-items:flex-start;padding:2px 0;font-size:11.5px;">
-            ${cb(chestChecked)}<span style="color:${chestChecked?'#065f46':'#374151'};font-weight:${chestChecked?'700':'500'};">CHEST</span>
-            <span style="margin-left:8px;color:#6b7280;font-size:11px;line-height:1.8;">
-              ${cb(paAlvChecked)}&nbsp;PA/ALV&nbsp;&nbsp;${cb(paLatChecked)}&nbsp;PA/LAT&nbsp;&nbsp;${cb(apLatChecked)}&nbsp;AP/LAT
-            </span>
-          </div>
-          <div style="display:flex;align-items:center;padding:2px 0;font-size:11.5px;">${cb(skullChecked)}<span style="color:${skullChecked?'#065f46':'#374151'};font-weight:${skullChecked?'700':'500'};">SKULL X-RAY – AP/LAT</span></div>
-          <div style="display:flex;align-items:center;padding:2px 0;font-size:11.5px;">${cb(pnsChecked)}<span style="color:${pnsChecked?'#065f46':'#374151'};font-weight:${pnsChecked?'700':'500'};">PNS – AP/LAT / Water's View</span></div>
-          <div style="display:flex;align-items:flex-start;padding:2px 0;font-size:11.5px;">${cb(extChecked)}<div>
-            <span style="color:${extChecked?'#065f46':'#374151'};font-weight:${extChecked?'700':'500'};">EXT</span><br>
-            <span style="font-size:10.5px;color:#6b7280;padding-left:2px;">• Upper – Forearm, Hand, Wrist</span><br>
-            <span style="font-size:10.5px;color:#6b7280;padding-left:2px;">• Lower – Thigh, Leg, Knee, Ankle, Foot</span>
-          </div></div>
-          <div style="display:flex;align-items:center;padding:2px 0;font-size:11.5px;">${cb(lumboChecked)}<span style="color:${lumboChecked?'#065f46':'#374151'};font-weight:${lumboChecked?'700':'500'};">LUMBOSACRAL</span></div>
-          <div style="display:flex;align-items:center;padding:2px 0;font-size:11.5px;">${cb(thorChecked)}<span style="color:${thorChecked?'#065f46':'#374151'};font-weight:${thorChecked?'700':'500'};">THORACIC</span></div>
-          <div style="display:flex;align-items:center;padding:2px 0;font-size:11.5px;">
-            ${cb(!!xrayOtherTag)}<span style="color:${xrayOtherTag?'#065f46':'#374151'};font-weight:${xrayOtherTag?'700':'500'};">OTHERS: <span style="display:inline-block;min-width:80px;border-bottom:1px solid #94a3b8;">${xrayOtherTag ? xrayOtherTag.split(":")[1]?.trim() || "" : "&nbsp;"}</span></span>
-          </div>
-        </div>`;
- 
-        const leftCol = `
-          ${buildCategory("HEMATOLOGY",         ALL_TESTS["HEMATOLOGY"])}
-          ${buildCategory("BLOOD CHEMISTRY",     ALL_TESTS["BLOOD CHEMISTRY"])}
-          ${buildCategory("ULTRASOUND",          ALL_TESTS["ULTRASOUND"])}
-          ${buildCategory("CLINICAL MICROSCOPY", ALL_TESTS["CLINICAL MICROSCOPY"])}
-        `;
-        const rightCol = `
-          ${buildCategory("SEROLOGY",             ALL_TESTS["SEROLOGY"])}
-          ${buildCategory("THYROID FUNCTION TEST",ALL_TESTS["THYROID FUNCTION TEST"])}
-          ${buildCategory("OTHERS",               ALL_TESTS["OTHERS"])}
-          ${xraySection}
-        `;
- 
-        const priorityColor = { routine: "#0369a1", urgent: "#92400e", emergency: "#b91c1c" };
-        const pColor = priorityColor[priority.toLowerCase()] || "#374151";
- 
-        // ── Open save-as-PDF window (A4 portrait, no position:absolute wrapper) ──
-        const pdfWin = window.open("", "_blank", "width=794,height=1123");
-        pdfWin.document.write(`<!DOCTYPE html><html><head>
-          <meta charset="utf-8"/>
-          <title>Lab Request ${refNum}</title>
-          <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
-          <style>
-            * { box-sizing:border-box; margin:0; padding:0; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-            body { font-family:'Plus Jakarta Sans',Arial,sans-serif; background:white; color:#111; font-size:12px; }
-            .pdf-wrapper { width:100%; padding:16mm 18mm; box-sizing:border-box; }
-            @media print {
-              @page { size: A4 portrait; margin: 0; }
-              * { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
-              body { margin:0; padding:0; }
-              .pdf-wrapper { padding:14mm 16mm; }
-            }
-            .header-section {
-              display:flex; flex-direction:column;
-              padding-bottom:5px; border-bottom:3px solid #065f46; margin-bottom:5px;
-            }
-            .header-top { display:flex; align-items:center; justify-content:center; gap:12px; }
-            .clinic-info { text-align:center; }
-            .clinic-main-name {
-              font-size:20px; font-weight:900; color:#065f46;
-              letter-spacing:3px; font-family:'Arial Black','Arial Bold',Arial,sans-serif;
-              line-height:1; margin-bottom:2px;
-            }
-            .clinic-full-name {
-              font-size:9px; font-weight:bold; color:#064e3b;
-              letter-spacing:1px; margin-bottom:3px; font-family:Arial,sans-serif;
-            }
-            .clinic-services {
-              font-size:7.5px; color:#8b5a2b; font-weight:bold;
-              letter-spacing:0.3px; line-height:1.5; font-family:Arial,sans-serif;
-            }
-            .clinic-meta {
-              display:flex; justify-content:space-between; margin-top:4px;
-              font-size:7px; color:#6b7280; font-family:Arial,sans-serif; font-style:italic;
-            }
-            .doctors-section {
-              text-align:center; font-size:8px; font-weight:bold;
-              color:#064e3b; font-family:Arial,sans-serif; margin:3px 0 4px;
-            }
-            .doctors-row {
-              display:grid; grid-template-columns:1fr 1fr;
-              text-align:center; line-height:1.7;
-            }
-            .doctors-row span:first-child { text-align:right; padding-right:18px; }
-            .doctors-row span:last-child  { text-align:left;  padding-left:18px;  }
-          </style>
-        </head><body>
-        <div class="pdf-wrapper">
- 
-          <!-- CLINIC HEADER -->
-          <div class="header-section">
-            <div class="header-top">
-              <img src="../user/Assets/wellserved_logo.jpg" alt="WellServed Logo"
-                style="width:64px;height:64px;border-radius:50%;border:3px solid #065f46;object-fit:cover;flex-shrink:0;box-shadow:0 2px 8px rgba(6,95,70,0.15);">
-              <div class="clinic-info">
-                <div class="clinic-main-name">WELL SERVED</div>
-                <div class="clinic-full-name">INFIRMARY &amp; DRUGSTORE INC.</div>
-                <div class="clinic-services">&bull; MEDICAL &nbsp;&bull; PEDIA &nbsp;&bull; OB GYNE &nbsp;&bull; MINOR SURGERY</div>
-                <div class="clinic-services">&bull; X-RAY &nbsp;&bull; ECG &nbsp;&bull; LABORATORY &nbsp;&bull; ULTRASOUND &nbsp;&bull; DRUGSTORE</div>
-              </div>
-            </div>
-            <div class="clinic-meta">
-              <span>&#128205; #26 Steve St. cor Villiongco St., Brgy. Commonwealth, Quezon City &nbsp;|&nbsp; Tel: 8 952-77-79</span>
-              <span>&#128231; wellservedinfirmary@gmail.com</span>
-            </div>
-          </div>
- 
-          <!-- DOCTORS GRID -->
-          <div class="doctors-section">
-            <div class="doctors-row">
-              <span>DAISY VILLARAMA-TIGA, M.D. CFP, MHA</span>
-              <span>JOSE EDUARDO M. TIGA, M.D. CFP</span>
-            </div>
-            <div class="doctors-row">
-              <span>DANIEL JOSE V. TIGA, M.D. CFP</span>
-              <span>EDUARDO MARCO DAYRIT M.D.</span>
-            </div>
-            <div class="doctors-row">
-              <span>KATRINA MAE TIGA-AGUILA, M.D.</span>
-              <span>RICSON RAY AGUILA, M.D.</span>
-            </div>
-          </div>
- 
-          <!-- FORM TITLE -->
-          <div style="text-align:center;font-size:16px;font-weight:900;text-transform:uppercase;letter-spacing:2.5px;color:#065f46;padding:5px 0 10px;">
-            Laboratory Request Form
-          </div>
- 
-          <!-- PATIENT INFO -->
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px 20px;margin-bottom:10px;">
-            <div style="border-bottom:1px solid #374151;padding-bottom:3px;">
-              <span style="font-size:10px;color:#6b7280;font-weight:700;">NAME: </span>
-              <span style="font-weight:700;font-size:13px;">${patientName}</span>
-            </div>
-            <div style="border-bottom:1px solid #374151;padding-bottom:3px;">
-              <span style="font-size:10px;color:#6b7280;font-weight:700;">DATE: </span>
-              <span style="font-weight:700;font-size:13px;">${reqDate}</span>
-            </div>
-            <div style="border-bottom:1px solid #374151;padding-bottom:3px;">
-              <span style="font-size:10px;color:#6b7280;font-weight:700;">AGE/SEX: </span>
-              <span style="font-weight:700;font-size:13px;">${ageSex}</span>
-            </div>
-            <div style="border-bottom:1px solid #374151;padding-bottom:3px;">
-              <span style="font-size:10px;color:#6b7280;font-weight:700;">ID: </span>
-              <span style="font-weight:700;font-size:13px;">${patientId}</span>
-            </div>
-          </div>
- 
-          <!-- REF + PRIORITY + DATE SUBMITTED -->
-          <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;align-items:center;">
-            <div style="background:#f0fdf4;border:1px solid #6ee7b7;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;color:#065f46;">
-              REF#: <span style="font-size:14px;font-weight:900;">${refNum}</span>
-            </div>
-            <div style="background:#fff7ed;border:1px solid #fdba74;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;color:${pColor};">
-              PRIORITY: <span style="font-size:13px;font-weight:900;text-transform:uppercase;">${priority}</span>
-            </div>
-            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;color:#374151;margin-left:auto;">
-              SUBMITTED: ${dateSubmitted}
-            </div>
-          </div>
- 
-          <!-- TEST GRID -->
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px;border:1.5px solid #065f46;border-radius:10px;padding:12px 16px;margin-bottom:12px;">
-            <div>${leftCol}</div>
-            <div>${rightCol}</div>
-          </div>
- 
-          <!-- FASTING NOTE -->
-          <div style="background:#ecfdf5;border:1px solid #6ee7b7;border-radius:9px;padding:8px 14px;text-align:center;font-size:11.5px;color:#065f46;margin-bottom:10px;">
-            <strong>NOTE: Blood Chemistry + Whole Ultrasound</strong> Needs Fasting (No Food) From 12mn–8am
-          </div>
- 
-          ${remarks !== "—" ? `
-          <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:9px;padding:8px 14px;font-size:12px;color:#374151;margin-bottom:10px;">
-            <span style="font-weight:800;color:#6b7280;text-transform:uppercase;font-size:10px;letter-spacing:0.08em;">Remarks / Notes: </span>${remarks}
-          </div>` : ""}
- 
-          <!-- SIGNATURE -->
-          <div style="display:flex;justify-content:flex-end;margin-top:20px;">
-            <div style="text-align:center;min-width:200px;">
-              <div style="height:44px;"></div>
-              <div style="border-top:1.5px solid #374151;padding-top:5px;font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.06em;">
-                ${referringDr !== "—" ? referringDr : "Physician's Signature"}
-              </div>
-              <div style="font-size:10px;color:#94a3b8;margin-top:2px;">Referring Doctor</div>
-            </div>
-          </div>
- 
-        </div>
-        </body></html>`);
- 
-        pdfWin.document.close();
-        pdfWin.focus();
-        // Short delay so fonts/images load before print dialog
-        setTimeout(() => { pdfWin.print(); }, 800);
-      }
+  if (!_lastFormData) return;
+
+  const fd           = _lastFormData;
+  const refNum       = fd.requestId    || "—";
+  const testTags     = fd.tests        || [];
+  const patientName  = fd.patientName  || "—";
+  const ageSex       = `${fd.patientAge || "—"} / ${fd.patientSex || "—"}`;
+  const patientId    = fd.patientID    || "—";
+  const priority     = fd.priority     || "—";
+  const reqDate      = fmtDate(fd.requestedDate);
+  const referringDr  = fd.referringDoctor || "—";
+  const remarks      = fd.notes        || "";
+  const dateSubmitted = fd.dateSubmitted || "—";
+
+  // Build a hidden iframe with the same HTML as printReceipt, then use html2canvas → jsPDF
+  // Since jsPDF alone can't render complex HTML well, we use the print window approach
+  // but trigger "Save as PDF" via the browser's built-in PDF printer silently.
+
+  const ALL_TESTS = {
+    "HEMATOLOGY": ["CBC", "CBC w/ Platelet", "ABO w/ RH Typing", "ESR"],
+    "BLOOD CHEMISTRY": ["HGT/FBS", "Lipid Profile", "BUN", "CREA", "BUA", "HgbA1c", "SGPT", "SGOT", "Sodium", "Potassium", "Calcium", "Chloride"],
+    "ULTRASOUND": ["Whole Abdomen US", "Upper Abdomen US", "KUB US", "Pelvic US", "Transvaginal US", "Transrectal US", "Scrotal US"],
+    "CLINICAL MICROSCOPY": ["Urinalysis", "Fecalysis", "Pregnancy Test"],
+    "SEROLOGY": ["HBsAG/VDRL/HIV", "Dengue Rapid Test", "ASO"],
+    "THYROID FUNCTION TEST": ["TSH", "FT3", "FT4"],
+    "OTHERS": ["12-L ECG"],
+    "X-RAY": ["Chest X-Ray", "Chest PA/ALV", "Chest PA/LAT", "Chest AP/LAT", "Skull X-Ray AP/LAT", "PNS X-Ray", "Extremities X-Ray", "Lumbosacral X-Ray", "Thoracic X-Ray"],
+  };
+
+  function buildCategory(title, items) {
+    const rows = items.map(item => {
+      const isChecked = testTags.some(t => t === item || t.startsWith(item + ":") || item.startsWith(t));
+      const box = isChecked
+        ? `<span style="display:inline-block;width:13px;height:13px;border:1.5px solid #065f46;background:#065f46;border-radius:3px;margin-right:6px;vertical-align:middle;position:relative;"><span style="position:absolute;left:1px;top:-1px;color:white;font-size:10px;font-weight:900;line-height:13px;">✓</span></span>`
+        : `<span style="display:inline-block;width:13px;height:13px;border:1.5px solid #94a3b8;border-radius:3px;margin-right:6px;vertical-align:middle;"></span>`;
+      return `<div style="display:flex;align-items:center;padding:2px 0;font-size:11.5px;">
+                ${box}<span style="color:${isChecked ? '#065f46' : '#374151'};font-weight:${isChecked ? '700' : '500'};">${item}</span>
+              </div>`;
+    }).join("");
+
+    const othersTag = testTags.find(t =>
+      (title === "ULTRASOUND" && t.startsWith("US Others")) ||
+      (title === "X-RAY" && t.startsWith("X-Ray Others"))
+    );
+    const othersRow = othersTag
+      ? `<div style="display:flex;align-items:center;padding:2px 0;font-size:11.5px;">
+          <span style="display:inline-block;width:13px;height:13px;border:1.5px solid #065f46;background:#065f46;border-radius:3px;margin-right:6px;vertical-align:middle;position:relative;"><span style="position:absolute;left:1px;top:-1px;color:white;font-size:10px;font-weight:900;line-height:13px;">✓</span></span>
+          <span style="color:#065f46;font-weight:700;">OTHERS: <u>${othersTag.split(":")[1]?.trim() || ""}</u></span>
+        </div>`
+      : (title === "ULTRASOUND" || title === "X-RAY")
+        ? `<div style="display:flex;align-items:center;padding:2px 0;font-size:11.5px;">
+            <span style="display:inline-block;width:13px;height:13px;border:1.5px solid #94a3b8;border-radius:3px;margin-right:6px;vertical-align:middle;"></span>
+            <span style="color:#374151;font-weight:500;">OTHERS: <span style="display:inline-block;width:80px;border-bottom:1px solid #94a3b8;">&nbsp;</span></span>
+          </div>`
+        : "";
+
+    return `<div style="margin-bottom:10px;">
+      <div style="font-weight:800;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:#111;border-bottom:2px solid #065f46;padding-bottom:3px;margin-bottom:5px;">${title}</div>
+      ${rows}${othersRow}
+    </div>`;
+  }
+
+  function cb(checked) {
+    return checked
+      ? `<span style="display:inline-block;width:13px;height:13px;border:1.5px solid #065f46;background:#065f46;border-radius:3px;margin-right:6px;vertical-align:middle;position:relative;"><span style="position:absolute;left:1px;top:-1px;color:white;font-size:10px;font-weight:900;line-height:13px;">✓</span></span>`
+      : `<span style="display:inline-block;width:13px;height:13px;border:1.5px solid #94a3b8;border-radius:3px;margin-right:6px;vertical-align:middle;"></span>`;
+  }
+
+  const chestChecked = testTags.some(t => t === "Chest X-Ray");
+  const paAlvChecked = testTags.some(t => t === "Chest PA/ALV");
+  const paLatChecked = testTags.some(t => t === "Chest PA/LAT");
+  const apLatChecked = testTags.some(t => t === "Chest AP/LAT");
+  const skullChecked = testTags.some(t => t === "Skull X-Ray AP/LAT");
+  const pnsChecked   = testTags.some(t => t === "PNS X-Ray");
+  const extChecked   = testTags.some(t => t === "Extremities X-Ray");
+  const lumboChecked = testTags.some(t => t === "Lumbosacral X-Ray");
+  const thorChecked  = testTags.some(t => t === "Thoracic X-Ray");
+  const xrayOtherTag = testTags.find(t => t.startsWith("X-Ray Others"));
+
+  const xraySection = `<div style="margin-bottom:10px;">
+    <div style="font-weight:800;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:#111;border-bottom:2px solid #065f46;padding-bottom:3px;margin-bottom:5px;">X-RAY</div>
+    <div style="display:flex;align-items:flex-start;padding:2px 0;font-size:11.5px;">
+      ${cb(chestChecked)}<span style="color:${chestChecked?'#065f46':'#374151'};font-weight:${chestChecked?'700':'500'};">CHEST</span>
+      <span style="margin-left:8px;color:#6b7280;font-size:11px;line-height:1.8;">
+        ${cb(paAlvChecked)}&nbsp;PA/ALV&nbsp;&nbsp;${cb(paLatChecked)}&nbsp;PA/LAT&nbsp;&nbsp;${cb(apLatChecked)}&nbsp;AP/LAT
+      </span>
+    </div>
+    <div style="display:flex;align-items:center;padding:2px 0;font-size:11.5px;">${cb(skullChecked)}<span style="color:${skullChecked?'#065f46':'#374151'};font-weight:${skullChecked?'700':'500'};">SKULL X-RAY – AP/LAT</span></div>
+    <div style="display:flex;align-items:center;padding:2px 0;font-size:11.5px;">${cb(pnsChecked)}<span style="color:${pnsChecked?'#065f46':'#374151'};font-weight:${pnsChecked?'700':'500'};">PNS – AP/LAT / Water's View</span></div>
+    <div style="display:flex;align-items:flex-start;padding:2px 0;font-size:11.5px;">${cb(extChecked)}<div>
+      <span style="color:${extChecked?'#065f46':'#374151'};font-weight:${extChecked?'700':'500'};">EXT</span><br>
+      <span style="font-size:10.5px;color:#6b7280;padding-left:2px;">• Upper – Forearm, Hand, Wrist</span><br>
+      <span style="font-size:10.5px;color:#6b7280;padding-left:2px;">• Lower – Thigh, Leg, Knee, Ankle, Foot</span>
+    </div></div>
+    <div style="display:flex;align-items:center;padding:2px 0;font-size:11.5px;">${cb(lumboChecked)}<span style="color:${lumboChecked?'#065f46':'#374151'};font-weight:${lumboChecked?'700':'500'};">LUMBOSACRAL</span></div>
+    <div style="display:flex;align-items:center;padding:2px 0;font-size:11.5px;">${cb(thorChecked)}<span style="color:${thorChecked?'#065f46':'#374151'};font-weight:${thorChecked?'700':'500'};">THORACIC</span></div>
+    <div style="display:flex;align-items:center;padding:2px 0;font-size:11.5px;">
+      ${cb(!!xrayOtherTag)}<span style="color:${xrayOtherTag?'#065f46':'#374151'};font-weight:${xrayOtherTag?'700':'500'};">OTHERS: <span style="display:inline-block;min-width:80px;border-bottom:1px solid #94a3b8;">${xrayOtherTag ? xrayOtherTag.split(":")[1]?.trim() || "" : "&nbsp;"}</span></span>
+    </div>
+  </div>`;
+
+  const leftCol = `
+    ${buildCategory("HEMATOLOGY",         ALL_TESTS["HEMATOLOGY"])}
+    ${buildCategory("BLOOD CHEMISTRY",     ALL_TESTS["BLOOD CHEMISTRY"])}
+    ${buildCategory("ULTRASOUND",          ALL_TESTS["ULTRASOUND"])}
+    ${buildCategory("CLINICAL MICROSCOPY", ALL_TESTS["CLINICAL MICROSCOPY"])}
+  `;
+  const rightCol = `
+    ${buildCategory("SEROLOGY",             ALL_TESTS["SEROLOGY"])}
+    ${buildCategory("THYROID FUNCTION TEST",ALL_TESTS["THYROID FUNCTION TEST"])}
+    ${buildCategory("OTHERS",               ALL_TESTS["OTHERS"])}
+    ${xraySection}
+  `;
+
+  const priorityColor = { routine: "#0369a1", urgent: "#92400e", emergency: "#b91c1c" };
+  const pColor = priorityColor[priority.toLowerCase()] || "#374151";
+}
+
+function saveReceiptAsPDF() {
+  const receiptModal = document.getElementById('receiptModal');
+  if (!receiptModal) {
+    alert('Unable to save PDF. Receipt not available.');
+    return;
+  }
+
+  const clone = receiptModal.cloneNode(true);
+  clone.style.position = 'static';
+  clone.style.width = '100%';
+  clone.style.maxWidth = '800px';
+  clone.style.margin = '0 auto';
+  clone.style.boxShadow = 'none';
+  clone.style.background = 'white';
+  clone.style.padding = '20px';
+  clone.style.borderRadius = '20px';
+
+  clone.querySelectorAll('.no-print').forEach(el => el.remove());
+  clone.querySelectorAll('[onclick="printReceipt()"], [onclick="saveReceiptAsPDF()"], [onclick="closeReceipt()"]').forEach(el => el.remove());
+
+  const wrapper = document.createElement('div');
+  wrapper.style.background = '#fff';
+  wrapper.style.padding = '12px';
+  wrapper.appendChild(clone);
+
+  const filename = `WellServed_Request_${_lastFormData.requestId || 'receipt'}_${new Date().toISOString().split('T')[0]}.pdf`;
+  const opt = {
+    margin: [10, 10, 10, 10],
+    filename,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, logging: false },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    pagebreak: { mode: ['css', 'legacy'] },
+  };
+
+  html2pdf().set(opt).from(wrapper).save();
+}
 
       // Clicking outside the modal closes it without resetting the form
       document.getElementById("receiptOverlay").addEventListener("click", function(e) {

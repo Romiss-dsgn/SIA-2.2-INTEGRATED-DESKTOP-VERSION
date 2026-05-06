@@ -379,6 +379,10 @@ function showPrintPreview() {
           style="padding:6px 16px;border-radius:7px;border:1.5px solid rgba(255,255,255,0.4);background:transparent;color:white;font-weight:700;cursor:pointer;font-size:12px;"
           onmouseover="this.style.background='rgba(255,255,255,0.12)'"
           onmouseout="this.style.background='transparent'">✕ Close</button>
+        <button onclick="saveReportAsPDF(); setTimeout(closePrintPreview, 150);"
+          style="padding:6px 20px;border-radius:7px;border:none;background:#10b981;color:white;font-weight:900;cursor:pointer;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,0.15);"
+          onmouseover="this.style.opacity='0.88'"
+          onmouseout="this.style.opacity='1'">💾 Save as PDF</button>
         <button onclick="closePrintPreview(); setTimeout(() => downloadReport(), 150);"
           style="padding:6px 20px;border-radius:7px;border:none;background:white;color:#065f46;font-weight:900;cursor:pointer;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,0.15);"
           onmouseover="this.style.opacity='0.88'"
@@ -666,6 +670,36 @@ function closePrintPreview() {
   const modal = document.getElementById('printPreviewModal');
   if (modal) modal.remove();
   document.body.style.overflow = '';
+}
+
+// ====== SAVE REPORT AS PDF ======
+function saveReportAsPDF() {
+  const dateRange = document.getElementById("dateRangeFilter").selectedOptions[0].text;
+  const doctor = document.getElementById("doctorFilter").selectedOptions[0].text;
+  const today = new Date();
+  const dateStr = today.toISOString().split('T')[0];
+  const filename = `WellServed_Report_${dateStr}.pdf`;
+
+  const previewDocument = document.getElementById('previewDocument');
+  if (!previewDocument) {
+    alert('Error: Could not find report document to save.');
+    return;
+  }
+
+  const element = previewDocument.cloneNode(true);
+  element.style.transform = 'scale(1)';
+  element.style.width = '794px';
+
+  const opt = {
+    margin: [10, 10, 10, 10],
+    filename: filename,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, logging: false },
+    jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' },
+    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+  };
+
+  html2pdf().set(opt).from(element).save();
 }
 
 // ====== EXECUTE PRINT ======
