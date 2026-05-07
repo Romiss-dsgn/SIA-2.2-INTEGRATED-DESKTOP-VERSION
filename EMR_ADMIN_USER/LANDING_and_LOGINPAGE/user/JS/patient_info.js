@@ -2657,12 +2657,25 @@ function setupBarangayAutocomplete() {
 // LOAD PATIENT INFO
 // ============================================================
 async function loadPatientInfo() {
-  const params    = new URLSearchParams(window.location.search);
-  const patientId = params.get("patientId");
+  const params     = new URLSearchParams(window.location.search);
+  const patientId  = params.get("patientId");
+  const isArchived = params.get("archived") === "true";
   if (!patientId) { alert("No patient selected!"); return; }
 
   try {
-    const res = await fetch(`http://localhost:5000/api/patients/${patientId}`);
+    // Try the correct endpoint first, fall back to the other
+    let res = await fetch(
+      isArchived
+        ? `http://localhost:5000/api/archived-patients/${patientId}`
+        : `http://localhost:5000/api/patients/${patientId}`
+    );
+    if (!res.ok) {
+      res = await fetch(
+        isArchived
+          ? `http://localhost:5000/api/patients/${patientId}`
+          : `http://localhost:5000/api/archived-patients/${patientId}`
+      );
+    }
     if (!res.ok) throw new Error("Patient not found");
     const p = await res.json();
 

@@ -31,6 +31,19 @@ function formatPatientName(firstName, middleName, lastName) {
   return `${first} ${last}`;
 }
 
+function calculateDurationDays(frequency, quantity) {
+  const dosesPerDay = {
+    "Once a day": 1,
+    "2x a day": 2,
+    "3x a day": 3,
+    "Every 8 hours": 3,
+    "Every 12 hours": 2,
+    "As needed": 1,
+  };
+  const doses = dosesPerDay[frequency] || 1;
+  return quantity > 0 ? Math.ceil(quantity / doses) : 0;
+}
+
 // ✅ ELECTRON GPU FIX: MutationObserver watches for select2-dropdown appearing in DOM
 // and immediately forces it to fixed position with correct coordinates
 // More reliable than select2:open event — catches dropdown at paint time
@@ -172,6 +185,7 @@ function getMedicationFormData(form) {
   const frequencySelect = form.querySelector('.freqSelect');
   const medicnameSelect = form.querySelector('select[name="medicname"]');
   const prescriberSelect = form.querySelector('select[name="presby"]');
+  const durationDaysInput = form.querySelector('input[name="durationDays"]');
 
   return {
     ...rawData,
@@ -182,6 +196,7 @@ function getMedicationFormData(form) {
     indication: indicationInput ? indicationInput.value.trim() : "",
     presNotes: presNotesInput ? presNotesInput.value.trim() : "",
     quantity: Number(rawData.quantity) || 0,
+    durationDays: durationDaysInput ? parseInt(durationDaysInput.value) || 0 : 0,
   };
 }
 
@@ -392,9 +407,11 @@ function createMedicationForm(index, existingMed = null, isReadOnly = false) {
   const wrapper = document.createElement("div");
   wrapper.className = "medecineCon bg-slate-50 border border-slate-200 rounded-xl p-5 mb-4";
 
-  // ✅ Duration: maintain checkbox + days input
-  const isMaintain = existingMed?.durationMaintain === true || existingMed?.durationMaintain === "true";
-  const durationDays = existingMed?.durationDays || "";
+  // Calculate initial duration days if existingMed has quantity and frequency
+  let initialDays = "";
+  if (existingMed?.quantity && existingMed?.frequency) {
+    initialDays = calculateDurationDays(existingMed.frequency, existingMed.quantity);
+  }
 
   wrapper.innerHTML = `
     <div class="flex items-center justify-between mb-4">
@@ -422,7 +439,7 @@ function createMedicationForm(index, existingMed = null, isReadOnly = false) {
 
       <div class="flex flex-col gap-1">
         <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Quantity</label>
-        <input type="number" name="quantity" value="${existingMed?.quantity || ""}" placeholder="e.g. 10" required
+        <input type="number" id="quantityInput${index}" name="quantity" value="${existingMed?.quantity || ""}" placeholder="e.g. 10" required
           class="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
       </div>
 
@@ -434,21 +451,11 @@ function createMedicationForm(index, existingMed = null, isReadOnly = false) {
 
       <!-- ✅ DURATION FIELD -->
       <div class="flex flex-col gap-1">
-        <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Duration</label>
-        <div class="flex flex-col gap-2">
-          <label class="flex items-center gap-2 cursor-pointer select-none">
-            <input type="checkbox" name="durationMaintain" id="maintainCheck${index}"
-              class="w-4 h-4 rounded accent-primary cursor-pointer"
-              ${isMaintain ? "checked" : ""} />
-            <span class="text-sm font-semibold text-slate-700">Maintain (ongoing)</span>
-          </label>
-          <div id="daysWrapper${index}" class="flex items-center gap-2 ${isMaintain ? 'hidden' : ''}">
-            <input type="number" name="durationDays" id="durationDays${index}"
-              value="${durationDays}"
-              min="1" max="365" placeholder="No. of days"
-              class="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
-            <span class="text-sm text-slate-500 whitespace-nowrap">day(s)</span>
-          </div>
+        <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Duration (Days)</label>
+        <div class="flex items-center gap-2">
+          <input type="number" id="durationDays${index}" name="durationDays" value="${initialDays}" readonly
+            class="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-gray-100 text-sm text-slate-800 focus:outline-none" />
+          <span class="text-sm text-slate-500 whitespace-nowrap">day(s)</span>
         </div>
       </div>
 
@@ -467,21 +474,21 @@ function createMedicationForm(index, existingMed = null, isReadOnly = false) {
     </form>
   `;
 
-  // ✅ Toggle days input when maintain checkbox is clicked
+  // ✅ Calculate duration days when quantity or frequency changes
   setTimeout(() => {
-    const check = wrapper.querySelector(`#maintainCheck${index}`);
-    const daysWrapper = wrapper.querySelector(`#daysWrapper${index}`);
+    const quantityInput = wrapper.querySelector(`#quantityInput${index}`);
+    const freqSelect = wrapper.querySelector(`#freqSelect${index}`);
     const daysInput = wrapper.querySelector(`#durationDays${index}`);
-    if (check && daysWrapper) {
-      check.addEventListener("change", () => {
-        if (check.checked) {
-          daysWrapper.classList.add("hidden");
-          if (daysInput) daysInput.value = "";
-        } else {
-          daysWrapper.classList.remove("hidden");
-        }
-      });
-    }
+
+    const updateDays = () => {
+      const quantity = parseInt(quantityInput?.value) || 0;
+      const frequency = freqSelect?.value || "";
+      const calculatedDays = calculateDurationDays(frequency, quantity);
+      if (daysInput) daysInput.value = calculatedDays;
+    };
+
+    if (quantityInput) quantityInput.addEventListener("input", updateDays);
+    if (freqSelect) freqSelect.addEventListener("change", updateDays);
   }, 0);
 
   return wrapper;
@@ -953,6 +960,16 @@ async function initializeReadOnlyMedication(index, existingMed) {
 
   if (existingMed.presby) prescriberSelect.val(existingMed.presby).trigger("change");
 
+  // Set duration days for read-only
+  const durationDaysInput = document.getElementById(`durationDays${index}`);
+  if (durationDaysInput) {
+    let days = existingMed.durationDays || 0;
+    if (!days && existingMed.quantity && existingMed.frequency) {
+      days = calculateDurationDays(existingMed.frequency, existingMed.quantity);
+    }
+    durationDaysInput.value = days;
+  }
+
   setTimeout(() => {
     const form = document.getElementById(`medicineSelect${index}`)?.closest(".patientForm");
     if (!form) return;
@@ -1050,17 +1067,10 @@ async function loadPrescriptionMedications(patientId, appointmentId) {
             <tbody class="divide-y divide-slate-50">
               ${appointmentMeds.map((m) => {
                 let durationDisplay = "—";
-                if (m.duration) {
-                  if (m.duration.toLowerCase() === "maintain") {
-                    durationDisplay = '<span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">Maintain</span>';
-                  } else {
-                    durationDisplay = m.duration;
-                  }
-                } else {
-                  const isMaintain = m.durationMaintain === true || m.durationMaintain === "true" || m.durationMaintain === "on";
-                  durationDisplay = isMaintain
-                    ? '<span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">Maintain</span>'
-                    : m.durationDays ? `${m.durationDays} day(s)` : "—";
+                if (m.duration && m.duration !== "") {
+                  durationDisplay = m.duration;
+                } else if (m.durationDays && m.durationDays > 0) {
+                  durationDisplay = `${m.durationDays} day(s)`;
                 }
 
                 return `
@@ -1269,43 +1279,8 @@ if (saveBtn) {
     }
 
     const medData = formsWithMedications.map((f) => {
-      const formData = new FormData(f);
-      const data = normalizeFormData(Object.fromEntries(formData));
-
-      const prescriberSelect = f.querySelector('select[name="presby"]');
-      if (prescriberSelect) data.presby = prescriberSelect.value || "N/A";
-
-      const dosageInput = f.querySelector('.dosageInput');
-      if (dosageInput) data.dosage = dosageInput.value || "";
-
-      const frequencySelect = f.querySelector('.freqSelect');
-      if (frequencySelect) data.frequency = frequencySelect.value || "";
-
-      const medicineSelect = f.querySelector('.medicineSelect');
-      if (medicineSelect) data.medicname = medicineSelect.value || "";
-
-      // ✅ Capture duration fields
-      const maintainCheck = f.querySelector('input[name="durationMaintain"]');
-      data.durationMaintain = maintainCheck ? maintainCheck.checked : false;
-      const daysInput = f.querySelector('input[name="durationDays"]');
-      data.durationDays = (!data.durationMaintain && daysInput?.value) ? parseInt(daysInput.value) : null;
-
-      // ✅ BUILD DURATION STRING FOR DATABASE
-      if (data.durationMaintain || data.durationMaintain === "on") {
-        data.duration = "Maintain";
-      } else if (data.durationDays && data.durationDays > 0) {
-        data.duration = `${data.durationDays} day(s)`;
-      } else {
-        data.duration = "";
-      }
-
-      // ✅ Capture indication (read directly from DOM, not FormData)
-      const indicationInput = f.querySelector('input[name="indication"]');
-      data.indication = indicationInput ? indicationInput.value.trim() : "";
-
-      // ✅ Remove FormData's "on" string for durationMaintain (checkbox quirk)
-      if (data.durationMaintain === "on") data.durationMaintain = true;
-
+      const data = getMedicationFormData(f);
+      data.duration = data.durationDays > 0 ? `${data.durationDays} day(s)` : "";
       return data;
     });
 
@@ -1323,8 +1298,7 @@ if (saveBtn) {
           followupTime,
           followup: followupDate || null,
           // ✅ Explicitly include new fields so they're not dropped by spread
-          durationMaintain: med.durationMaintain === true || med.durationMaintain === "on",
-          durationDays: (med.durationMaintain === true || med.durationMaintain === "on") ? null : (med.durationDays || null),
+          durationDays: med.durationDays || 0,
           duration: med.duration || "",  // ✅ ADD DURATION STRING
           indication: med.indication || "",
         };
@@ -1711,10 +1685,9 @@ function setupMedicationsPageFunctionality(patientId) {
 
       const medData = formsWithMedications.map((f) => {
         const data = getMedicationFormData(f);
-        const maintainCheck = f.querySelector('input[name="durationMaintain"]');
-        data.durationMaintain = maintainCheck ? maintainCheck.checked : false;
         const daysInput = f.querySelector('input[name="durationDays"]');
-        data.durationDays = (!data.durationMaintain && daysInput?.value) ? parseInt(daysInput.value) : null;
+        data.durationDays = daysInput?.value ? parseInt(daysInput.value) : 0;
+        data.duration = data.durationDays > 0 ? `${data.durationDays} day(s)` : "";
         return data;
       });
 
@@ -1911,15 +1884,10 @@ function setupPrintFunctionality(patientId, appointmentId) {
         // ✅ Format duration for print - CHECK DURATION FIELD FIRST
         let durationText = "—";
         
-        if (m.duration) {
-          // If duration field exists, use it directly
+        if (m.duration && m.duration !== "") {
           durationText = m.duration;
-        } else {
-          // Fallback to old method
-          const isMaintain = m.durationMaintain === true || m.durationMaintain === "true" || m.durationMaintain === "on";
-          durationText = isMaintain
-            ? "Maintain"
-            : m.durationDays ? `${m.durationDays} day(s)` : "—";
+        } else if (m.durationDays && m.durationDays > 0) {
+          durationText = `${m.durationDays} day(s)`;
         }
         
         return `
