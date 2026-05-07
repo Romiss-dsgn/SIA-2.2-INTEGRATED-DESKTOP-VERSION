@@ -1142,7 +1142,14 @@ _patientName = ((p.firstname || "") + middleInitial + " " + (p.lastname || "")).
 
   function buildCard(r) {
     const isUploadedFile = !!r.fileName;
-    const label = r.testName || TEST_LABELS[r.testType] || r.testType || "Lab Result";
+    const hasMultipleFiles = isUploadedFile && r.files && r.files.length > 1;
+
+    // ✅ For multi-file: show each filename on its own line in the card title
+    const label = hasMultipleFiles
+      ? r.files.map(f => f.fileName).join(" · ")
+      : (r.testName || TEST_LABELS[r.testType] || r.testType || "Lab Result");
+
+    const fileCount = hasMultipleFiles ? r.files.length : (r.fileName ? 1 : 0);
     const type  = r.testType || "UA";
     const icon  = TEST_ICONS[type] || "science";
     const displayIcon = isUploadedFile ? "description" : icon;
@@ -1158,14 +1165,27 @@ _patientName = ((p.firstname || "") + middleInitial + " " + (p.lastname || "")).
             <span class="material-symbols-outlined ${isUploadedFile ? 'text-blue-600' : 'text-primary'} text-2xl">${displayIcon}</span>
           </div>
           <div class="flex-1 min-w-0">
-            <h3 class="font-extrabold text-slate-800 dark:text-slate-100 text-sm">${escapeHtml(label)}</h3>
+            ${hasMultipleFiles
+              ? `<div class="space-y-0.5">
+                  ${r.files.map(f => `
+                    <h3 class="font-extrabold text-slate-800 dark:text-slate-100 text-sm truncate">${escapeHtml(f.fileName)}</h3>
+                  `).join('')}
+                </div>`
+              : `<h3 class="font-extrabold text-slate-800 dark:text-slate-100 text-sm">${escapeHtml(label)}</h3>`
+            }
             <p class="text-xs text-slate-400 mt-1 font-medium">
               <i class="fa-solid fa-calendar-alt mr-1 text-primary/60"></i>${fd}
             </p>
             ${isUploadedFile ? `
-            <div class="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 border border-blue-100">
-              <span class="material-symbols-outlined text-blue-600 text-xs">attach_file</span>
-              <span class="text-[10px] font-bold text-blue-600">Uploaded File</span>
+            <div class="mt-1.5 flex flex-wrap gap-1">
+              <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 border border-blue-100">
+                <span class="material-symbols-outlined text-blue-600 text-xs">attach_file</span>
+                <span class="text-[10px] font-bold text-blue-600">Uploaded File${fileCount > 1 ? 's' : ''}</span>
+              </div>
+              ${fileCount > 1 ? `
+              <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-100">
+                <span class="text-[10px] font-bold text-emerald-600">${fileCount} images</span>
+              </div>` : ''}
             </div>
             ` : ''}
           </div>
@@ -1181,7 +1201,6 @@ _patientName = ((p.firstname || "") + middleInitial + " " + (p.lastname || "")).
         </div>
       </div>`;
   }
-
   // ════════════════════════════════════════════════════════════
   // MODAL: openAddModal — shows choice modal for Medtech
   // ════════════════════════════════════════════════════════════
@@ -1702,48 +1721,57 @@ _patientName = ((p.firstname || "") + middleInitial + " " + (p.lastname || "")).
       </div>`;
 
     if (isUploadedFile) {
-      html += `
-        <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 p-6">
-          <div class="flex items-center gap-4 mb-6">
-            <div class="w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center shrink-0">
-              <span class="material-symbols-outlined text-4xl text-blue-600">description</span>
-            </div>
-            <div class="flex-1">
-              <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-1">Uploaded Document</h3>
-              <p class="text-sm text-slate-500">This lab result was uploaded as a file</p>
-            </div>
+  // ✅ Build files list from `files` array if available, else fall back to single file
+  const filesList = (r.files && r.files.length > 1)
+    ? r.files
+    : [{ fileName: r.fileName, fileType: r.fileType }];
+
+  const fileRows = filesList.map((f, i) => `
+    <div class="flex items-center justify-between pb-3 ${i < filesList.length - 1 ? 'border-b border-slate-200 dark:border-slate-600 mb-3' : ''}">
+      <div class="flex items-center gap-3">
+        <span class="material-symbols-outlined text-2xl text-primary">attach_file</span>
+        <div>
+          <p class="font-bold text-slate-800 dark:text-white text-sm">${H(f.fileName)}</p>
+          <p class="text-xs text-slate-400 mt-0.5">File Type: ${H(getFileTypeName(f.fileType))}</p>
+        </div>
+      </div>
+      <button onclick="viewUploadedFile('${r._id || r.id}', '${f.fileType || ''}', ${i})"
+        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white font-bold text-xs hover:bg-[#054a37] transition-all shadow-md">
+        <span class="material-symbols-outlined text-lg">open_in_new</span>
+        View
+      </button>
+    </div>`).join('');
+
+  html += `
+    <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 p-6">
+      <div class="flex items-center gap-4 mb-6">
+        <div class="w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center shrink-0">
+          <span class="material-symbols-outlined text-4xl text-blue-600">description</span>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-1">Uploaded Document${filesList.length > 1 ? 's' : ''}</h3>
+          <p class="text-sm text-slate-500">${filesList.length > 1 ? filesList.length + ' files attached' : 'This lab result was uploaded as a file'}</p>
+        </div>
+      </div>
+      <div class="bg-slate-50 dark:bg-slate-700 rounded-2xl p-5 space-y-3">
+        ${fileRows}
+        ${r.notes ? `
+        <div class="pt-2 border-t border-slate-200 dark:border-slate-600">
+          <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Notes</p>
+          <p class="text-sm text-slate-700 dark:text-slate-300">${H(r.notes)}</p>
+        </div>
+        ` : ''}
+      </div>
+      <div class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800">
+        <div class="flex items-start gap-3">
+          <span class="material-symbols-outlined text-blue-600 text-xl">info</span>
+          <div class="flex-1">
+            <p class="text-xs font-bold text-blue-800 dark:text-blue-300 mb-1">About Uploaded Files</p>
+            <p class="text-xs text-blue-600 dark:text-blue-400">These documents were uploaded from an external source. Click the view buttons above to open each file.</p>
           </div>
-          <div class="bg-slate-50 dark:bg-slate-700 rounded-2xl p-5 space-y-3">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-600">
-              <div class="flex items-center gap-3">
-                <span class="material-symbols-outlined text-2xl text-primary">attach_file</span>
-                <div>
-                  <p class="font-bold text-slate-800 dark:text-white text-sm">${H(r.fileName)}</p>
-                  <p class="text-xs text-slate-400 mt-0.5">File Type: ${H(getFileTypeName(r.fileType))}</p>
-                </div>
-              </div>
-              <button onclick="viewUploadedFile('${r._id || r.id}', '${r.fileType || ''}')" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white font-bold text-xs hover:bg-[#054a37] transition-all shadow-md">
-                <span class="material-symbols-outlined text-lg">open_in_new</span>
-                View
-              </button>
-            </div>
-            ${r.notes ? `
-            <div class="pt-2">
-              <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Notes</p>
-              <p class="text-sm text-slate-700 dark:text-slate-300">${H(r.notes)}</p>
-            </div>
-            ` : ''}
-          </div>
-          <div class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800">
-            <div class="flex items-start gap-3">
-              <span class="material-symbols-outlined text-blue-600 text-xl">info</span>
-              <div class="flex-1">
-                <p class="text-xs font-bold text-blue-800 dark:text-blue-300 mb-1">About Uploaded Files</p>
-                <p class="text-xs text-blue-600 dark:text-blue-400">This document was uploaded from an external source. Click the view button above to view the full file.</p>
-              </div>
-            </div>
-          </div>
-        </div>`;
+        </div>
+      </div>
+    </div>`;
     } else {
       html += `
         <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 overflow-hidden">
@@ -1779,32 +1807,46 @@ _patientName = ((p.firstname || "") + middleInitial + " " + (p.lastname || "")).
     return typeMap[fileType] || "Document";
   }
 
-  async function viewUploadedFile(resultId, fileType) {
+  async function viewUploadedFile(resultId, fileType, fileIndex = 0) {
     if (!resultId) { alert("Cannot open file: Invalid result ID"); return; }
     try {
       const res = await fetch(`http://localhost:5000/api/lab-results/${resultId}`);
       if (!res.ok) throw new Error("Failed to fetch result");
       const result = await res.json();
-      if (!result.fileData || !result.fileName) { alert("This result does not have an attached file."); return; }
 
-      const byteCharacters = atob(result.fileData);
+      // ✅ Pick the right file — from files[] array if available, else single file
+      let fileName, fileData, resolvedFileType;
+
+      const hasMultipleFiles = result.files && result.files.length > 1;
+      if (hasMultipleFiles && result.files[fileIndex]) {
+        fileName         = result.files[fileIndex].fileName;
+        fileData         = result.files[fileIndex].fileData;
+        resolvedFileType = result.files[fileIndex].fileType || fileType;
+      } else {
+        fileName         = result.fileName;
+        fileData         = result.fileData;
+        resolvedFileType = result.fileType || fileType;
+      }
+
+      if (!fileData || !fileName) { alert("This result does not have an attached file."); return; }
+
+      const byteCharacters = atob(fileData);
       const byteArray = new Uint8Array(byteCharacters.length);
       for (let i = 0; i < byteCharacters.length; i++) byteArray[i] = byteCharacters.charCodeAt(i);
-      const mimeType = result.fileType || fileType || "application/octet-stream";
-      const blob = new Blob([byteArray], { type: mimeType });
+      const blob = new Blob([byteArray], { type: resolvedFileType });
       const url  = window.URL.createObjectURL(blob);
 
-      const isPdf    = mimeType === "application/pdf" || result.fileName.toLowerCase().endsWith(".pdf");
-      const isImage  = mimeType.startsWith("image/") || result.fileName.toLowerCase().match(/\.(png|jpg|jpeg|gif|webp)$/);
+      const isPdf   = resolvedFileType === "application/pdf" || fileName.toLowerCase().endsWith(".pdf");
+      const isImage = resolvedFileType.startsWith("image/") || fileName.toLowerCase().match(/\.(png|jpg|jpeg|gif|webp)$/);
 
       if (isPdf || isImage) {
         const win = window.open(url, "_blank");
         if (!win) alert("Pop-up blocked. Please allow pop-ups and try again.");
         setTimeout(() => window.URL.revokeObjectURL(url), 10000);
       } else {
-        alert("ℹ️ This file type (" + result.fileName.split(".").pop().toUpperCase() + ") cannot be previewed in the browser and will be downloaded instead.");
+        alert("ℹ️ This file type (" + fileName.split(".").pop().toUpperCase() + ") cannot be previewed and will be downloaded instead.");
         const a = document.createElement("a");
-        a.style.display = "none"; a.href = url; a.download = result.fileName;
+        a.style.display = "none"; a.href = url; a.download = fileName;
         document.body.appendChild(a); a.click();
         setTimeout(() => { window.URL.revokeObjectURL(url); document.body.removeChild(a); }, 1000);
       }
