@@ -1096,6 +1096,17 @@ const labResultSchema = new mongoose.Schema(
     fileName:     { type: String, default: "" },
     fileData:     { type: String, default: "" },
     fileType:     { type: String, default: "" },
+    // ✅ ADD THIS — array for multiple files
+    files: {
+      type: [
+        {
+          fileName: { type: String, default: "" },
+          fileData: { type: String, default: "" },
+          fileType: { type: String, default: "" },
+        }
+      ],
+      default: [],
+    },
     testType:     { type: String, default: "" },
     testData:     { type: mongoose.Schema.Types.Mixed, default: null },
     physician:    { type: String, default: "" },
@@ -1109,22 +1120,90 @@ const LabResult = mongoose.model("LabResult", labResultSchema);
 
 app.post("/api/lab-results/upload", async (req, res) => {
   try {
-    const { testName, patientName, patientId, testDate, notes, uploadedBy, uploadedById, fileName, fileData, fileType, testType, testData, physician, remarks } = req.body;
+    const {
+      testName, patientName, patientId, testDate, notes,
+      uploadedBy, uploadedById, fileName, fileData, fileType,
+      files,  // ✅ NEW — array of { fileName, fileData, fileType }
+      testType, testData, physician, remarks
+    } = req.body;
+
     if (!testName)    return res.status(400).json({ message: "Test name is required." });
     if (!patientName) return res.status(400).json({ message: "Patient name is required." });
-    const labResult = new LabResult({ patientId: patientId || null, patientName, testName, testDate: testDate || new Date(), notes: notes || "", fileName: fileName || "", fileData: fileData || "", fileType: fileType || "", testType: testType || "", testData: testData || null, physician: physician || "", remarks: remarks || "", uploadedBy: uploadedBy || "Medical Technologist", uploadedById: uploadedById || null });
+
+    // ✅ Normalize the files array
+    // If frontend sent a `files` array, use it.
+    // Otherwise fall back to single-file fields for backward compatibility.
+    let normalizedFiles = [];
+    if (Array.isArray(files) && files.length > 0) {
+      normalizedFiles = files.map(f => ({
+        fileName: f.fileName || "",
+        fileData: f.fileData || "",
+        fileType: f.fileType || "",
+      }));
+    } else if (fileName || fileData) {
+      // Single file — wrap it into the array too for consistency
+      normalizedFiles = [{
+        fileName: fileName || "",
+        fileData: fileData || "",
+        fileType: fileType || "",
+      }];
+    }
+
+    const labResult = new LabResult({
+      patientId:    patientId || null,
+      patientName,
+      testName,
+      testDate:     testDate || new Date(),
+      notes:        notes || "",
+      // ✅ Keep single-file fields for backward compatibility with existing records
+      fileName:     fileName || (normalizedFiles[0]?.fileName) || "",
+      fileData:     fileData || (normalizedFiles[0]?.fileData) || "",
+      fileType:     fileType || (normalizedFiles[0]?.fileType) || "",
+      // ✅ Save the full files array
+      files:        normalizedFiles,
+      testType:     testType || "",
+      testData:     testData || null,
+      physician:    physician || "",
+      remarks:      remarks || "",
+      uploadedBy:   uploadedBy || "Medical Technologist",
+      uploadedById: uploadedById || null,
+    });
+
     await labResult.save();
     res.status(201).json({ message: "Lab result saved successfully.", labResult });
+
   } catch (err) {
     console.error("❌ Lab result save error:", err);
     res.status(500).json({ message: "Server error. Please try again." });
   }
 });
 
+// Replace both GET /api/lab-results and GET /api/lab-results/patient/:patientId list mappers:
+
 app.get("/api/lab-results", async (req, res) => {
   try {
-    const results = await LabResult.find({}, "-fileData").sort({ createdAt: -1 }).lean();
-    res.json(results.map((r) => ({ id: r._id, testName: r.testName, testType: r.testType, patientName: r.patientName, patientId: r.patientId, testDate: r.testDate, notes: r.notes, remarks: r.remarks, physician: r.physician, uploadedBy: r.uploadedBy, uploadDate: r.createdAt, fileType: r.fileType, fileName: r.fileName })));
+    const results = await LabResult.find({}, "-fileData -files.fileData")
+      .sort({ createdAt: -1 }).lean();
+    res.json(results.map((r) => ({
+      id: r._id,
+      testName: r.testName,
+      testType: r.testType,
+      patientName: r.patientName,
+      patientId: r.patientId,
+      testDate: r.testDate,
+      notes: r.notes,
+      remarks: r.remarks,
+      physician: r.physician,
+      uploadedBy: r.uploadedBy,
+      uploadDate: r.createdAt,
+      fileType: r.fileType,
+      fileName: r.fileName,
+      // ✅ Include files array metadata (no fileData for performance)
+      files: (r.files || []).map(f => ({
+        fileName: f.fileName,
+        fileType: f.fileType,
+      })),
+    })));
   } catch (err) {
     res.status(500).json({ message: "Failed to fetch lab results." });
   }
@@ -1132,8 +1211,31 @@ app.get("/api/lab-results", async (req, res) => {
 
 app.get("/api/lab-results/patient/:patientId", async (req, res) => {
   try {
-    const results = await LabResult.find({ patientId: req.params.patientId }, "-fileData").sort({ createdAt: -1 }).lean();
-    res.json(results.map((r) => ({ id: r._id, testName: r.testName, testType: r.testType, patientName: r.patientName, patientId: r.patientId, testDate: r.testDate, notes: r.notes, remarks: r.remarks, physician: r.physician, uploadedBy: r.uploadedBy, uploadDate: r.createdAt, fileType: r.fileType, fileName: r.fileName })));
+    const results = await LabResult.find(
+      { patientId: req.params.patientId },
+      "-fileData -files.fileData"
+    ).sort({ createdAt: -1 }).lean();
+
+    res.json(results.map((r) => ({
+      id: r._id,
+      testName: r.testName,
+      testType: r.testType,
+      patientName: r.patientName,
+      patientId: r.patientId,
+      testDate: r.testDate,
+      notes: r.notes,
+      remarks: r.remarks,
+      physician: r.physician,
+      uploadedBy: r.uploadedBy,
+      uploadDate: r.createdAt,
+      fileType: r.fileType,
+      fileName: r.fileName,
+      // ✅ Include files array metadata (no fileData for performance)
+      files: (r.files || []).map(f => ({
+        fileName: f.fileName,
+        fileType: f.fileType,
+      })),
+    })));
   } catch (err) {
     res.status(500).json({ message: "Failed to fetch lab results." });
   }

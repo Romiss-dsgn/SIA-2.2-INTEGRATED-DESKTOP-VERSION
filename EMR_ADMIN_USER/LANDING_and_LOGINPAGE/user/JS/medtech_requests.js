@@ -236,7 +236,7 @@ function closeModal() {
 }
 
 // ════════════════════════════════════════════════════════════
-// ✅ ADD LAB RESULT — mark Complete HERE, then navigate
+// ✅ ADD LAB RESULT — navigate to LabResults (don't mark complete yet)
 // ════════════════════════════════════════════════════════════
 async function addLabResult() {
   if (!currentRequestData) { alert('No request data available'); return; }
@@ -246,48 +246,19 @@ async function addLabResult() {
 
   if (!patientId) { alert('No patient ID found for this request.'); return; }
 
-  // ── Store physician for autofill in LabResults.html ──
+  // ── Store physician, requested tests, and requestId for autofill and completion in LabResults.html ──
   const physician = currentRequestData.referringDoctor || currentRequestData.submittedBy || '';
   if (physician) sessionStorage.setItem('pendingPhysician', physician);
+  if (requestId) sessionStorage.setItem('pendingRequestId', requestId);
 
-  // ── Disable button + show spinner while calling API ──
-  const btn = document.getElementById('addResultBtn');
-  const originalHTML = btn ? btn.innerHTML : '';
-  if (btn) {
-    btn.disabled = true;
-    btn.innerHTML = `<span class="material-symbols-outlined animate-spin text-xl">progress_activity</span><span>Processing...</span>`;
+  const tests = Array.isArray(currentRequestData.tests) ? currentRequestData.tests : [];
+  if (tests.length) {
+    sessionStorage.setItem('pendingTests', JSON.stringify(tests.map(String).filter(Boolean)));
+  } else {
+    sessionStorage.removeItem('pendingTests');
   }
 
-  try {
-    // ✅ Mark request as Completed RIGHT NOW — before navigating anywhere
-    const completedBy = sessionStorage.getItem('name') || 'Medical Technologist';
-    const res = await fetch(
-      `http://localhost:5000/api/request-forms/${requestId}/complete`,
-      {
-        method:  'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ completedBy }),
-      }
-    );
-
-    if (res.ok) {
-      console.log(`✅ Request ${requestId} marked as Completed`);
-    } else {
-      const err = await res.json().catch(() => ({}));
-      console.warn('⚠️ Could not mark request complete:', res.status, err.message);
-      // Don't block navigation — still let the medtech add the result
-    }
-  } catch (err) {
-    console.warn('⚠️ Network error marking request complete:', err.message);
-    // Don't block navigation on network error
-  } finally {
-    if (btn) {
-      btn.disabled = false;
-      btn.innerHTML = originalHTML;
-    }
-  }
-
-  // ── Navigate to LabResults regardless of completion API result ──
+  // ── Navigate to LabResults ──
   window.location.href = `LabResults.html?patientId=${patientId}&requestId=${requestId}`;
 }
 

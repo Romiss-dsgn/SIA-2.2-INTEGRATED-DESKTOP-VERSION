@@ -324,7 +324,7 @@
 
                   <!-- BLOOD CHEMISTRY -->
                   <div class="bg-slate-50 dark:bg-slate-700/50 rounded-2xl p-4">
-                    <div class="lab-category-title">Blood Chemistry</div>
+                    <div class="lab-category-title">Clinical Chemistry</div>
                     <div class="space-y-0.5">
                       <div class="lab-item">
                         <input type="checkbox" id="hgtFbs" class="lab-checkbox" />
@@ -1542,10 +1542,12 @@ function saveReceiptAsPDF() {
           if (!res.ok) throw new Error(data.message || "Submission failed.");
 
           // ✅ Notify Medtech AFTER successful backend save with REAL requestId
-          window.notifyMedtechNewRequest(data.requestId, {
-            patientName, tests, priority, 
-            doctorName: referringDoctor || sessionStorage.getItem("name")
-          }).catch(console.error);
+          if (typeof window.notifyMedtechNewRequest === "function") {
+            window.notifyMedtechNewRequest(data.requestId, {
+              patientName, tests, priority,
+              doctorName: referringDoctor || sessionStorage.getItem("name")
+            }).catch(console.error);
+          }
 
           showAlert("success", "", data.requestId);
 
