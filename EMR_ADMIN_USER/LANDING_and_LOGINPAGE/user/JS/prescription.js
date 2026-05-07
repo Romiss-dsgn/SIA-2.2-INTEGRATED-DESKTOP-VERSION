@@ -164,6 +164,34 @@ function normalizeFormData(raw) {
   return out;
 }
 
+function getMedicationFormData(form) {
+  const rawData = normalizeFormData(Object.fromEntries(new FormData(form)));
+  const indicationInput = form.querySelector('input[name="indication"]');
+  const presNotesInput = form.querySelector('input[name="presNotes"]');
+  const dosageInput = form.querySelector('.dosageInput');
+  const frequencySelect = form.querySelector('.freqSelect');
+  const medicnameSelect = form.querySelector('select[name="medicname"]');
+  const prescriberSelect = form.querySelector('select[name="presby"]');
+
+  return {
+    ...rawData,
+    medicname: (medicnameSelect?.value || rawData.medicname || "").trim(),
+    dosage: (dosageInput?.value || rawData.dosage || "").trim(),
+    frequency: (frequencySelect?.value || rawData.frequency || "").trim(),
+    presby: (prescriberSelect?.value || rawData.presby || "").trim(),
+    indication: indicationInput ? indicationInput.value.trim() : "",
+    presNotes: presNotesInput ? presNotesInput.value.trim() : "",
+    quantity: Number(rawData.quantity) || 0,
+  };
+}
+
+function isMedicationFormValid(form) {
+  const med = getMedicationFormData(form);
+  const hasAnyCoreField = med.medicname || med.dosage || med.frequency || med.quantity > 0 || med.presby;
+  if (!hasAnyCoreField) return false;
+  return med.medicname !== "" && med.dosage !== "" && med.frequency !== "" && med.quantity > 0;
+}
+
 async function loadAppointmentService(appointmentId) {
   try {
     const response = await fetch(`http://localhost:5000/api/appointments/${appointmentId}`);
@@ -1224,11 +1252,21 @@ if (saveBtn) {
     const newForms = allForms.filter((form) => !form.querySelector("input")?.disabled);
     if (newForms.length === 0) { alert("No new medications to save."); return; }
 
-    const formsWithMedications = newForms.filter((form) => {
-      const medicnameSelect = form.querySelector('select[name="medicname"]');
-      return (medicnameSelect?.value || "").trim() !== "";
+    const invalidForms = newForms.filter((form) => {
+      const med = getMedicationFormData(form);
+      const hasAnyEntry = med.medicname || med.dosage || med.frequency || med.quantity > 0 || med.presby || med.indication || med.presNotes;
+      return hasAnyEntry && !isMedicationFormValid(form);
     });
-    if (formsWithMedications.length === 0) { alert("Please select at least one medication before saving."); return; }
+    if (invalidForms.length > 0) {
+      alert("Some medication entries are incomplete or have zero quantity. Please complete medicine, dosage, frequency, and quantity for each entry.");
+      return;
+    }
+
+    const formsWithMedications = newForms.filter(isMedicationFormValid);
+    if (formsWithMedications.length === 0) {
+      alert("Please complete at least one medication with a valid quantity before saving.");
+      return;
+    }
 
     const medData = formsWithMedications.map((f) => {
       const formData = new FormData(f);
@@ -1658,14 +1696,25 @@ function setupMedicationsPageFunctionality(patientId) {
       const newForms = allForms.filter((form) => !form.querySelector("input")?.disabled);
       if (newForms.length === 0) { alert("No new medications to save."); return; }
 
-      const medData = newForms.map((f) => {
-        const data = normalizeFormData(Object.fromEntries(new FormData(f)));
+      const invalidForms = newForms.filter((form) => {
+        const med = getMedicationFormData(form);
+        const hasAnyEntry = med.medicname || med.dosage || med.frequency || med.quantity > 0 || med.presby || med.indication || med.presNotes;
+        return hasAnyEntry && !isMedicationFormValid(form);
+      });
+      if (invalidForms.length > 0) {
+        alert("Some medication entries are incomplete or have zero quantity. Please complete medicine, dosage, frequency, and quantity for each entry.");
+        return;
+      }
+
+      const formsWithMedications = newForms.filter(isMedicationFormValid);
+      if (formsWithMedications.length === 0) { alert("Please complete at least one medication with a valid quantity before saving."); return; }
+
+      const medData = formsWithMedications.map((f) => {
+        const data = getMedicationFormData(f);
         const maintainCheck = f.querySelector('input[name="durationMaintain"]');
         data.durationMaintain = maintainCheck ? maintainCheck.checked : false;
         const daysInput = f.querySelector('input[name="durationDays"]');
         data.durationDays = (!data.durationMaintain && daysInput?.value) ? parseInt(daysInput.value) : null;
-        const indicationInput = f.querySelector('input[name="indication"]');
-        data.indication = indicationInput ? indicationInput.value.trim() : "";
         return data;
       });
 
