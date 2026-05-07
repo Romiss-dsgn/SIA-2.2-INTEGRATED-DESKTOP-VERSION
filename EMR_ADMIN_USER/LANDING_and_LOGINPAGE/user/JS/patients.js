@@ -9,6 +9,9 @@ let _currentList    = [];
 let _currentPage    = 1;
 const PATIENTS_PER_PAGE = 10;
 
+// Archive modal state
+let patientDetailsToArchive = null;
+
 // ════════════════════════════════════════════════════════════
 // LOAD PATIENTS
 // ════════════════════════════════════════════════════════════
@@ -110,6 +113,12 @@ async function loadPatients() {
                 <span class="material-symbols-outlined text-base">visibility</span>
                 View Details
               </button>
+              ${sessionStorage.getItem("role") === "Nurse"
+                ? `<button type="button" class="archiveBtn inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border-2 border-gray-400 text-gray-500 text-xs font-bold hover:bg-gray-100 hover:border-gray-500 transition-all ml-2" data-id="${p.patientId}" data-name="${fullName}" title="Archive as Deceased">
+                    <span class="material-symbols-outlined text-base text-gray-500">archive</span>
+                    Archive
+                  </button>`
+                : ``}
             </td>
           </tr>`;
         }).join("");
@@ -123,6 +132,22 @@ async function loadPatients() {
               addRecentPatient(patientId, patientName);
             }
             window.location.href = `PatientInfo.html?patientId=${patientId}`;
+          });
+        });
+
+        // Wire archive buttons
+        const archiveButtons = tbody.querySelectorAll(".archiveBtn");
+        console.log(`Found ${archiveButtons.length} archive buttons`);
+        archiveButtons.forEach(btn => {
+          btn.addEventListener("click", async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log("Archive button clicked");
+            const patientId = btn.dataset.id;
+            const patientName = btn.dataset.name;
+            console.log(`Archiving patient: ${patientId} (${patientName})`);
+            patientDetailsToArchive = { patientId, patientName };
+            openNurseAuthArchiveModal();
           });
         });
       }
@@ -275,8 +300,81 @@ async function autoUpdateInactivePatients() {
 function controlAddPatientVisibility() {
   const role = (sessionStorage.getItem("role") || "").trim().toLowerCase();
   if (role === "doctor" || role === "medtech") {
-    const btn = document.querySelector(".addBtn");
-    if (btn) btn.style.display = "none";
+    const addBtn = document.querySelector(".addBtn");
+    if (addBtn) addBtn.style.display = "none";
+  }
+  // View Archive and per-row Archive buttons are Nurse-only
+  if (role !== "nurse") {
+    const viewArchiveBtn = document.querySelector(".viewArchiveBtn");
+    if (viewArchiveBtn) viewArchiveBtn.style.display = "none";
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+// ARCHIVE MODAL FUNCTIONS
+// ════════════════════════════════════════════════════════════
+function openNurseAuthArchiveModal() {
+  if (!patientDetailsToArchive) return;
+  
+  document.getElementById("archivePatientNameDisplay").textContent = patientDetailsToArchive.patientName;
+  document.getElementById("nursePasswordArchiveInput").value = "";
+  document.getElementById("nurseAuthArchiveMessage").textContent = "";
+  document.getElementById("nurseAuthArchiveMessage").classList.add("hidden");
+  document.getElementById("nurseAuthArchiveModal").classList.remove("hidden");
+}
+
+function closeNurseAuthArchiveModal() {
+  document.getElementById("nurseAuthArchiveModal").classList.add("hidden");
+  patientDetailsToArchive = null;
+}
+
+async function verifyNursePasswordForArchive() {
+  const authMessage = document.getElementById("nurseAuthArchiveMessage");
+  authMessage.classList.add("hidden");
+  const nursePassword = document.getElementById("nursePasswordArchiveInput").value;
+  
+  if (!nursePassword) {
+    authMessage.textContent = "Please enter your password.";
+    authMessage.classList.remove("hidden");
+    return;
+  }
+  
+  if (!patientDetailsToArchive) {
+    authMessage.textContent = "Patient details not found.";
+    authMessage.classList.remove("hidden");
+    return;
+  }
+  
+  const userId = sessionStorage.getItem("userId");
+  if (!userId) {
+    authMessage.textContent = "User session expired. Please log in again.";
+    authMessage.classList.remove("hidden");
+    return;
+  }
+  
+  try {
+    console.log("Sending archive request to server...");
+    const response = await fetch(`http://localhost:5000/api/patients/${patientDetailsToArchive.patientId}/archive`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, password: nursePassword })
+    });
+    const data = await response.json();
+    
+    console.log("Archive response:", response.status, data);
+    
+    if (response.ok) {
+      alert(`Patient "${patientDetailsToArchive.patientName}" has been successfully archived as deceased.`);
+      closeNurseAuthArchiveModal();
+      loadPatients(); // Reload the list
+    } else {
+      authMessage.textContent = data.error || "Failed to archive patient.";
+      authMessage.classList.remove("hidden");
+    }
+  } catch (err) {
+    console.error("Error archiving patient:", err);
+    authMessage.textContent = "Network error. Please try again.";
+    authMessage.classList.remove("hidden");
   }
 }
 

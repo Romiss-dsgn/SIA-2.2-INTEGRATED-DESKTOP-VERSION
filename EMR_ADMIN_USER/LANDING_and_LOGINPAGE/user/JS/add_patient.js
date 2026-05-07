@@ -2645,6 +2645,62 @@ document.addEventListener("DOMContentLoaded", () => {
 // ============================================================
 // FORM SUBMIT
 // ============================================================
+// ============================================================
+// CUSTOM CONFIRM DIALOG
+// ============================================================
+function showConfirmDialog(message) {
+  return new Promise(resolve => {
+    // Remove any existing dialog
+    const existing = document.getElementById("ph-confirm-dialog");
+    if (existing) existing.remove();
+
+    const overlay = document.createElement("div");
+    overlay.id = "ph-confirm-dialog";
+    overlay.style.cssText = `
+      position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 99999;
+    `;
+
+    overlay.innerHTML = `
+      <div style="
+        background: white; border-radius: 12px; padding: 28px 32px;
+        max-width: 420px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        font-family: 'Plus Jakarta Sans', sans-serif;
+      ">
+        <h3 style="margin: 0 0 12px; font-size: 16px; font-weight: 700; color: #1e293b;">
+          Duplicate Patient Name
+        </h3>
+        <p style="margin: 0 0 24px; font-size: 14px; color: #475569; line-height: 1.6;">
+          ${message}
+        </p>
+        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+          <button id="ph-confirm-cancel" style="
+            padding: 9px 20px; border-radius: 8px; border: 1.5px solid #cbd5e1;
+            background: white; color: #475569; font-size: 14px; font-weight: 600;
+            cursor: pointer; font-family: inherit;
+          ">Cancel</button>
+          <button id="ph-confirm-ok" style="
+            padding: 9px 20px; border-radius: 8px; border: none;
+            background: #065f46; color: white; font-size: 14px; font-weight: 600;
+            cursor: pointer; font-family: inherit;
+          ">Continue</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    document.getElementById("ph-confirm-ok").onclick = () => {
+      overlay.remove();
+      resolve(true);
+    };
+    document.getElementById("ph-confirm-cancel").onclick = () => {
+      overlay.remove();
+      resolve(false);
+    };
+  });
+}
 document.getElementById("addPatient").addEventListener("submit", async function (e) {
   e.preventDefault();
 
@@ -2664,16 +2720,34 @@ document.getElementById("addPatient").addEventListener("submit", async function 
   if (email && !emailRegex.test(email))     { alert("Please enter a valid email address (e.g. example@gmail.com, example@yahoo.com)."); return; }
   if (emEmail && !emailRegex.test(emEmail)) { alert("Please enter a valid emergency contact email address."); return; }
 
-  if (email) {
-    try {
-      const chk = await fetch("http://localhost:5000/api/patients");
-      if (chk.ok) {
-        const list = await chk.json();
-        const dup = list.find(p => p.email && p.email.toLowerCase() === email.toLowerCase());
-        if (dup) { alert("This email address is already registered. Please use a different email."); return; }
+  // ── Duplicate name check ──
+  try {
+    const nameChk = await fetch("http://localhost:5000/api/patients");
+    if (nameChk.ok) {
+      const list = await nameChk.json();
+      const firstName = document.getElementById("firstname").value.trim().toLowerCase();
+      const lastName  = document.getElementById("lastname").value.trim().toLowerCase();
+
+      const sameName = list.find(p =>
+        (p.firstname || "").toLowerCase() === firstName &&
+        (p.lastname  || "").toLowerCase() === lastName
+      );
+
+      if (sameName) {
+        const fullName = `${sameName.firstname} ${sameName.lastname}`;
+        const confirmed = await showConfirmDialog(
+          `A patient named "${fullName}" already exists. Do you still want to continue creating this patient record?`
+        );
+        if (!confirmed) return;
       }
-    } catch (err) { console.error("Duplicate check error:", err); }
-  }
+
+      // ── Duplicate email check ──
+      if (email) {
+        const dupEmail = list.find(p => p.email && p.email.toLowerCase() === email.toLowerCase());
+        if (dupEmail) { alert("This email address is already registered. Please use a different email."); return; }
+      }
+    }
+  } catch (err) { console.error("Duplicate check error:", err); }
 
   const formData = {
     province:     document.getElementById("province").value.trim(),

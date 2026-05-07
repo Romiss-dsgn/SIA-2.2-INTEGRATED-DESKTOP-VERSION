@@ -547,13 +547,46 @@ const patientSchema = new mongoose.Schema({
 });
 const Patient = mongoose.model("Patient", patientSchema);
 
+// ====== ARCHIVED PATIENT SCHEMA ======
+const archivedPatientSchema = new mongoose.Schema({
+  patientId: { type: String, unique: true },
+  firstname: String,
+  middlename: { type: String, default: null },
+  lastname: String,
+  dob: Date,
+  gender: String,
+  province: String,
+  address: String,
+  city: String,
+  barangay: String,
+  zipcode: String,
+  email: String,
+  phone: String,
+  insurance: String,
+  status: { type: String, default: "Deceased" },
+  em_fullname: String,
+  em_phone: String,
+  relationship: String,
+  em_email: String,
+}, {
+  timestamps: true
+});
+const ArchivedPatient = mongoose.model("ArchivedPatient", archivedPatientSchema);
+
 async function generatePatientId() {
-  const lastPatient = await Patient.findOne().sort({ _id: -1 });
-  if (!lastPatient) return "P001";
-  const lastId = lastPatient.patientId || lastPatient.patientid;
-  if (!lastId) return "P001";
-  const lastIdNum = parseInt(lastId.replace("P", ""));
-  return "P" + (lastIdNum + 1).toString().padStart(3, "0");
+  const [lastPatient, lastArchived] = await Promise.all([
+    Patient.findOne().sort({ patientId: -1 }).lean(),
+    ArchivedPatient.findOne().sort({ patientId: -1 }).lean()
+  ]);
+
+  const ids = [lastPatient?.patientId, lastArchived?.patientId].filter(Boolean);
+  const maxNumber = ids.reduce((max, id) => {
+    const num = parseInt((id || "").replace(/[^0-9]/g, ""), 10);
+    return Number.isFinite(num) ? Math.max(max, num) : max;
+  }, 0);
+
+  const nextNumber = maxNumber + 1;
+  return "P" + nextNumber.toString().padStart(3, '0');
 }
 
 app.get("/api/patients/fix-status", async (req, res) => {
@@ -672,6 +705,74 @@ app.post("/api/patients/auto-update-status", async (req, res) => {
   }
 });
 
+app.put("/api/patients/:patientId/archive", async (req, res) => {
+  try {
+    const { patientId } = req.params;
+    const trimmedPatientId = patientId.trim();
+    const { userId, password } = req.body;
+
+    if (!userId || !password) {
+      return res.status(400).json({ error: "userId and password are required" });
+    }
+
+    const user = await User.findOne({ userId });
+    if (!user) {
+      return res.status(401).json({ error: "User not found" });
+    }
+    if (user.status !== "Active") {
+      return res.status(401).json({ error: "User account is not active" });
+    }
+    const userRole = (user.role || "").toLowerCase();
+    if (userRole !== "nurse") {
+      return res.status(403).json({ error: "Only nurses can archive patients" });
+    }
+
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (!isValidPassword) {
+      return res.status(401).json({ error: "Invalid password" });
+    }
+
+    const patient = await Patient.findOne({ patientId: trimmedPatientId });
+    if (!patient) {
+      return res.status(404).json({ error: "Patient not found" });
+    }
+
+    // Check if already archived (avoid duplicate key error)
+    const alreadyArchived = await ArchivedPatient.findOne({ patientId: trimmedPatientId });
+    if (alreadyArchived) {
+      // Already in archive — just remove from main collection
+      await Patient.deleteOne({ patientId: trimmedPatientId });
+      return res.json({ success: true, message: "Patient archive completed" });
+    }
+
+    // Strip MongoDB _id so it doesn't conflict
+    const patientObj = patient.toObject();
+    delete patientObj._id;
+
+    const archivedPatient = new ArchivedPatient({
+      ...patientObj,
+      status: "Deceased"
+    });
+    await archivedPatient.save();
+
+    await Patient.deleteOne({ patientId: trimmedPatientId });
+
+    res.json({ success: true, message: "Patient archived successfully" });
+  } catch (err) {
+    console.error("Error archiving patient:", err);
+    if (err.code === 11000) {
+      // Duplicate key — patient already archived, just remove from main
+      try {
+        await Patient.deleteOne({ patientId: req.params.patientId.trim() });
+        return res.json({ success: true, message: "Patient archive completed" });
+      } catch (delErr) {
+        return res.status(500).json({ error: "Duplicate archive error: " + delErr.message });
+      }
+    }
+    res.status(500).json({ error: "Internal server error: " + err.message });
+  }
+});
+
 app.get("/api/patients/:patientId/appointment-summary", async (req, res) => {
   try {
     const { patientId } = req.params;
@@ -691,6 +792,29 @@ app.get("/api/patients/:patientId/appointment-summary", async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ message: "Error fetching appointment summary" });
+  }
+});
+
+// ====== ARCHIVED PATIENTS ROUTES ======
+app.get("/api/archived-patients", async (req, res) => {
+  try {
+    const archivedPatients = await ArchivedPatient.find().sort({ createdAt: -1 });
+    res.json(archivedPatients);
+  } catch (err) {
+    console.error("Error fetching archived patients:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// ✅ Single archived patient by patientId
+app.get("/api/archived-patients/:patientId", async (req, res) => {
+  try {
+    const patient = await ArchivedPatient.findOne({ patientId: req.params.patientId });
+    if (!patient) return res.status(404).json({ message: "Archived patient not found" });
+    res.json(patient);
+  } catch (err) {
+    console.error("Error fetching archived patient:", err);
+    res.status(500).json({ message: "Error fetching archived patient" });
   }
 });
 

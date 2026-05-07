@@ -74,9 +74,9 @@
     <div class="mainContainer flex-1 ml-64 p-5 overflow-y-auto" style="margin-top: 80px;">
       <header class="flex justify-between items-center mb-6">
         <div class="flex items-center gap-4">
-          <a href="Patients.html" class="flex items-center justify-center w-9 h-9 rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-primary hover:border-primary hover:bg-brand-light transition-all shadow-sm" title="Back to Patients">
-            <span class="material-symbols-outlined text-xl">arrow_back</span>
-          </a>
+          <a id="backBtn" href="Patients.html" class="flex items-center justify-center w-9 h-9 rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-primary hover:border-primary hover:bg-brand-light transition-all shadow-sm" title="Back to Patients">
+  <span class="material-symbols-outlined text-xl">arrow_back</span>
+</a>
           <h1 class="text-2xl font-bold text-primary">Patient Information</h1>
         </div>
 
@@ -259,6 +259,14 @@
     <script src="JS/header.js"></script>
 
     <script>
+      (function() {
+    const isArchived = new URLSearchParams(window.location.search).get("archived") === "true";
+    const backBtn = document.getElementById("backBtn");
+    if (backBtn && isArchived) {
+      backBtn.href = "DeceasedRecords.html";
+      backBtn.title = "Back to Deceased Records";
+    }
+  })();
       document.addEventListener("DOMContentLoaded", () => {
         function storePatientToSession() {
           const patientId = new URLSearchParams(window.location.search).get("patientId");
